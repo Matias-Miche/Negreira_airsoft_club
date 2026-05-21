@@ -1,5 +1,24 @@
-<div id="mi-apartado">
-    <h2>Este es el apartado de destino</h2>
-    <p>El usuario llegará aquí al pulsar el enlace.</p>
-</div>
-<h1>Posibilidades<h1>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mi Base de Datos Online</title>
+    <!-- Cargar el SDK de Supabase -->
+    <script src="https://jsdelivr.net"></script>
+</head>
+<body>
+    <h1>Mis Datos</h1>
+    <script>
+        // Inicializa Supabase con tus credenciales
+        const SUPABASE_URL = 'TU_URL_AQUI';
+        const SUPABASE_ANON_KEY = 'TU_CLAVE_AQUI';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Ejemplo: Leer datos de la tabla
+        async function obtenerDatos() {
+            const { data, error } = await supabase.from('nombre_de_tu_tabla').select('*');
+            console.log(data);
+        }
+        obtenerDatos();
+    </script>
+</body>
+</html>
