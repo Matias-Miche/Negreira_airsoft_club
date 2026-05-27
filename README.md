@@ -179,7 +179,7 @@
             <div class="form-grupo">
                 <!-- Comando HTML para que el usuario escriba su ID -->
                 <label for="jugador-id">Introduce tu ID de Operador:</label>
-                <input type="text" id="jugador-id" name="jugador-id" placeholder="Ej: AN-9823" maxlength="10" required>
+                <input type="text" id="jugador-id" name="jugador-id" placeholder="Ej: AN-9823" maxlength="50" required>
             </div>
             <button type="submit" class="btn-accion" style="border:none; cursor:pointer;">Verificar ID</button>
         </form>
