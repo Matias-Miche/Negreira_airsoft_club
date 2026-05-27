@@ -6,12 +6,15 @@
     <title>Mi Perfil - Airsoft Negreira</title>
     <script src="https://jsdelivr.net"></script>
     <style>
-        body { background-color: #1a1a1a; color: #ffffff; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .tarjeta-perfil { background-color: #0b0b0b; padding: 30px; border-radius: 8px; border: 3px solid #4a5d4e; width: 100%; max-width: 400px; text-align: center; }
-        h2 { color: #7fa984; text-transform: uppercase; }
-        .avatar { width: 80px; height: 80px; background-color: #4a5d4e; border-radius: 50%; margin: 20px auto; display: flex; justify-content: center; align-items: center; font-size: 2rem; }
+        body { background-color: #1a1a1a; color: #ffffff; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .tarjeta-perfil { background-color: #0b0b0b; padding: 30px; border-radius: 8px; border: 3px solid #4a5d4e; width: 100%; max-width: 450px; text-align: center; }
+        h2 { color: #7fa984; text-transform: uppercase; margin-top: 0; }
+        .avatar { width: 80px; height: 80px; background-color: #4a5d4e; border-radius: 50%; margin: 15px auto; display: flex; justify-content: center; align-items: center; font-size: 2rem; }
         .btn-salir { display: inline-block; background-color: #b33939; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 20px; font-weight: bold; }
         .info-caja { background: #1a1a1a; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #4a5d4e; }
+        .estilo-juego { background: #1a251c; padding: 15px; border-radius: 6px; border-left: 5px solid #7fa984; text-align: left; margin-top: 15px; }
+        .estilo-juego h4 { color: #7fa984; margin: 0 0 8px 0; text-transform: uppercase; font-size: 0.95rem; }
+        .estilo-juego p { margin: 0; font-size: 0.9rem; color: #ddd; line-height: 1.4; }
     </style>
 </head>
 <body>
@@ -23,20 +26,21 @@
         <h3 id="nombre-usuario" style="color: #7fa984; font-size: 1.5rem; margin: 5px 0;">Cargando...</h3>
         
         <div class="info-caja">
-            <p style="margin: 5px 0;">Rol de combate: <strong id="rol-usuario" style="color: #7fa984;">...</strong></p>
+            <p style="margin: 5px 0;">Rol asignado: <strong id="rol-usuario" style="color: #7fa984;">...</strong></p>
         </div>
 
         <div class="info-caja">
             <p style="margin: 5px 0;">Puntos de Victoria: <strong id="puntos-usuario">0 PTS</strong></p>
-            <p style="margin: 5px 0;">Rango Militar: <strong id="rango-usuario" style="color: #eccc68;">...</strong></p>
         </div>
+
+        <!-- TEXTO TÁCTICO PARA EL JUGADOR -->
+        <div id="contenedor-estilo"></div>
         
-        <p>Estado: <strong>Activo para combate</strong></p>
+        <p style="margin-top: 15px; font-size: 0.9rem;">Estado: <strong>Activo para combate</strong></p>
         <a href="registro.html" class="btn-salir">Cerrar Sesión</a>
     </div>
 
     <script>
-        // Claves del proyecto vinculadas
         const SUPABASE_URL = "https://supabase.co";
         const SUPABASE_KEY = "sb_publishable_CH_3b10nSrV6PolJp3Q85w_sFCTAjrp";
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -46,6 +50,15 @@
         if (!usuarioGuardado) {
             window.location.href = 'registro.html';
         }
+
+        // Estilos de juego visibles solo para el jugador
+        const estilosCombate = {
+            "Medico": "Tu misión es la supervivencia del grupo. Debes moverte rápido entre coberturas, mantenerte cerca de tus compañeros caídos y asegurar el reabastecimiento médico en la zona de combate.",
+            "Ametrallador": "Tu estilo es puramente defensivo y de contención. Debes ganar posiciones elevadas o pasillos clave para retener el avance enemigo usando fuego continuo de cobertura.",
+            "Asalto": "Eres la punta de lanza del equipo. Tu estilo es ofensivo y dinámico. Te encargas de liderar la entrada a los edificios, limpiar esquinas y empujar la línea de frente hacia el objetivo.",
+            "Tirador designado": "Tu juego se basa en la paciencia y el sigilo. Debes mantener una distancia media-larga, camuflarte con el entorno y eliminar objetivos clave que frenen a tus compañeros de asalto.",
+            "AT": "Eres el especialista táctico contra defensas pesadas. Tu estilo requiere leer bien el mapa para flanquear fortificaciones enemigas, destruir escudos y limpiar salas protegidas."
+        };
 
         async function cargarDatos() {
             const { data, error } = await supabase
@@ -59,13 +72,15 @@
                 document.getElementById('rol-usuario').innerText = data.rol;
                 document.getElementById('puntos-usuario').innerText = data.puntos + " PTS";
 
-                // Escala de Rangos Militares
-                let rango = "Recluta (Novato) 🔰";
-                if (data.puntos >= 300) rango = "General de Campo 🎖️";
-                else if (data.puntos >= 150) rango = "Veterano 🎖️";
-                else if (data.puntos >= 50) rango = "Soldado Raso 🪖";
-
-                document.getElementById('rango-usuario').innerText = rango;
+                const textoEstilo = estilosCombate[data.rol];
+                if (textoEstilo) {
+                    document.getElementById('contenedor-estilo').innerHTML = `
+                        <div class="estilo-juego">
+                            <h4>Tu Estilo de Juego Asignado ⚡</h4>
+                            <p>${textoEstilo}</p>
+                        </div>
+                    `;
+                }
             }
         }
 
