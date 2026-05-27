@@ -17,18 +17,15 @@
         .estilo-juego { background: #1a251c; padding: 15px; border-radius: 6px; border-left: 5px solid #7fa984; text-align: left; margin-top: 15px; }
         .estilo-juego h4 { color: #7fa984; margin: 0 0 8px 0; text-transform: uppercase; font-size: 0.95rem; }
         .estilo-juego p { margin: 0; font-size: 0.9rem; color: #ddd; line-height: 1.4; }
-        
         .caja-herramientas { background: #1a1a1a; padding: 15px; border-radius: 6px; border: 1px solid #4a5d4e; margin-bottom: 20px; text-align: left; }
         input, select { padding: 10px; background-color: #2b2b2b; border: 1px solid #4a5d4e; border-radius: 4px; color: #fff; margin: 5px 10px 5px 0; }
         .btn-militar { background-color: #4a5d4e; color: white; border: none; padding: 10px 15px; font-weight: bold; border-radius: 4px; cursor: pointer; }
         .btn-militar:hover { background-color: #637d68; }
         .btn-juggernaut { background-color: #962d2d; color: white; border: none; padding: 12px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; width: 100%; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 20px; box-shadow: 0 0 10px rgba(150, 45, 45, 0.5); }
-        
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 10px; text-align: center; border-bottom: 1px solid #2b2b2b; font-size: 0.9rem; }
         th { background-color: #4a5d4e; color: white; }
         .texto-prestamo { font-size: 0.85rem; color: #eccc68; text-align: left; }
-
         .alerta-juggernaut { display: none; background-color: #962d2d; border: 3px dashed #ff0000; padding: 15px; border-radius: 6px; text-align: center; font-weight: bold; font-size: 1.1rem; color: #fff; margin-bottom: 25px; width: 100%; max-width: 450px; box-sizing: border-box; animation: parpadeo 1.5s infinite; }
         @keyframes parpadeo { 0% {opacity: 1;} 50% {opacity: 0.6;} 100% {opacity: 1;} }
     </style>
@@ -44,30 +41,23 @@
         <h2>Panel de Operador</h2>
         <div class="avatar" id="icono-perfil">🪖</div>
         <p>Bienvenido de nuevo, soldado:</p>
-        <h3 id="nombre-usuario" style="color: #7fa984; font-size: 1.5rem; margin: 5px 0;">Buscando operador...</h3>
+        <h3 id="nombre-usuario" style="color: #7fa984; font-size: 1.5rem; margin: 5px 0;">Buscando...</h3>
         
         <div class="info-caja">
             <p style="margin: 5px 0;">ID de Operador: <strong id="id-usuario" style="color: #eccc68;">...</strong></p>
         </div>
-
         <div class="info-caja">
             <p style="margin: 5px 0;">Rol asignado: <strong id="rol-usuario" style="color: #7fa984;">...</strong></p>
         </div>
-
         <div class="info-caja">
             <p style="margin: 5px 0;">Puntos de Victoria: <strong id="puntos-usuario">0 PTS</strong></p>
         </div>
-
         <div id="contenedor-estilo"></div>
-        
-        <p style="margin-top: 15px; font-size: 0.9rem;">Estado: <strong>Activo para combate</strong></p>
         <button id="btn-cerrar-normal" onclick="cerrarSesion()" class="btn-salir">Cerrar Sesión</button>
     </div>
 
     <div class="panel-admin" id="panel-secreto-admin">
         <h2>Panel de Mando Central (ADMIN)</h2>
-        <p>Herramientas avanzadas de gestión para el control del campo de Airsoft Negreira.</p>
-        
         <button id="btn-toggle-juggernaut" class="btn-juggernaut" onclick="cambiarModoJuggernaut()">Activar Modo Juggernaut 🚀</button>
 
         <div class="caja-herramientas">
@@ -81,14 +71,7 @@
             <h3>👥 Control de Alistados y Suministro del Campo</h3>
             <table>
                 <thead>
-                    <tr>
-                        <th>Operador</th>
-                        <th>Rol</th>
-                        <th>Tipo de Entrada</th>
-                        <th>Arsenales a Prestar 📦</th>
-                        <th>Puntos actuales</th>
-                        <th>Acción</th>
-                    </tr>
+                    <tr><th>Operador</th><th>Rol</th><th>Tipo de Entrada</th><th>Arsenales a Prestar 📦</th><th>Puntos</th><th>Acción</th></tr>
                 </thead>
                 <tbody id="tabla-gestion-jugadores"></tbody>
             </table>
@@ -104,50 +87,73 @@
         if (!usuarioGuardado) { window.location.href = 'index.html'; }
 
         const estilosCombate = {
-            "Medico": "Tu misión es la supervivencia del grupo. Debes moverte rápido entre coberturas, mantenerte cerca de tus compañeros caídos y asegurar el reabastecimiento médico en la zona de combate.",
-            "Ametrallador": "Tu estilo es puramente defensivo y de contención. Debes ganar posiciones elevadas o pasillos clave para retener el avance enemigo usando fuego continuo de cobertura.",
-            "Asalto": "Eres la punta de lanza del equipo. Tu estilo es ofensivo y dinámico. Te encargas de liderar la entrada a los edificios, limpiar esquinas y empujar la línea de frente hacia el objetivo.",
-            "Tirador designado": "Tu juego se basa en la paciencia y el sigilo. Debes mantener una distancia media-larga, camuflarte con el entorno y eliminar objetivos clave que frenen a tus compañeros de asalto.",
-            "AT": "Eres el especialista táctico contra defensas pesadas. Tu estilo requiere leer bien el mapa para flanquear fortificaciones enemigas, destruir escudos y limpiar salas protegidas."
+            "Medico": "Tu misión es la supervivencia del grupo. Muévete rápido entre coberturas y reanima compañeros.",
+            "Ametrallador": "Tu estilo es defensivo. Gana posiciones clave para retener el avance enemigo con fuego continuo.",
+            "Asalto": "Punta de lanza del equipo. Estilo ofensivo para limpiar esquinas y avanzar la línea.",
+            "Tirador designado": "Paciencia y sigilo. Mantén la distancia y elimina objetivos estratégicos.",
+            "AT": "Especialista táctico contra escudos y fortificaciones. Busca flancos limpios."
         };
 
         const equiposPrestamo = {
-            "Medico": "Subfusil compacto (MP5/ARP9) + Chaleco porta-médico ligero + Distintivo de cruz roja.",
-            "Ametrallador": "Réplica pesada de apoyo (LMG/M249) + Cargador de tambor + Bípode acoplado.",
-            "Asalto": "Fusil de asalto estándar (M4/AK) + 3 Cargadores Mid-Cap + Mira de punto rojo.",
-            "Tirador designado": "Fusil de tirador selectivo (DMR) + Mira telescópica con aumentos + Paquete de bolas de 0.30g.",
-            "AT": "Fusil compacto de apoyo + Lanzagranadas acoplado + 2 Cartuchos de granadas de gas."
+            "Medico": "Subfusil compacto + Chaleco ligero + Distintivo médico.",
+            "Ametrallador": "Réplica pesada (LMG) + Cargador de tambor + Bípode.",
+            "Asalto": "Fusil estándar (M4/AK) + 3 Cargadores + Punto rojo.",
+            "Tirador designado": "Fusil DMR + Mira con aumentos + Bolas pesadas 0.30g.",
+            "AT": "Fusil compacto + Lanzagranadas acoplado + 2 Cartuchos."
         };
 
         let datosMiUsuario = null;
 
         async function cargarPerfilInteligente() {
-            // Buscamos los datos exactos del usuario logueado
-            const { data, error } = await supabase.from('jugadores').select('*').eq('usuario', usuarioGuardado).single();
-            
-            if (error || !data) {
-                document.getElementById('nombre-usuario').innerText = "Error al cargar operador";
-                return;
-            }
-            
+            const { data } = await supabase.from('jugadores').select('*').eq('usuario', usuarioGuardado).single();
+            if (!data) return;
             datosMiUsuario = data;
 
-            // Inyectamos los datos reales en las etiquetas HTML correspondientes
             document.getElementById('id-usuario').innerText = "#" + data.id;
             document.getElementById('nombre-usuario').innerText = data.usuario;
             document.getElementById('rol-usuario').innerText = data.rol;
             document.getElementById('puntos-usuario').innerText = data.puntos + " PTS";
 
-            // Si el nombre contiene admin se abren las opciones secretas
             if (usuarioGuardado.toLowerCase().includes('admin')) {
                 document.getElementById('icono-perfil').innerText = "👑";
-                document.getElementById('btn-cerrar-normal').style.backgroundColor = "#962d2d";
-                document.getElementById('contenedor-estilo').innerHTML = `
-                    <div class="estilo-juego" style="border-left: 5px solid #962d2d; background: #241414;">
-                        <h4>Rango: Mando de Campo ⭐</h4>
-                        <p>Cuentas con derechos de administrador. Tienes acceso al panel táctico inferior para activar eventos especiales de Juggernaut y gestionar las misiones públicas.</p>
-                    </div>
-                `;
-
                 document.getElementById('panel-secreto-admin').style.display = "block";
-                
+                document.getElementById('contenedor-estilo').innerHTML = `<p>Rango: Mando de Campo. Tienes acceso al panel inferior.</p>`;
+                actualizarBotonJuggernautUI(data.en_partida);
+                cargarDatosPartidaAdmin();
+                listarJugadoresAdmin();
+            } else {
+                const textoEstilo = estilosCombate[data.rol];
+                if (textoEstilo) document.getElementById('contenedor-estilo').innerHTML = `<div class="estilo-juego"><p>${textoEstilo}</p></div>`;
+            }
+            comprobarAlertaJuggernautPublica();
+        }
+
+        async function cambiarModoJuggernaut() {
+            const nuevoEstado = !datosMiUsuario.en_partida;
+            await supabase.from('jugadores').update({ en_partida: nuevoEstado }).eq('usuario', usuarioGuardado);
+            location.reload();
+        }
+
+        function actualizarBotonJuggernautUI(estado) {
+            const btn = document.getElementById('btn-toggle-juggernaut');
+            btn.innerText = estado ? "💥 JUGGERNAUT ACTIVO (Apagar) 💥" : "Activar Modo Juggernaut 🚀";
+            btn.style.backgroundColor = estado ? "#ff0000" : "#962d2d";
+        }
+
+        async function cargarDatosPartidaAdmin() {
+            const { data } = await supabase.from('partidas').select('*').eq('activa', true).maybeSingle();
+            if(data) {
+                document.getElementById('nombre-partida').value = data.nombre;
+                document.getElementById('fecha-partida').value = data.fecha;
+            }
+        }
+
+        async function guardarPartida() {
+            const nombre = document.getElementById('nombre-partida').value;
+            const fecha = document.getElementById('fecha-partida').value;
+            await supabase.from('partidas').update({ activa: false }).eq('activa', true);
+            await supabase.from('partidas').insert([{ nombre, fecha, activa: true }]);
+            location.reload();
+        }
+
+        async function listarJugadoresAdmin() {
