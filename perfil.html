@@ -24,7 +24,7 @@
 
     <div id="alerta-boss-perfil" class="alerta-juggernaut">
         ⚠️ ATENCIÓN OPERADOR ⚠️<br>
-        ¡El Administrador ha entrado a la partida como JUGGERNAUT!
+        ¡Un Administrador ha entrado a la partida como JUGGERNAUT!
     </div>
 
     <div class="tarjeta-perfil">
@@ -83,8 +83,19 @@
                 }
             }
 
-            const { data: admin } = await supabase.from('jugadores').select('*').eq('usuario', 'Admin').maybeSingle();
-            if(admin && admin.en_partida === true) {
+            // Comprobar si algún administrador está en partida
+            const { data: todos } = await supabase.from('jugadores').select('*');
+            let juggernautEncontrado = false;
+            
+            if(todos) {
+                todos.forEach(j => {
+                    if(j.usuario.toLowerCase().includes('admin') && j.en_partida === true) {
+                        juggernautEncontrado = true;
+                    }
+                });
+            }
+
+            if(juggernautEncontrado) {
                 document.getElementById('alerta-boss-perfil').style.display = "block";
             }
         }
