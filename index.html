@@ -12,10 +12,8 @@
         input, select { width: 100%; padding: 10px; background-color: #2b2b2b; border: 1px solid #4a5d4e; border-radius: 4px; color: #fff; box-sizing: border-box; margin-bottom: 15px; }
         .btn-accion { width: 100%; background-color: #4a5d4e; color: white; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
         .btn-accion:hover { background-color: #637d68; }
-        
         .alerta-juggernaut { display: none; background-color: #962d2d; border: 3px dashed #ff0000; padding: 15px; border-radius: 6px; text-align: center; font-weight: bold; font-size: 1.1rem; color: #fff; margin-bottom: 25px; width: 100%; max-width: 550px; box-sizing: border-box; animation: parpadeo 1.5s infinite; }
         @keyframes parpadeo { 0% {opacity: 1;} 50% {opacity: 0.6;} 100% {opacity: 1;} }
-
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 10px; text-align: center; border-bottom: 1px solid #2b2b2b; }
         th { background-color: #4a5d4e; }
@@ -27,7 +25,7 @@
 
     <div id="alerta-boss" class="alerta-juggernaut">
         🚨 ¡EVENTO ESPECIAL DETECTADO! 🚨<br>
-        ¡Un Administrador se ha unido a la batalla como JUGGERNAUT! ¡Preparad vuestras tácticas!
+        ¡Un Administrador se ha unido a la batalla como JUGGERNAUT!
     </div>
 
     <div class="contenedor-login">
@@ -43,11 +41,10 @@
     <div class="contenedor-marcador" id="zona-partida" style="display:none;">
         <h3 id="titulo-partida">Cargando partida...</h3>
         <p style="text-align:center; color:#ccc;" id="fecha-partida"></p>
-        
         <label>Selecciona tu modalidad (Se paga en mano en el propio campo):</label>
         <select id="tipo-pago">
-            <option value="5">Alistarse: 5€ (Traigo mi propia réplica + Seguro de campo obligado)</option>
-            <option value="25">Alistarse: 25€ (Alquiler de equipo completo del campo + Seguro obligado)</option>
+            <option value="5">Alistarse: 5€ (Traigo mi propia réplica + Seguro de campo)</option>
+            <option value="25">Alistarse: 25€ (Alquiler de equipo completo + Seguro)</option>
         </select>
         <button class="btn-accion" onclick="unirseAPartida()">Confirmar Asistencia al Campo</button>
     </div>
@@ -72,14 +69,14 @@
 
         document.getElementById('formLogin').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const usuario = document.getElementById('usuario').value;
+            const usuario = document.getElementById('usuario').value.trim();
             const contra = document.getElementById('contra').value;
 
             const { data } = await supabase.from('jugadores').select('*').eq('usuario', usuario).eq('contrasena', contra).maybeSingle();
             if (data) {
                 localStorage.setItem('usuarioRegistrado', usuario);
                 alert('¡Acceso autorizado!');
-                location.reload();
+                window.location.href = 'perfil.html';
             } else {
                 alert('Datos incorrectos.');
             }
@@ -87,16 +84,16 @@
 
         async function unirseAPartida() {
             const precio = document.getElementById('tipo-pago').value;
-            await supabase.from('jugadores').update({ tipo_entrada: precio, en_partida: true }).eq('usuario', usuarioLogueado);
-            alert("¡Te has alistado con éxito! Nos vemos en el campo.");
+            await supabase.from('jugadores').update({ tipo_entrada: precio }).eq('usuario', usuarioLogueado);
+            alert("¡Te has alistado con éxito!");
             location.reload();
         }
 
         async function sistemaEnTiempoReal() {
             const { data: partida } = await supabase.from('partidas').select('*').eq('activa', true).maybeSingle();
             if(partida) {
-                document.getElementById('titulo-partida').innerText = "⚔️ NUEVA MISIÓN: " + partida.nombre;
-                document.getElementById('fecha-partida').innerText = "Fecha del despliegue: " + partida.fecha;
+                document.getElementById('titulo-partida').innerText = "⚔️ MISIÓN: " + partida.nombre;
+                document.getElementById('fecha-partida').innerText = "Fecha: " + partida.fecha;
             }
 
             const { data: jugadores } = await supabase.from('jugadores').select('*').order('puntos', { ascending: false });
@@ -107,24 +104,16 @@
 
             if (jugadores) {
                 jugadores.forEach(j => {
-                    // Si el usuario contiene "Admin" en su nombre y está en la partida, activa el aviso
                     if (j.usuario.toLowerCase().includes('admin')) {
-                        if (j.en_partida === true) {
-                            juggernautActivo = true;
-                        }
-                        return; // No mostrar a los administradores en la lista pública de puntos
+                        if (j.en_partida === true) juggernautActivo = true;
+                        return;
                     }
-                    
                     let estilo = j.rol === "Medico" ? "rol-medico" : j.rol === "Asalto" ? "rol-asalto" : j.rol === "Ametrallador" ? "rol-ametrallador" : j.rol === "Tirador designado" ? "rol-tirador" : "rol-at";
                     tbody.innerHTML += `<tr><td><strong>${j.usuario}</strong></td><td><span class="etiqueta-rol ${estilo}">${j.rol}</span></td><td><strong>${j.puntos} PTS</strong></td></tr>`;
                 });
             }
-
-            if (juggernautActivo) {
-                document.getElementById('alerta-boss').style.display = "block";
-            }
+            if (juggernautActivo) document.getElementById('alerta-boss').style.display = "block";
         }
-
         sistemaEnTiempoReal();
     </script>
 </body>
