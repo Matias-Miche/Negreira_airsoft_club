@@ -154,7 +154,7 @@
         <h1>Bienvenidos al Club de Airsoft de Negreira</h1>
         <p>Táctica, estrategia y adrenalina en la comarca de Barcala. Únete a nuestras partidas de fin de semana.</p>
         <!-- Enlace de reenvío al apartado de registro -->
-        <a href="#registro" class="btn-accion">Obtener mi ID de Miembro</a>
+        <a href="registro.html" class="btn-accion">Obtener mi ID de Miembro</a>
     </section>
 
     <!-- SECCIÓN 2: INFORMACIÓN -->
