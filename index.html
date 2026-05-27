@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Airsoft Negreira</title>
+    <!-- Cargamos Supabase para conectar la base de datos -->
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        body { 
+            background-color: #1a1a1a; 
+            color: #ffffff; 
+            font-family: Arial, sans-serif; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center;
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .contenedor-login { 
+            background-color: #0b0b0b; 
+            padding: 30px; 
+            border-radius: 8px; 
+            border: 3px solid #4a5d4e; 
+            width: 100%; 
+            max-width: 400px; 
+            box-sizing: border-box;
+            margin-bottom: 30px;
+        }
+        h2, h3 { color: #7fa984; text-transform: uppercase; text-align: center; margin-top: 0; }
+        .form-grupo { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #ccc; }
+        input { width: 100%; padding: 10px; background-color: #2b2b2b; border: 1px solid #4a5d4e; border-radius: 4px; color: #fff; box-sizing: border-box; }
+        .btn-accion { width: 100%; background-color: #4a5d4e; color: white; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: background 0.3s; margin-top: 10px; }
+        .btn-accion:hover { background-color: #637d68; }
+        .enlace-registro { display: block; text-align: center; margin-top: 15px; color: #7fa984; text-decoration: none; font-size: 0.9rem; }
+        
+        /* Estilos del marcador visual de jugadores */
+        .contenedor-marcador {
+            background-color: #0b0b0b;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #4a5d4e;
+            width: 100%;
+            max-width: 550px;
+            box-sizing: border-box;
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 10px; text-align: center; border-bottom: 1px solid #2b2b2b; font-size: 0.9rem; }
+        th { background-color: #4a5d4e; color: white; text-transform: uppercase; font-size: 0.85rem; }
+        
+        /* Estilos de las etiquetas de rol estilo videojuego */
+        .etiqueta-rol {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+        .rol-medico { background-color: #962d2d; color: white; }
+        .rol-ametrallador { background-color: #b87333; color: white; }
+        .rol-asalto { background-color: #3b5998; color: white; }
+        .rol-tirador { background-color: #6b8e23; color: white; }
+        .rol-at { background-color: #ff8c00; color: black; }
+    </style>
+</head>
+<body>
+
+    <!-- FORMULARIO DE ACCESO -->
+    <div class="contenedor-login">
+        <h2>Ingreso de Operadores</h2>
+        
+        <form id="formLogin">
+            <div class="form-grupo">
+                <label for="usuario">Nombre de Usuario:</label>
+                <input type="text" id="usuario" required placeholder="Tu usuario registrado">
+            </div>
+            
+            <div class="form-grupo">
+                <label for="contra">Contraseña:</label>
+                <input type="password" id="contra" required placeholder="Tu contraseña">
+            </div>
+            
+            <button type="submit" class="btn-accion">Entrar al Panel</button>
+        </form>
+
+        <a href="registro.html" class="enlace-registro">¿No tienes perfil? Regístrate aquí</a>
+    </div>
+
+    <!-- MARCADOR GENERAL PÚBLICO -->
+    <div class="contenedor-marcador">
+        <h3>Marcador de Operadores</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Operador</th>
+                    <th>Rol Asignado</th>
+                    <th>Puntos</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-marcador">
+                <!-- Se rellena automáticamente desde internet -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Claves del proyecto vinculadas
+        const SUPABASE_URL = "https://supabase.co";
+        const SUPABASE_KEY = "sb_publishable_CH_3b10nSrV6PolJp3Q85w_sFCTAjrp";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Control del Formulario de Login
+        document.getElementById('formLogin').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const usuario = document.getElementById('usuario').value;
+            const contra = document.getElementById('contra').value;
+
+            const { data, error } = await supabase
+                .from('jugadores')
+                .select('*')
+                .eq('usuario', usuario)
+                .eq('contrasena', contra)
+                .maybeSingle();
+
+            if (data) {
+                localStorage.setItem('usuarioRegistrado', usuario);
+                alert('¡Acceso autorizado, soldado!');
+                window.location.href = 'perfil.html';
+            } else {
+                alert('Usuario o contraseña incorrectos. Verifica tus datos.');
+            }
+        });
+
+        // Función para cargar el marcador visual público
+        async function cargarMarcador() {
+            const { data, error } = await supabase
+                .from('jugadores')
+                .select('*')
+                .order('puntos', { ascending: false }); // Los que tienen más puntos salen arriba
+
+            const tbody = document.getElementById('tabla-marcador');
+            tbody.innerHTML = "";
+
+            if (data) {
+                data.forEach(jugador => {
+                    // Definimos qué etiqueta de color y texto corresponde a cada rol
+                    let claseEstilo = "";
+                    let iconoRol = "";
+
+                    if (jugador.rol === "Medico") { claseEstilo = "rol-medico"; iconoRol = "🩹 Médico"; }
+                    else if (jugador.rol === "Ametrallador") { claseEstilo = "rol-ametrallador"; iconoRol = "🪖 Ametrallador"; }
+                    else if (jugador.rol === "Asalto") { claseEstilo = "rol-asalto"; iconoRol = "💥 Asalto"; }
+                    else if (jugador.rol === "Tirador designado") { claseEstilo = "rol-tirador"; iconoRol = "🎯 Tirador Des."; }
+                    else if (jugador.rol === "AT") { claseEstilo = "rol-at"; iconoRol = "🚀 AT"; }
+                    else { claseEstilo = ""; iconoRol = "Sin Rol"; }
+
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td><strong>${jugador.usuario}</strong></td>
+                        <td><span class="etiqueta-rol ${claseEstilo}">${iconoRol}</span></td>
+                        <td><strong>${jugador.puntos} PTS</strong></td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+            }
+        }
+
+        // Ejecutar la carga del marcador al abrir la página
+        cargarMarcador();
+    </script>
+</body>
+</html>
