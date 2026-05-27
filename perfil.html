@@ -7,27 +7,43 @@
     <script src="https://jsdelivr.net"></script>
     <style>
         body { background-color: #1a1a1a; color: #ffffff; font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-        .tarjeta-perfil { background-color: #0b0b0b; padding: 30px; border-radius: 8px; border: 3px solid #4a5d4e; width: 100%; max-width: 450px; text-align: center; }
-        h2 { color: #7fa984; text-transform: uppercase; margin-top: 0; }
+        .tarjeta-perfil { background-color: #0b0b0b; padding: 30px; border-radius: 8px; border: 3px solid #4a5d4e; width: 100%; max-width: 500px; text-align: center; margin-bottom: 20px; }
+        .panel-admin { background-color: #0b0b0b; padding: 30px; border-radius: 8px; border: 3px solid #962d2d; width: 100%; max-width: 850px; box-sizing: border-box; display: none; }
+        h2, h3 { color: #7fa984; text-transform: uppercase; margin-top: 0; }
+        .panel-admin h2 { color: #962d2d; }
         .avatar { width: 80px; height: 80px; background-color: #4a5d4e; border-radius: 50%; margin: 15px auto; display: flex; justify-content: center; align-items: center; font-size: 2rem; }
-        .btn-salir { display: inline-block; background-color: #b33939; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 20px; font-weight: bold; }
+        .btn-salir { display: inline-block; background-color: #b33939; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 20px; font-weight: bold; cursor: pointer; border: none; }
         .info-caja { background: #1a1a1a; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #4a5d4e; }
         .estilo-juego { background: #1a251c; padding: 15px; border-radius: 6px; border-left: 5px solid #7fa984; text-align: left; margin-top: 15px; }
         .estilo-juego h4 { color: #7fa984; margin: 0 0 8px 0; text-transform: uppercase; font-size: 0.95rem; }
         .estilo-juego p { margin: 0; font-size: 0.9rem; color: #ddd; line-height: 1.4; }
         
-        .alerta-juggernaut { display: none; background-color: #962d2d; border: 3px dashed #ff0000; padding: 15px; border-radius: 6px; text-align: center; font-weight: bold; font-size: 1.1rem; color: #fff; margin-bottom: 25px; width: 100%; max-width: 450px; box-sizing: border-box; animation: parpadeo 1.5s infinite; }
+        /* HERRAMIENTAS DE ADMINISTRACIÓN */
+        .caja-herramientas { background: #1a1a1a; padding: 15px; border-radius: 6px; border: 1px solid #4a5d4e; margin-bottom: 20px; text-align: left; }
+        input, select { padding: 10px; background-color: #2b2b2b; border: 1px solid #4a5d4e; border-radius: 4px; color: #fff; margin: 5px 10px 5px 0; }
+        .btn-militar { background-color: #4a5d4e; color: white; border: none; padding: 10px 15px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        .btn-militar:hover { background-color: #637d68; }
+        .btn-juggernaut { background-color: #962d2d; color: white; border: none; padding: 12px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; width: 100%; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 20px; box-shadow: 0 0 10px rgba(150, 45, 45, 0.5); }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 10px; text-align: center; border-bottom: 1px solid #2b2b2b; font-size: 0.9rem; }
+        th { background-color: #4a5d4e; color: white; }
+        .texto-prestamo { font-size: 0.85rem; color: #eccc68; text-align: left; }
+
+        .alerta-juggernaut { display: none; background-color: #962d2d; border: 3px dashed #ff0000; padding: 15px; border-radius: 6px; text-align: center; font-weight: bold; font-size: 1.1rem; color: #fff; margin-bottom: 25px; width: 100%; max-width: 500px; box-sizing: border-box; animation: parpadeo 1.5s infinite; }
         @keyframes parpadeo { 0% {opacity: 1;} 50% {opacity: 0.6;} 100% {opacity: 1;} }
     </style>
 </head>
 <body>
 
+    <!-- RECUADRO ROJO EN VIVO (SOLO PARA JUGADORES) -->
     <div id="alerta-boss-perfil" class="alerta-juggernaut">
         ⚠️ ATENCIÓN OPERADOR ⚠️<br>
         ¡Un Administrador ha entrado a la partida como JUGGERNAUT!
     </div>
 
-    <div class="tarjeta-perfil">
+    <!-- VISTA 1: PERFIL DEL JUGADOR NORMAL -->
+    <div class="tarjeta-perfil" id="vista-jugador">
         <h2>Panel de Operador</h2>
         <div class="avatar">🪖</div>
         <p>Bienvenido de nuevo, soldado:</p>
@@ -44,7 +60,45 @@
         <div id="contenedor-estilo"></div>
         
         <p style="margin-top: 15px; font-size: 0.9rem;">Estado: <strong>Activo para combate</strong></p>
-        <a href="index.html" class="btn-salir">Volver al Inicio</a>
+        <button onclick="cerrarSesion()" class="btn-salir">Cerrar Sesión</button>
+    </div>
+
+    <!-- VISTA 2: PANEL EXCLUSIVO DE ADMINISTRADORES -->
+    <div class="panel-admin" id="vista-admin">
+        <h2>Panel de Mando Central (ADMIN)</h2>
+        <p>Bienvenido, Comandante <strong id="nombre-admin" style="color: #eccc68;">...</strong>. Desde aquí controlas todo el campo de juego.</p>
+        
+        <!-- BOTÓN MÁGICO JUGGERNAUT -->
+        <button id="btn-toggle-juggernaut" class="btn-juggernaut" onclick="cambiarModoJuggernaut()">Activar Modo Juggernaut 🚀</button>
+
+        <!-- PROGRAMACIÓN DE PARTIDAS -->
+        <div class="caja-herramientas">
+            <h3>📅 Programar / Modificar Próxima Partida</h3>
+            <input type="text" id="nombre-partida" placeholder="Nombre (Ej: Operación Negreira)">
+            <input type="date" id="fecha-partida">
+            <button class="btn-militar" onclick="guardarPartida()">Programar Partida</button>
+            <p style="font-size:0.85rem; color:#aaa; margin: 5px 0 0 0;">*Al crear una nueva partida, la anterior se cerrará y archivará automáticamente.</p>
+        </div>
+
+        <!-- LISTA DE OPERADORES Y SUMA DE PUNTOS -->
+        <div class="caja-herramientas">
+            <h3>👥 Control de Alistados y Suministro del Campo</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Operador</th>
+                        <th>Rol</th>
+                        <th>Tipo de Entrada</th>
+                        <th>Arsenales a Prestar 📦</th>
+                        <th>Puntos actuales</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-gestion-jugadores"></tbody>
+            </table>
+        </div>
+
+        <button onclick="cerrarSesion()" class="btn-salir">Cerrar Mando Central</button>
     </div>
 
     <script>
@@ -53,7 +107,6 @@
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const usuarioGuardado = localStorage.getItem('usuarioRegistrado');
-
         if (!usuarioGuardado) { window.location.href = 'index.html'; }
 
         const estilosCombate = {
@@ -64,10 +117,35 @@
             "AT": "Eres el especialista táctico contra defensas pesadas. Tu estilo requiere leer bien el mapa para flanquear fortificaciones enemigas, destruir escudos y limpiar salas protegidas."
         };
 
-        async function cargarDatos() {
-            const { data } = await supabase.from('jugadores').select('*').eq('usuario', usuarioGuardado).single();
+        const equiposPrestamo = {
+            "Medico": "Subfusil compacto (MP5/ARP9) + Chaleco porta-médico ligero + Distintivo de cruz roja.",
+            "Ametrallador": "Réplica pesada de apoyo (LMG/M249) + Cargador de tambor + Bípode acoplado.",
+            "Asalto": "Fusil de asalto estándar (M4/AK) + 3 Cargadores Mid-Cap + Mira de punto rojo.",
+            "Tirador designado": "Fusil de tirador selectivo (DMR) + Mira telescópica con aumentos + Paquete de bolas de 0.30g.",
+            "AT": "Fusil compacto de apoyo + Lanzagranadas acoplado + 2 Cartuchos de granadas de gas."
+        };
 
-            if (data) {
+        let datosMiUsuario = null;
+
+        async function verificarIdentidad() {
+            const { data } = await supabase.from('jugadores').select('*').eq('usuario', usuarioGuardado).single();
+            if (!data) return;
+            datosMiUsuario = data;
+
+            // COMPROBACIÓN INTELIGENTE: ¿Es Admin?
+            if (usuarioGuardado.toLowerCase().includes('admin')) {
+                document.getElementById('vista-jugador').style.display = "none";
+                document.getElementById('vista-admin').style.display = "block";
+                document.getElementById('nombre-admin').innerText = data.usuario;
+                
+                // Actualizar botón de Juggernaut visualmente según la base de datos
+                actualizarBotonJuggernautUI(data.en_partida);
+                
+                // Cargar herramientas exclusivas de admin
+                cargarDatosPartidaAdmin();
+                listarJugadoresAdmin();
+            } else {
+                // Es un jugador normal
                 document.getElementById('nombre-usuario').innerText = data.usuario;
                 document.getElementById('rol-usuario').innerText = data.rol;
                 document.getElementById('puntos-usuario').innerText = data.puntos + " PTS";
@@ -75,32 +153,3 @@
                 const textoEstilo = estilosCombate[data.rol];
                 if (textoEstilo) {
                     document.getElementById('contenedor-estilo').innerHTML = `
-                        <div class="estilo-juego">
-                            <h4>Tu Estilo de Juego Asignado ⚡</h4>
-                            <p>${textoEstilo}</p>
-                        </div>
-                    `;
-                }
-            }
-
-            // Comprobar si algún administrador está en partida
-            const { data: todos } = await supabase.from('jugadores').select('*');
-            let juggernautEncontrado = false;
-            
-            if(todos) {
-                todos.forEach(j => {
-                    if(j.usuario.toLowerCase().includes('admin') && j.en_partida === true) {
-                        juggernautEncontrado = true;
-                    }
-                });
-            }
-
-            if(juggernautEncontrado) {
-                document.getElementById('alerta-boss-perfil').style.display = "block";
-            }
-        }
-
-        cargarDatos();
-    </script>
-</body>
-</html>
