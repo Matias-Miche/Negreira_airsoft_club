@@ -4,72 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Cuenta - Airsoft Negreira</title>
+    <!-- Cargamos Supabase para que funcione en GitHub -->
+    <script src="https://jsdelivr.net"></script>
     <style>
-        body {
-            background-color: #1a1a1a;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .contenedor-registro {
-            background-color: #0b0b0b;
-            padding: 30px;
-            border-radius: 8px;
-            border: 3px solid #4a5d4e;
-            width: 100%;
-            max-width: 400px;
-        }
-        h2 {
-            color: #7fa984;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .form-grupo {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #ccc;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            background-color: #2b2b2b;
-            border: 1px solid #4a5d4e;
-            border-radius: 4px;
-            color: #fff;
-            box-sizing: border-box;
-        }
-        .btn-accion {
-            width: 100%;
-            background-color: #4a5d4e;
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background 0.3s;
-            margin-top: 10px;
-        }
-        .btn-accion:hover {
-            background-color: #637d68;
-        }
-        .enlace-volver {
-            display: block;
-            text-align: center;
-            margin-top: 15px;
-            color: #7fa984;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
+        body { background-color: #1a1a1a; color: #ffffff; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .contenedor-registro { background-color: #0b0b0b; padding: 30px; border-radius: 8px; border: 3px solid #4a5d4e; width: 100%; max-width: 400px; }
+        h2 { color: #7fa984; text-transform: uppercase; margin-bottom: 20px; text-align: center; }
+        .form-grupo { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #ccc; }
+        input, select { width: 100%; padding: 10px; background-color: #2b2b2b; border: 1px solid #4a5d4e; border-radius: 4px; color: #fff; box-sizing: border-box; }
+        .btn-accion { width: 100%; background-color: #4a5d4e; color: white; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: background 0.3s; margin-top: 10px; }
+        .btn-accion:hover { background-color: #637d68; }
+        .enlace-volver { display: block; text-align: center; margin-top: 15px; color: #7fa984; text-decoration: none; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -87,31 +33,47 @@
                 <label for="nueva-contra">Contraseña:</label>
                 <input type="password" id="nueva-contra" required placeholder="Mínimo 6 caracteres">
             </div>
+
+            <div class="form-grupo">
+                <label for="rol-juego">Elige tu Rol en el Campo:</label>
+                <select id="rol-juego" required>
+                    <option value="Medico">Médico 🩹</option>
+                    <option value="Ametrallador">Ametrallador 🪖</option>
+                    <option value="Asalto">Asalto 💥</option>
+                    <option value="Tirador designado">Tirador Designado 🎯</option>
+                    <option value="AT">AT (Anti-Tanque) 🚀</option>
+                </select>
+            </div>
             
             <button type="submit" class="btn-accion">Registrar y Guardar Perfil</button>
         </form>
-
-        <a href="index.html" class="enlace-volver">Volver al Inicio</a>
+        <a href="perfil.html" class="enlace-volver">Volver al Perfil</a>
     </div>
 
     <script>
-        // Código para capturar los datos y guardarlos en el navegador
-        document.getElementById('formRegistro').addEventListener('submit', function(e) {
-            e.preventDefault(); // Evita que la página se recargue
+        // Claves del proyecto vinculadas
+        const SUPABASE_URL = "https://supabase.co";
+        const SUPABASE_KEY = "sb_publishable_CH_3b10nSrV6PolJp3Q85w_sFCTAjrp";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        document.getElementById('formRegistro').addEventListener('submit', async function(e) {
+            e.preventDefault();
             const usuario = document.getElementById('nuevo-usuario').value;
             const contra = document.getElementById('nueva-contra').value;
+            const rol = document.getElementById('rol-juego').value;
 
-            // Guardamos los datos en la memoria del navegador (localStorage)
-            localStorage.setItem('usuarioRegistrado', usuario);
-            localStorage.setItem('contraRegistrada', contra);
+            const { data, error } = await supabase
+                .from('jugadores')
+                .insert([{ usuario: usuario, contrasena: contra, rol: rol }]);
 
-            alert('¡Perfil creado con éxito! Ahora serás redirigido a tu zona de perfil.');
-            
-            // Redirige automáticamente a la pantalla de perfil
-            window.location.href = 'perfil.html';
+            if (error) {
+                alert('Error al registrar: El usuario podría estar duplicado.');
+            } else {
+                localStorage.setItem('usuarioRegistrado', usuario);
+                alert('¡Perfil creado con éxito!');
+                window.location.href = 'perfil.html';
+            }
         });
     </script>
-
 </body>
 </html>
