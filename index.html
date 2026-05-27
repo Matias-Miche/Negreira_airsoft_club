@@ -27,7 +27,7 @@
 
     <div id="alerta-boss" class="alerta-juggernaut">
         🚨 ¡EVENTO ESPECIAL DETECTADO! 🚨<br>
-        Un Administrador se ha unido a la batalla como JUGGERNAUT. ¡Preparad vuestras tácticas!
+        ¡Un Administrador se ha unido a la batalla como JUGGERNAUT! ¡Preparad vuestras tácticas!
     </div>
 
     <div class="contenedor-login">
@@ -99,21 +99,29 @@
                 document.getElementById('fecha-partida').innerText = "Fecha del despliegue: " + partida.fecha;
             }
 
-            const { data: admin } = await supabase.from('jugadores').select('*').eq('usuario', 'Admin').maybeSingle();
-            if(admin && admin.en_partida === true) {
-                document.getElementById('alerta-boss').style.display = "block";
-            }
-
             const { data: jugadores } = await supabase.from('jugadores').select('*').order('puntos', { ascending: false });
             const tbody = document.getElementById('tabla-marcador');
             tbody.innerHTML = "";
 
+            let juggernautActivo = false;
+
             if (jugadores) {
                 jugadores.forEach(j => {
-                    if(j.usuario === "Admin") return;
+                    // Si el usuario contiene "Admin" en su nombre y está en la partida, activa el aviso
+                    if (j.usuario.toLowerCase().includes('admin')) {
+                        if (j.en_partida === true) {
+                            juggernautActivo = true;
+                        }
+                        return; // No mostrar a los administradores en la lista pública de puntos
+                    }
+                    
                     let estilo = j.rol === "Medico" ? "rol-medico" : j.rol === "Asalto" ? "rol-asalto" : j.rol === "Ametrallador" ? "rol-ametrallador" : j.rol === "Tirador designado" ? "rol-tirador" : "rol-at";
                     tbody.innerHTML += `<tr><td><strong>${j.usuario}</strong></td><td><span class="etiqueta-rol ${estilo}">${j.rol}</span></td><td><strong>${j.puntos} PTS</strong></td></tr>`;
                 });
+            }
+
+            if (juggernautActivo) {
+                document.getElementById('alerta-boss').style.display = "block";
             }
         }
 
