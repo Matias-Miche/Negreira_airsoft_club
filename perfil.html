@@ -1,51 +1,17 @@
-html<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Perfil - Airsoft Negreira</title>
+    <script src="https://jsdelivr.net"></script>
     <style>
-        body {
-            background-color: #1a1a1a;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .tarjeta-perfil {
-            background-color: #0b0b0b;
-            padding: 30px;
-            border-radius: 8px;
-            border: 3px solid #4a5d4e;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
+        body { background-color: #1a1a1a; color: #ffffff; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .tarjeta-perfil { background-color: #0b0b0b; padding: 30px; border-radius: 8px; border: 3px solid #4a5d4e; width: 100%; max-width: 400px; text-align: center; }
         h2 { color: #7fa984; text-transform: uppercase; }
-        .avatar {
-            width: 80px;
-            height: 80px;
-            background-color: #4a5d4e;
-            border-radius: 50%;
-            margin: 20px auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2rem;
-        }
-        .btn-salir {
-            display: inline-block;
-            background-color: #b33939;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-top: 20px;
-            font-weight: bold;
-        }
+        .avatar { width: 80px; height: 80px; background-color: #4a5d4e; border-radius: 50%; margin: 20px auto; display: flex; justify-content: center; align-items: center; font-size: 2rem; }
+        .btn-salir { display: inline-block; background-color: #b33939; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 20px; font-weight: bold; }
+        .info-caja { background: #1a1a1a; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #4a5d4e; }
     </style>
 </head>
 <body>
@@ -54,26 +20,56 @@ html<!DOCTYPE html>
         <h2>Panel de Operador</h2>
         <div class="avatar">🪖</div>
         <p>Bienvenido de nuevo, soldado:</p>
-        <!-- Aquí se inyectará el nombre guardado -->
-        <h3 id="nombre-usuario" style="color: #7fa984; font-size: 1.5rem;">Cargando...</h3>
+        <h3 id="nombre-usuario" style="color: #7fa984; font-size: 1.5rem; margin: 5px 0;">Cargando...</h3>
+        
+        <div class="info-caja">
+            <p style="margin: 5px 0;">Rol de combate: <strong id="rol-usuario" style="color: #7fa984;">...</strong></p>
+        </div>
+
+        <div class="info-caja">
+            <p style="margin: 5px 0;">Puntos de Victoria: <strong id="puntos-usuario">0 PTS</strong></p>
+            <p style="margin: 5px 0;">Rango Militar: <strong id="rango-usuario" style="color: #eccc68;">...</strong></p>
+        </div>
         
         <p>Estado: <strong>Activo para combate</strong></p>
-        
-        <a href="index.html" class="btn-salir">Cerrar Sesión</a>
+        <a href="registro.html" class="btn-salir">Cerrar Sesión</a>
     </div>
 
     <script>
-        // Leer los datos que guardamos en la página anterior
+        // Claves del proyecto vinculadas
+        const SUPABASE_URL = "https://supabase.co";
+        const SUPABASE_KEY = "sb_publishable_CH_3b10nSrV6PolJp3Q85w_sFCTAjrp";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         const usuarioGuardado = localStorage.getItem('usuarioRegistrado');
 
-        if (usuarioGuardado) {
-            document.getElementById('nombre-usuario').innerText = usuarioGuardado;
-        } else {
-            // Si entra a esta página sin registrarse, lo mandamos a registrarse
-            alert('No tienes perfil creado todavía.');
+        if (!usuarioGuardado) {
             window.location.href = 'registro.html';
         }
-    </script>
 
+        async function cargarDatos() {
+            const { data, error } = await supabase
+                .from('jugadores')
+                .select('*')
+                .eq('usuario', usuarioGuardado)
+                .single();
+
+            if (data) {
+                document.getElementById('nombre-usuario').innerText = data.usuario;
+                document.getElementById('rol-usuario').innerText = data.rol;
+                document.getElementById('puntos-usuario').innerText = data.puntos + " PTS";
+
+                // Escala de Rangos Militares
+                let rango = "Recluta (Novato) 🔰";
+                if (data.puntos >= 300) rango = "General de Campo 🎖️";
+                else if (data.puntos >= 150) rango = "Veterano 🎖️";
+                else if (data.puntos >= 50) rango = "Soldado Raso 🪖";
+
+                document.getElementById('rango-usuario').innerText = rango;
+            }
+        }
+
+        cargarDatos();
+    </script>
 </body>
 </html>
