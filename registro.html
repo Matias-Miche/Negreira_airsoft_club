@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Cuenta - Airsoft Negreira</title>
-    <!-- Cargamos Supabase para que funcione en GitHub -->
     <script src="https://jsdelivr.net"></script>
     <style>
         body { background-color: #1a1a1a; color: #ffffff; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
@@ -45,29 +44,35 @@
                 </select>
             </div>
             
-            <button type="submit" class="btn-accion">Registrar y Guardar Perfil</button>
+            <button type="submit" id="btn-registro" class="btn-accion">Registrar y Guardar Perfil</button>
         </form>
-        <a href="perfil.html" class="enlace-volver">Volver al Perfil</a>
+        <a href="index.html" class="enlace-volver">Volver al Inicio</a>
     </div>
 
     <script>
-        // Claves del proyecto vinculadas
         const SUPABASE_URL = "https://supabase.co";
         const SUPABASE_KEY = "sb_publishable_CH_3b10nSrV6PolJp3Q85w_sFCTAjrp";
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         document.getElementById('formRegistro').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const usuario = document.getElementById('nuevo-usuario').value;
+            const btn = document.getElementById('btn-registro');
+            btn.innerText = "Registrando en Base de Datos...";
+            btn.disabled = true;
+
+            const usuario = document.getElementById('nuevo-usuario').value.trim();
             const contra = document.getElementById('nueva-contra').value;
             const rol = document.getElementById('rol-juego').value;
 
+            // Esperamos de forma real a que internet responda
             const { data, error } = await supabase
                 .from('jugadores')
                 .insert([{ usuario: usuario, contrasena: contra, rol: rol }]);
 
             if (error) {
                 alert('Error al registrar: El usuario podría estar duplicado.');
+                btn.innerText = "Registrar y Guardar Perfil";
+                btn.disabled = false;
             } else {
                 localStorage.setItem('usuarioRegistrado', usuario);
                 alert('¡Perfil creado con éxito!');
