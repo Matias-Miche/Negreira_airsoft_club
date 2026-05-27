@@ -44,7 +44,7 @@
         <h2>Panel de Operador</h2>
         <div class="avatar" id="icono-perfil">🪖</div>
         <p>Bienvenido de nuevo, soldado:</p>
-        <h3 id="nombre-usuario" style="color: #7fa984; font-size: 1.5rem; margin: 5px 0;">Cargando...</h3>
+        <h3 id="nombre-usuario" style="color: #7fa984; font-size: 1.5rem; margin: 5px 0;">Buscando operador...</h3>
         
         <div class="info-caja">
             <p style="margin: 5px 0;">ID de Operador: <strong id="id-usuario" style="color: #eccc68;">...</strong></p>
@@ -75,7 +75,6 @@
             <input type="text" id="nombre-partida" placeholder="Nombre (Ej: Operación Negreira)">
             <input type="date" id="fecha-partida">
             <button class="btn-militar" onclick="guardarPartida()">Programar Partida</button>
-            <p style="font-size:0.85rem; color:#aaa; margin: 5px 0 0 0;">*Al guardar la fecha de una nueva partida, la anterior se archivará de forma automática en la web.</p>
         </div>
 
         <div class="caja-herramientas">
@@ -123,15 +122,23 @@
         let datosMiUsuario = null;
 
         async function cargarPerfilInteligente() {
-            const { data } = await supabase.from('jugadores').select('*').eq('usuario', usuarioGuardado).single();
-            if (!data) return;
+            // Buscamos los datos exactos del usuario logueado
+            const { data, error } = await supabase.from('jugadores').select('*').eq('usuario', usuarioGuardado).single();
+            
+            if (error || !data) {
+                document.getElementById('nombre-usuario').innerText = "Error al cargar operador";
+                return;
+            }
+            
             datosMiUsuario = data;
 
+            // Inyectamos los datos reales en las etiquetas HTML correspondientes
             document.getElementById('id-usuario').innerText = "#" + data.id;
             document.getElementById('nombre-usuario').innerText = data.usuario;
             document.getElementById('rol-usuario').innerText = data.rol;
             document.getElementById('puntos-usuario').innerText = data.puntos + " PTS";
 
+            // Si el nombre contiene admin se abren las opciones secretas
             if (usuarioGuardado.toLowerCase().includes('admin')) {
                 document.getElementById('icono-perfil').innerText = "👑";
                 document.getElementById('btn-cerrar-normal').style.backgroundColor = "#962d2d";
@@ -144,9 +151,3 @@
 
                 document.getElementById('panel-secreto-admin').style.display = "block";
                 
-                actualizarBotonJuggernautUI(data.en_partida);
-                cargarDatosPartidaAdmin();
-                listarJugadoresAdmin();
-            } else {
-                const textoEstilo = estilosCombate[data.rol];
-                if (textoEstilo) {
