@@ -6,7 +6,7 @@
     <title>Mi Perfil - Airsoft Negreira</title>
     <script src="https://jsdelivr.net"></script>
     <style>
-        body { background-color: #1a1a1a; color: #ffffff; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        body { background-color: #1a1a1a; color: #ffffff; font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
         .tarjeta-perfil { background-color: #0b0b0b; padding: 30px; border-radius: 8px; border: 3px solid #4a5d4e; width: 100%; max-width: 450px; text-align: center; }
         h2 { color: #7fa984; text-transform: uppercase; margin-top: 0; }
         .avatar { width: 80px; height: 80px; background-color: #4a5d4e; border-radius: 50%; margin: 15px auto; display: flex; justify-content: center; align-items: center; font-size: 2rem; }
@@ -15,9 +15,17 @@
         .estilo-juego { background: #1a251c; padding: 15px; border-radius: 6px; border-left: 5px solid #7fa984; text-align: left; margin-top: 15px; }
         .estilo-juego h4 { color: #7fa984; margin: 0 0 8px 0; text-transform: uppercase; font-size: 0.95rem; }
         .estilo-juego p { margin: 0; font-size: 0.9rem; color: #ddd; line-height: 1.4; }
+        
+        .alerta-juggernaut { display: none; background-color: #962d2d; border: 3px dashed #ff0000; padding: 15px; border-radius: 6px; text-align: center; font-weight: bold; font-size: 1.1rem; color: #fff; margin-bottom: 25px; width: 100%; max-width: 450px; box-sizing: border-box; animation: parpadeo 1.5s infinite; }
+        @keyframes parpadeo { 0% {opacity: 1;} 50% {opacity: 0.6;} 100% {opacity: 1;} }
     </style>
 </head>
 <body>
+
+    <div id="alerta-boss-perfil" class="alerta-juggernaut">
+        ⚠️ ATENCIÓN OPERADOR ⚠️<br>
+        ¡El Administrador ha entrado a la partida como JUGGERNAUT!
+    </div>
 
     <div class="tarjeta-perfil">
         <h2>Panel de Operador</h2>
@@ -33,11 +41,10 @@
             <p style="margin: 5px 0;">Puntos de Victoria: <strong id="puntos-usuario">0 PTS</strong></p>
         </div>
 
-        <!-- TEXTO TÁCTICO PARA EL JUGADOR -->
         <div id="contenedor-estilo"></div>
         
         <p style="margin-top: 15px; font-size: 0.9rem;">Estado: <strong>Activo para combate</strong></p>
-        <a href="registro.html" class="btn-salir">Cerrar Sesión</a>
+        <a href="index.html" class="btn-salir">Volver al Inicio</a>
     </div>
 
     <script>
@@ -47,11 +54,8 @@
 
         const usuarioGuardado = localStorage.getItem('usuarioRegistrado');
 
-        if (!usuarioGuardado) {
-            window.location.href = 'registro.html';
-        }
+        if (!usuarioGuardado) { window.location.href = 'index.html'; }
 
-        // Estilos de juego visibles solo para el jugador
         const estilosCombate = {
             "Medico": "Tu misión es la supervivencia del grupo. Debes moverte rápido entre coberturas, mantenerte cerca de tus compañeros caídos y asegurar el reabastecimiento médico en la zona de combate.",
             "Ametrallador": "Tu estilo es puramente defensivo y de contención. Debes ganar posiciones elevadas o pasillos clave para retener el avance enemigo usando fuego continuo de cobertura.",
@@ -61,11 +65,7 @@
         };
 
         async function cargarDatos() {
-            const { data, error } = await supabase
-                .from('jugadores')
-                .select('*')
-                .eq('usuario', usuarioGuardado)
-                .single();
+            const { data } = await supabase.from('jugadores').select('*').eq('usuario', usuarioGuardado).single();
 
             if (data) {
                 document.getElementById('nombre-usuario').innerText = data.usuario;
@@ -81,6 +81,11 @@
                         </div>
                     `;
                 }
+            }
+
+            const { data: admin } = await supabase.from('jugadores').select('*').eq('usuario', 'Admin').maybeSingle();
+            if(admin && admin.en_partida === true) {
+                document.getElementById('alerta-boss-perfil').style.display = "block";
             }
         }
 
