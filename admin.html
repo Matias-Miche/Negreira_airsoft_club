@@ -1,112 +1,449 @@
+```html id="8hf1m2"
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control - Dueños Airsoft</title>
-    <script src="https://jsdelivr.net"></script>
+
+    <title>Panel de Control - Airsoft Negreira</title>
+
+    <!-- SDK REAL DE SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
-        body { background-color: #1a1a1a; color: #ffffff; font-family: Arial, sans-serif; padding: 20px; }
-        .contenedor { max-width: 950px; margin: 0 auto; background: #0b0b0b; padding: 20px; border: 3px solid #7fa984; border-radius: 8px; }
-        h1, h2 { color: #7fa984; text-align: center; text-transform: uppercase; }
-        .formulario { background: #1a1a1a; padding: 15px; border-radius: 6px; border: 1px solid #4a5d4e; margin-bottom: 20px; }
-        input { padding: 10px; background-color: #2b2b2b; border: 1px solid #4a5d4e; border-radius: 4px; color: #fff; margin-right: 10px; }
-        .btn { background-color: #7fa984; color: black; border: none; padding: 10px 15px; font-weight: bold; border-radius: 4px; cursor: pointer; }
-        .btn:hover { background-color: #637d68; color: white; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #4a5d4e; font-size: 0.95rem; }
-        th { background-color: #4a5d4e; color: white; }
-        .texto-prestamo { font-size: 0.85rem; color: #eccc68; text-align: left; }
+
+        body{
+            background-color:#1a1a1a;
+            color:white;
+            font-family:Arial, sans-serif;
+            padding:20px;
+        }
+
+        .contenedor{
+            max-width:1100px;
+            margin:auto;
+
+            background:#0b0b0b;
+
+            padding:25px;
+
+            border:3px solid #7fa984;
+            border-radius:10px;
+        }
+
+        h1,h2{
+            color:#7fa984;
+            text-align:center;
+            text-transform:uppercase;
+            margin-bottom:20px;
+        }
+
+        .formulario{
+            background:#1a1a1a;
+            padding:20px;
+            border-radius:8px;
+            border:1px solid #4a5d4e;
+            margin-bottom:30px;
+        }
+
+        input{
+            width:100%;
+            margin-bottom:15px;
+
+            padding:12px;
+
+            background:#2b2b2b;
+            color:white;
+
+            border:1px solid #4a5d4e;
+            border-radius:5px;
+        }
+
+        .btn{
+            background:#7fa984;
+            color:black;
+
+            border:none;
+
+            padding:12px 18px;
+
+            font-weight:bold;
+            border-radius:5px;
+
+            cursor:pointer;
+
+            transition:0.3s;
+        }
+
+        .btn:hover{
+            background:#637d68;
+            color:white;
+        }
+
+        .tabla-responsive{
+            overflow-x:auto;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            margin-top:20px;
+        }
+
+        th,td{
+            padding:12px;
+            border-bottom:1px solid #4a5d4e;
+            text-align:center;
+        }
+
+        th{
+            background:#4a5d4e;
+        }
+
+        .texto-prestamo{
+            text-align:left;
+            color:#f7d794;
+            font-size:0.9rem;
+        }
+
+        .estado{
+            margin-top:15px;
+            text-align:center;
+            color:#ccc;
+        }
+
+        @media(max-width:768px){
+
+            table{
+                font-size:0.85rem;
+            }
+
+            th,td{
+                padding:8px;
+            }
+        }
+
     </style>
+
 </head>
+
 <body>
 
 <div class="contenedor">
+
     <h1>Panel Secreto de Administración</h1>
-    
+
+    <!-- =========================
+         FORMULARIO
+    ========================== -->
+
     <div class="formulario">
+
         <h2>Crear Nueva Partida Pública</h2>
-        <input type="text" id="nombre-partida" placeholder="Ej: Operación Negreira">
-        <input type="date" id="fecha-partida">
-        <button class="btn" onclick="crearPartida()">Publicar Partida</button>
+
+        <input
+            type="text"
+            id="nombre-partida"
+            placeholder="Ej: Operación Negreira"
+        >
+
+        <input
+            type="date"
+            id="fecha-partida"
+        >
+
+        <button
+            class="btn"
+            onclick="crearPartida()"
+        >
+            Publicar Partida
+        </button>
+
+        <div class="estado" id="estado-panel"></div>
+
     </div>
 
-    <h2>Operadores Alistados y Control de Puntos</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Operador</th>
-                <th>Rol</th>
-                <th>Tipo de Entrada (Pago en Campo)</th>
-                <th>Arsenales a Prestar 📦</th>
-                <th>Puntos</th>
-                <th>Acción</th>
-            </tr>
-        </thead>
-        <tbody id="tabla-jugadores"></tbody>
-    </table>
+    <!-- =========================
+         TABLA
+    ========================== -->
+
+    <h2>Operadores Alistados</h2>
+
+    <div class="tabla-responsive">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Operador</th>
+                    <th>Rol</th>
+                    <th>Entrada</th>
+                    <th>Arsenal Prestado</th>
+                    <th>Puntos</th>
+                    <th>Acción</th>
+                </tr>
+
+            </thead>
+
+            <tbody id="tabla-jugadores">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
 </div>
 
-    <script>
-        const SUPABASE_URL = "https://supabase.co";
-        const SUPABASE_KEY = "sb_publishable_CH_3b10nSrV6PolJp3Q85w_sFCTAjrp";
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<script>
 
-        const equiposPrestamo = {
-            "Medico": "Subfusil compacto (MP5/ARP9) + Chaleco porta-médico ligero + Distintivo de cruz roja.",
-            "Ametrallador": "Réplica pesada de apoyo (LMG/M249) + Cargador de tambor + Bípode acoplado.",
-            "Asalto": "Fusil de asalto estándar (M4/AK) + 3 Cargadores Mid-Cap + Mira de punto rojo.",
-            "Tirador designado": "Fusil de tirador selectivo (DMR) + Mira telescópica con aumentos + Paquete de bolas de 0.30g.",
-            "AT": "Fusil compacto de apoyo + Lanzagranadas acoplado + 2 Cartuchos de granadas de gas."
-        };
+    // ============================
+    // CONFIGURACIÓN SUPABASE
+    // ============================
 
-        async function crearPartida() {
-            const nombre = document.getElementById('nombre-partida').value;
-            const fecha = document.getElementById('fecha-partida').value;
-            if(!nombre || !fecha) return alert("Rellena todos los campos");
+    const SUPABASE_URL =
+    "https://TU-PROYECTO.supabase.co";
 
-            await supabase.from('partidas').update({ activa: false }).eq('activa', true);
+    const SUPABASE_KEY =
+    "TU_CLAVE_PUBLICA";
 
-            const { error } = await supabase.from('partidas').insert([{ nombre, fecha, activa: true }]);
-            if(!error) {
-                alert("¡Partida creada con éxito!");
-                location.reload();
-            }
+    const clienteSupabase =
+    supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+    // ============================
+    // EQUIPOS DE PRÉSTAMO
+    // ============================
+
+    const equiposPrestamo = {
+
+        "Medico":
+        "Subfusil compacto + Chaleco médico + Cruz roja",
+
+        "Ametrallador":
+        "LMG/M249 + Tambor + Bípode",
+
+        "Asalto":
+        "M4/AK + 3 Mid-Cap + Mira Red Dot",
+
+        "Tirador designado":
+        "DMR + Mira telescópica + BBs 0.30g",
+
+        "AT":
+        "Lanzagranadas + Cartuchos de gas"
+    };
+
+    // ============================
+    // MENSAJES
+    // ============================
+
+    function mostrarEstado(texto){
+
+        document.getElementById("estado-panel")
+        .innerText = texto;
+    }
+
+    // ============================
+    // CREAR PARTIDA
+    // ============================
+
+    async function crearPartida(){
+
+        const nombre =
+        document.getElementById("nombre-partida").value;
+
+        const fecha =
+        document.getElementById("fecha-partida").value;
+
+        if(!nombre || !fecha){
+
+            alert("Rellena todos los campos");
+            return;
         }
 
-        async function listarJugadores() {
-            const { data } = await supabase.from('jugadores').select('*');
-            const tbody = document.getElementById('tabla-jugadores');
-            tbody.innerHTML = "";
+        mostrarEstado("Creando partida...");
 
-            if (data) {
-                data.forEach(jugador => {
-                    if(jugador.usuario === "Admin") return; 
-                    
-                    const necesitaEquipo = jugador.tipo_entrada === "25";
-                    const material = necesitaEquipo ? (equiposPrestamo[jugador.rol] || "Equipo básico") : "Ninguno (Trae réplica propia)";
-                    const textoEntrada = necesitaEquipo ? "🟢 25€ (Seguro + Alquiler)" : "🔵 5€ (Solo Seguro)";
+        // Desactivar partidas anteriores
 
-                    const fila = document.createElement('tr');
-                    fila.innerHTML = `
-                        <td><strong>${jugador.usuario}</strong></td>
-                        <td>${jugador.rol}</td>
-                        <td>${textoEntrada}</td>
-                        <td class="texto-prestamo">${material}</td>
-                        <td>${jugador.puntos} PTS</td>
-                        <td><button class="btn" onclick="sumarPuntos('${jugador.usuario}', ${jugador.puntos})">+10 Pts</button></td>
-                    `;
-                    tbody.appendChild(fila);
-                });
+        await clienteSupabase
+        .from("partidas")
+        .update({ activa:false })
+        .eq("activa", true);
+
+        // Crear nueva partida
+
+        const { error } =
+        await clienteSupabase
+        .from("partidas")
+        .insert([
+            {
+                nombre,
+                fecha,
+                activa:true
             }
+        ]);
+
+        if(error){
+
+            console.error(error);
+
+            mostrarEstado(
+                "Error al crear partida"
+            );
+
+            return;
         }
 
-        async function sumarPuntos(usuario, puntosActuales) {
-            await supabase.from('jugadores').update({ puntos: puntosActuales + 10 }).eq('usuario', usuario);
-            listarJugadores();
+        mostrarEstado(
+            "¡Partida creada correctamente!"
+        );
+
+        // Refrescar lista
+
+        listarJugadores();
+    }
+
+    // ============================
+    // LISTAR JUGADORES
+    // ============================
+
+    async function listarJugadores(){
+
+        const tbody =
+        document.getElementById(
+            "tabla-jugadores"
+        );
+
+        tbody.innerHTML =
+        "<tr><td colspan='6'>Cargando...</td></tr>";
+
+        const { data, error } =
+        await clienteSupabase
+        .from("jugadores")
+        .select("*");
+
+        if(error){
+
+            tbody.innerHTML =
+            "<tr><td colspan='6'>Error cargando jugadores</td></tr>";
+
+            console.error(error);
+
+            return;
+        }
+
+        tbody.innerHTML = "";
+
+        data.forEach(jugador => {
+
+            // Ignorar admins
+
+            if(jugador.usuario === "Admin"){
+                return;
+            }
+
+            const necesitaEquipo =
+            jugador.tipo_entrada === "25";
+
+            const material =
+            necesitaEquipo
+            ? (equiposPrestamo[jugador.rol]
+            || "Equipo básico")
+            : "Trae réplica propia";
+
+            const entradaTexto =
+            necesitaEquipo
+            ? "🟢 25€"
+            : "🔵 5€";
+
+            const fila =
+            document.createElement("tr");
+
+            fila.innerHTML = `
+
+                <td>
+                    <strong>${jugador.usuario}</strong>
+                </td>
+
+                <td>
+                    ${jugador.rol}
+                </td>
+
+                <td>
+                    ${entradaTexto}
+                </td>
+
+                <td class="texto-prestamo">
+                    ${material}
+                </td>
+
+                <td>
+                    ${jugador.puntos} PTS
+                </td>
+
+                <td>
+
+                    <button
+                        class="btn"
+                        onclick="sumarPuntos(
+                            '${jugador.usuario}',
+                            ${jugador.puntos}
+                        )"
+                    >
+                        +10 Pts
+                    </button>
+
+                </td>
+            `;
+
+            tbody.appendChild(fila);
+        });
+    }
+
+    // ============================
+    // SUMAR PUNTOS
+    // ============================
+
+    async function sumarPuntos(
+        usuario,
+        puntosActuales
+    ){
+
+        const nuevosPuntos =
+        puntosActuales + 10;
+
+        const { error } =
+        await clienteSupabase
+        .from("jugadores")
+        .update({
+            puntos:nuevosPuntos
+        })
+        .eq("usuario", usuario);
+
+        if(error){
+
+            alert("Error actualizando puntos");
+            console.error(error);
+
+            return;
         }
 
         listarJugadores();
-    </script>
+    }
+
+    // ============================
+    // INICIO
+    // ============================
+
+    listarJugadores();
+
+</script>
+
 </body>
 </html>
+```
