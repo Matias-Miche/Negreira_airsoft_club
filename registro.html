@@ -1,106 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<style>
+body{background:#1a1a1a;color:white;font-family:Arial;display:flex;justify-content:center;align-items:center;height:100vh}
+.box{background:#0b0b0b;padding:30px;border:2px solid #4a5d4e;border-radius:10px;width:100%;max-width:400px}
+input,select{width:100%;padding:10px;margin:10px 0;background:#2b2b2b;color:white;border:1px solid #4a5d4e}
+button{width:100%;padding:10px;background:#4a5d4e;color:white;border:none;cursor:pointer}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h2>Registro</h2>
+
+<input id="user" placeholder="Usuario">
+<input id="pass" type="password" placeholder="Contraseña">
+
+<select id="rol">
+<option>Medico</option>
+<option>Ametrallador</option>
+<option>Asalto</option>
+<option>Tirador designado</option>
+<option>AT</option>
+</select>
+
+<button onclick="registrar()">Crear cuenta</button>
+
+<p id="msg"></p>
+</div>
+
 <script>
 
-const SUPABASE_URL =
-"https://wbcfszivrbuqfqnizarq.supabase.co";
+async function registrar(){
 
-const SUPABASE_KEY =
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMjEsImV4cCI6MjA5NTQ3NTIyMX0.2iX7Twex3d96A9Iawg3zxvGAjFNLBqt81tSZgrzqA9s";
+const usuario = document.getElementById("user").value;
+const pass = document.getElementById("pass").value;
+const rol = document.getElementById("rol").value;
 
-const clienteSupabase =
-supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
+if(!usuario || !pass) return;
 
-document
-.getElementById("formRegistro")
-.addEventListener(
-    "submit",
-    async function(e){
+const { error } = await supabaseClient
+.from("jugadores")
+.insert([{
+usuario,
+contrasena: pass,
+rol,
+puntos:0,
+en_partida:false,
+tipo_entrada:"5"
+}]);
 
-    e.preventDefault();
+if(error){
+document.getElementById("msg").innerText = "Error";
+return;
+}
 
-    const usuario =
-    document
-    .getElementById("nuevo-usuario")
-    .value
-    .trim();
-
-    const contra =
-    document
-    .getElementById("nueva-contra")
-    .value;
-
-    const rol =
-    document
-    .getElementById("rol-juego")
-    .value;
-
-    const estado =
-    document.getElementById(
-        "estado-registro"
-    );
-
-    const {
-        data:usuarioExistente
-    } =
-    await clienteSupabase
-    .from("jugadores")
-    .select("*")
-    .eq("usuario", usuario)
-    .maybeSingle();
-
-    if(usuarioExistente){
-
-        estado.innerText =
-        "Ese usuario ya existe.";
-
-        return;
-    }
-
-    const { error } =
-    await clienteSupabase
-    .from("jugadores")
-    .insert([
-        {
-            usuario:usuario,
-            contrasena:contra,
-            rol:rol,
-            puntos:0,
-            en_partida:false,
-            tipo_entrada:"5"
-        }
-    ]);
-
-    if(error){
-
-        estado.innerText =
-        "Error registrando usuario";
-
-        console.error(error);
-
-        return;
-    }
-
-    localStorage.setItem(
-        "usuarioRegistrado",
-        usuario
-    );
-
-    localStorage.setItem(
-        "sesionActiva",
-        "true"
-    );
-
-    estado.innerText =
-    "¡Registro completado!";
-
-    setTimeout(() => {
-
-        window.location.href =
-        "perfil.html";
-
-    }, 1200);
-});
+localStorage.setItem("usuarioRegistrado", usuario);
+window.location.href="perfil.html";
+}
 
 </script>
+
+</body>
+</html>
