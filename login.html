@@ -1,89 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<style>
+body{background:#1a1a1a;color:white;font-family:Arial;display:flex;justify-content:center;align-items:center;height:100vh}
+.box{background:#0b0b0b;padding:30px;border:2px solid #4a5d4e;border-radius:10px;width:100%;max-width:400px}
+input{width:100%;padding:10px;margin:10px 0;background:#2b2b2b;color:white}
+button{width:100%;padding:10px;background:#4a5d4e;color:white;border:none}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h2>Login</h2>
+
+<input id="user">
+<input id="pass" type="password">
+
+<button onclick="login()">Entrar</button>
+<p id="msg"></p>
+</div>
+
 <script>
 
-const SUPABASE_URL =
-"https://wbcfszivrbuqfqnizarq.supabase.co";
+async function login(){
 
-const SUPABASE_KEY =
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMjEsImV4cCI6MjA5NTQ3NTIyMX0.2iX7Twex3d96A9Iawg3zxvGAjFNLBqt81tSZgrzqA9s";
+const user = document.getElementById("user").value;
+const pass = document.getElementById("pass").value;
 
-const clienteSupabase =
-supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
+const { data, error } = await supabaseClient
+.from("jugadores")
+.select("*")
+.eq("usuario", user)
+.eq("contrasena", pass)
+.single();
 
-document
-.getElementById("formLogin")
-.addEventListener(
-    "submit",
-    async function(e){
+if(data){
 
-    e.preventDefault();
+localStorage.setItem("usuarioRegistrado", user);
+window.location.href="perfil.html";
 
-    const usuario =
-    document
-    .getElementById("login-usuario")
-    .value
-    .trim();
+}else{
+document.getElementById("msg").innerText="Error login";
+}
 
-    const contra =
-    document
-    .getElementById("login-contra")
-    .value;
-
-    const estado =
-    document.getElementById(
-        "estado-login"
-    );
-
-    estado.innerText =
-    "Verificando acceso...";
-
-    const { data, error } =
-    await clienteSupabase
-    .from("jugadores")
-    .select("*")
-    .eq("usuario", usuario)
-    .eq("contrasena", contra)
-    .maybeSingle();
-
-    if(error){
-
-        estado.innerText =
-        "Error de conexión";
-
-        console.error(error);
-
-        return;
-    }
-
-    if(data){
-
-        localStorage.setItem(
-            "usuarioRegistrado",
-            usuario
-        );
-
-        localStorage.setItem(
-            "sesionActiva",
-            "true"
-        );
-
-        estado.innerText =
-        "¡Acceso autorizado!";
-
-        setTimeout(() => {
-
-            window.location.href =
-            "perfil.html";
-
-        }, 1200);
-
-    }else{
-
-        estado.innerText =
-        "Usuario o contraseña incorrectos.";
-    }
-});
+}
 
 </script>
+
+</body>
+</html>
