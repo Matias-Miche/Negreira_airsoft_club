@@ -1,194 +1,373 @@
-# Negreira_airsoft_club
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Club de Airsoft Negreira | Guía de Proyecto</title>
+
+    <title>Club Airsoft Negreira</title>
+
     <style>
-        /* --- ESTILOS GENERALES --- */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+        /* =========================
+           ESTILOS GENERALES
+        ========================== */
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        html {
-            scroll-behavior: smooth; /* Desplazamiento suave entre apartados */
+        html{
+            scroll-behavior:smooth;
         }
 
-        body {
-            background-color: #1a1a1a;
-            color: #ffffff;
-            line-height: 1.6;
+        body{
+            background-color:#1a1a1a;
+            color:white;
+            line-height:1.6;
         }
 
-        /* --- NAVEGACIÓN --- */
-        header {
-            background-color: #0b0b0b;
-            padding: 20px;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 3px solid #4a5d4e; /* Verde militar */
+        ul{
+            padding-left:20px;
         }
 
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
+        /* =========================
+           HEADER / NAVEGACIÓN
+        ========================== */
+
+        header{
+            background-color:#0b0b0b;
+            border-bottom:3px solid #4a5d4e;
+            position:fixed;
+            width:100%;
+            top:0;
+            z-index:1000;
+            padding:20px;
         }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #7fa984;
+        nav{
+            max-width:1200px;
+            margin:auto;
+
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            flex-wrap:wrap;
         }
 
-        .nav-links {
-            list-style: none;
-            display: flex;
-            gap: 20px;
+        .logo{
+            color:#7fa984;
+            font-size:1.5rem;
+            font-weight:bold;
         }
 
-        .nav-links a {
-            color: #fff;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
+        .nav-links{
+            list-style:none;
+            display:flex;
+            gap:20px;
         }
 
-        .nav-links a:hover {
-            color: #7fa984;
+        .nav-links a{
+            color:white;
+            text-decoration:none;
+            transition:0.3s;
+            font-weight:500;
         }
 
-        /* --- SECCIONES PRINCIPALES --- */
-        section {
-            padding: 100px 20px 60px 20px; /* Margen superior para no tapar con el menú fijo */
-            max-width: 1000px;
-            margin: 0 auto;
-            min-height: 80vh;
+        .nav-links a:hover{
+            color:#7fa984;
         }
 
-        h1, h2 {
-            color: #7fa984;
-            margin-bottom: 20px;
-            text-transform: uppercase;
+        /* =========================
+           SECCIONES
+        ========================== */
+
+        section{
+            max-width:1000px;
+            margin:auto;
+            padding:110px 20px 60px 20px;
+            min-height:80vh;
         }
 
-        /* --- SECCIÓN INICIO --- */
-        #inicio {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+        h1,h2{
+            color:#7fa984;
+            margin-bottom:20px;
+            text-transform:uppercase;
         }
 
-        .btn-accion {
-            display: inline-block;
-            background-color: #4a5d4e;
-            color: white;
-            padding: 12px 24px;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-top: 20px;
-            font-weight: bold;
-            transition: background 0.3s;
+        /* =========================
+           INICIO
+        ========================== */
+
+        #inicio{
+
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            align-items:center;
+            text-align:center;
+
+            background-image:
+            linear-gradient(rgba(0,0,0,0.65),
+            rgba(0,0,0,0.65)),
+            url('https://images.unsplash.com/photo-1511884642898-4c92249e20b6?q=80&w=1200');
+
+            background-size:cover;
+            background-position:center;
         }
 
-        .btn-accion:hover {
-            background-color: #637d68;
+        #inicio p{
+            max-width:700px;
         }
 
-        /* --- SECCIÓN REGISTRO (FORMULARIO) --- */
-        .form-grupo {
-            margin-bottom: 15px;
+        /* =========================
+           BOTONES
+        ========================== */
+
+        .btn-accion{
+            display:inline-block;
+            margin-top:20px;
+
+            background-color:#4a5d4e;
+            color:white;
+
+            padding:12px 24px;
+
+            border-radius:5px;
+            text-decoration:none;
+            font-weight:bold;
+
+            transition:0.3s;
         }
 
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #ccc;
+        .btn-accion:hover{
+            background-color:#637d68;
         }
 
-        input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 10px;
-            background-color: #2b2b2b;
-            border: 1px solid #4a5d4e;
-            border-radius: 4px;
-            color: #fff;
+        button.btn-accion{
+            border:none;
+            cursor:pointer;
+            font-size:1rem;
         }
 
-        /* --- PIE DE PÁGINA --- */
-        footer {
-            background-color: #0b0b0b;
-            text-align: center;
-            padding: 20px;
-            color: #666;
-            font-size: 0.9rem;
+        /* =========================
+           FORMULARIO
+        ========================== */
+
+        .form-grupo{
+            margin-bottom:15px;
         }
+
+        label{
+            display:block;
+            margin-bottom:5px;
+            color:#ccc;
+        }
+
+        input[type="text"]{
+            width:100%;
+            padding:10px;
+
+            background-color:#2b2b2b;
+            color:white;
+
+            border:1px solid #4a5d4e;
+            border-radius:4px;
+        }
+
+        /* =========================
+           FOOTER
+        ========================== */
+
+        footer{
+            background-color:#0b0b0b;
+            text-align:center;
+            padding:20px;
+            color:#777;
+            font-size:0.9rem;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media(max-width:768px){
+
+            nav{
+                flex-direction:column;
+                gap:15px;
+            }
+
+            .nav-links{
+                flex-direction:column;
+                text-align:center;
+            }
+
+            h1{
+                font-size:1.8rem;
+            }
+        }
+
     </style>
 </head>
+
 <body>
 
-    <!-- MENÚ DE NAVEGACIÓN -->
+    <!-- =========================
+         MENÚ
+    ========================== -->
+
     <header>
+
         <nav>
-            <div class="logo">Airsoft Negreira</div>
+
+            <div class="logo">
+                Airsoft Negreira
+            </div>
+
             <ul class="nav-links">
                 <li><a href="#inicio">Inicio</a></li>
                 <li><a href="#informacion">El Club</a></li>
                 <li><a href="#registro">Inscripción</a></li>
             </ul>
+
         </nav>
+
     </header>
 
-    <!-- SECCIÓN 1: INICIO -->
+    <!-- =========================
+         INICIO
+    ========================== -->
+
     <section id="inicio">
-        <h1>Bienvenidos al Club de Airsoft de Negreira</h1>
-        <p>Táctica, estrategia y adrenalina en la comarca de Barcala. Únete a nuestras partidas de fin de semana.</p>
-        <!-- Enlace de reenvío al apartado de registro -->
-        <a href="registro.html" class="btn-accion">Obtener mi ID de Miembro</a>
+
+        <h1>
+            Bienvenidos al Club de Airsoft de Negreira
+        </h1>
+
+        <p>
+            Táctica, estrategia y adrenalina en la comarca de Barcala.
+            Únete a nuestras partidas de fin de semana.
+        </p>
+
+        <!-- BOTÓN CORREGIDO -->
+
+        <a href="#registro" class="btn-accion">
+            Obtener mi ID de Miembro
+        </a>
+
     </section>
 
-    <!-- SECCIÓN 2: INFORMACIÓN -->
+    <!-- =========================
+         INFORMACIÓN
+    ========================== -->
+
     <section id="informacion">
+
         <h2>Sobre el Club</h2>
-        <p>Somos una asociación de airsoft con sede en Negreira. Organizamos eventos en entornos naturales controlados y campos autorizados, priorizando siempre la seguridad, el compañerismo y el juego limpio.</p>
+
+        <p>
+            Somos una asociación de airsoft con sede en Negreira.
+            Organizamos eventos en entornos naturales controlados
+            y campos autorizados, priorizando siempre la seguridad,
+            el compañerismo y el juego limpio.
+        </p>
+
         <br>
+
         <h3>Requisitos para participar:</h3>
+
         <ul>
-            <li>Ser mayor de edad (o disponer de autorización paterna).</li>
-            <li>Gafas de protección homologadas de uso obligatorio.</li>
-            <li>Cumplir estricto control de potencia (Cronógrafo).</li>
+            <li>Ser mayor de edad o disponer de autorización paterna.</li>
+            <li>Uso obligatorio de gafas homologadas.</li>
+            <li>Control estricto de potencia mediante cronógrafo.</li>
         </ul>
+
     </section>
 
-    <!-- SECCIÓN 3: REGISTRO (Usa los comandos que pediste antes) -->
+    <!-- =========================
+         REGISTRO
+    ========================== -->
+
     <section id="registro">
+
         <h2>Registro de Jugadores</h2>
-        <p>Si ya eres miembro, introduce tu credencial para verificar tu asistencia a la próxima partida:</p>
+
+        <p>
+            Introduce tu credencial para verificar
+            tu asistencia a la próxima partida.
+        </p>
+
         <br>
-        <form action="#" method="POST" onsubmit="alert('ID Validado correctamente'); return false;">
+
+        <form onsubmit="return validarID()">
+
             <div class="form-grupo">
-                <!-- Comando HTML para que el usuario escriba su ID -->
-                <label for="jugador-id">Introduce tu ID de Operador:</label>
-                <input type="text" id="jugador-id" name="jugador-id" placeholder="Ej: AN-9823" maxlength="50" required>
+
+                <label for="jugador-id">
+                    Introduce tu ID de Operador:
+                </label>
+
+                <input
+                    type="text"
+                    id="jugador-id"
+                    placeholder="Ej: AN-9823"
+                    maxlength="50"
+                    required
+                >
+
             </div>
-            <button type="submit" class="btn-accion" style="border:none; cursor:pointer;">Verificar ID</button>
+
+            <button type="submit" class="btn-accion">
+                Verificar ID
+            </button>
+
         </form>
+
     </section>
 
-    <!-- PIE DE PÁGINA -->
+    <!-- =========================
+         FOOTER
+    ========================== -->
+
     <footer>
-        <p>&copy; 2026 Club Airsoft Negreira. Diseñado como proyecto académico ejecutable en GitHub Pages.</p>
+
+        <p>
+            &copy; 2026 Airsoft Negreira |
+            Proyecto educativo desarrollado en HTML, CSS y JavaScript
+        </p>
+
     </footer>
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script>
+
+        function validarID(){
+
+            const id =
+            document.getElementById("jugador-id").value;
+
+            if(id.startsWith("AN-")){
+
+                alert("ID validado correctamente");
+
+            }else{
+
+                alert("Formato incorrecto. Usa AN-XXXX");
+
+            }
+
+            return false;
+        }
+
+    </script>
 
 </body>
 </html>
+```
