@@ -1,155 +1,100 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Registro - Airsoft Negreira</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js"></script>
-
-<style>
-
-body{
-background:#1a1a1a;
-color:white;
-font-family:Arial;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-padding:20px;
-}
-
-.box{
-background:#0b0b0b;
-padding:30px;
-border:2px solid #4a5d4e;
-border-radius:10px;
-width:100%;
-max-width:420px;
-}
-
-input,select{
-width:100%;
-padding:10px;
-margin:10px 0;
-background:#2b2b2b;
-color:white;
-border:1px solid #4a5d4e;
-border-radius:5px;
-}
-
-button{
-width:100%;
-padding:10px;
-background:#4a5d4e;
-color:white;
-border:none;
-cursor:pointer;
-border-radius:5px;
-}
-
-button:hover{
-background:#637d68;
-}
-
-.rol-option{
-display:flex;
-align-items:center;
-gap:10px;
-}
-
-</style>
-</head>
-
-<body>
-
-<div class="box">
-
-<h2>Crear cuenta</h2>
-
-<input id="user" placeholder="Usuario">
-<input id="pass" type="password" placeholder="Contraseña">
-
-<select id="rol">
-
-<option value="Medico">🩹 Médico</option>
-<option value="Ametrallador">🪖 Ametrallador</option>
-<option value="Asalto">💥 Asalto</option>
-<option value="Tirador designado">🎯 Tirador Designado</option>
-<option value="AT">🚀 AT Anti-Tanque</option>
-
-</select>
-
-<button onclick="registrar()">Crear cuenta</button>
-
-<p id="msg"></p>
-
-</div>
 
 <script>
 
-async function registrar(){
+// ============================
+// SUPABASE CLIENT (CORRECTO)
+// ============================
 
-const usuario = document.getElementById("user").value.trim();
-const pass = document.getElementById("pass").value;
-const rol = document.getElementById("rol").value;
-const msg = document.getElementById("msg");
+const supabaseClient = supabase.createClient(
+  "https://wbcfszivrbuqfqnizarq.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMjEsImV4cCI6MjA5NTQ3NTIyMX0.2iX7Twex3d96A9Iawg3zxvGAjFNLBqt81tSZgrzqA9s"
+);
 
-if(usuario.length < 3){
-msg.innerText = "Usuario demasiado corto";
-return;
-}
+// ============================
+// REGISTRO
+// ============================
 
-if(pass.length < 6){
-msg.innerText = "Contraseña mínimo 6 caracteres";
-return;
-}
+document.getElementById("formRegistro").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-msg.innerText = "Creando cuenta...";
+  const usuario = document.getElementById("nuevo-usuario").value.trim();
+  const contra = document.getElementById("nueva-contra").value;
+  const rol = document.getElementById("rol-juego").value;
 
-// comprobar duplicado
-const { data: existe } = await supabaseClient
-.from("jugadores")
-.select("usuario")
-.eq("usuario", usuario)
-.maybeSingle();
+  const estado = document.getElementById("estado-registro");
+  const btn = document.getElementById("btn-registro");
 
-if(existe){
-msg.innerText = "Ese usuario ya existe";
-return;
-}
+  btn.disabled = true;
+  estado.innerText = "Creando cuenta...";
 
-// insertar
-const { error } = await supabaseClient
-.from("jugadores")
-.insert([{
-usuario,
-contrasena: pass,
-rol,
-puntos:0,
-en_partida:false,
-tipo_entrada:"5"
-}]);
+  try {
 
-if(error){
-console.log(error);
-msg.innerText = "Error de conexión con Supabase";
-return;
-}
+    // ============================
+    // comprobar si existe
+    // ============================
 
-localStorage.setItem("usuarioRegistrado", usuario);
+    const { data: existe, error: errorCheck } = await supabaseClient
+      .from("jugadores")
+      .select("usuario")
+      .eq("usuario", usuario)
+      .maybeSingle();
 
-msg.innerText = "Cuenta creada ✔";
+    if (errorCheck) {
+      console.log(errorCheck);
+      estado.innerText = "Error de conexión";
+      btn.disabled = false;
+      return;
+    }
 
-setTimeout(()=>{
-window.location.href="perfil.html";
-},1000);
+    if (existe) {
+      estado.innerText = "Ese usuario ya existe";
+      btn.disabled = false;
+      return;
+    }
 
-}
+    // ============================
+    // insertar usuario
+    // ============================
+
+    const { error } = await supabaseClient
+      .from("jugadores")
+      .insert([
+        {
+          usuario: usuario,
+          contrasena: contra,
+          rol: rol,
+          puntos: 0,
+          en_partida: false,
+          tipo_entrada: "5"
+        }
+      ]);
+
+    if (error) {
+      console.log(error);
+      estado.innerText = "Error creando usuario";
+      btn.disabled = false;
+      return;
+    }
+
+    // ============================
+    // éxito
+    // ============================
+
+    localStorage.setItem("usuarioRegistrado", usuario);
+
+    estado.innerText = "Cuenta creada ✔";
+
+    setTimeout(() => {
+      window.location.href = "perfil.html";
+    }, 1000);
+
+  } catch (err) {
+    console.log(err);
+    estado.innerText = "Error inesperado";
+    btn.disabled = false;
+  }
+
+});
 
 </script>
-
-</body>
-</html>
