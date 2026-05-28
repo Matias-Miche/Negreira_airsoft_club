@@ -1,539 +1,62 @@
-```html id="f1wd7v"
-<!-- SDK REAL DE SUPABASE -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfil</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<style>
+body{background:#1a1a1a;color:white;font-family:Arial;padding:20px}
+.box{background:#0b0b0b;padding:20px;border:2px solid #4a5d4e;border-radius:10px}
+button{padding:10px;background:#4a5d4e;color:white;border:none;margin-top:10px}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h2>Perfil</h2>
+
+<p id="user"></p>
+<p id="rol"></p>
+<p id="pts"></p>
+
+<button onclick="salir()">Cerrar sesión</button>
+</div>
 
 <script>
 
-    // ============================
-    // CONFIGURACIÓN SUPABASE
-    // ============================
+const user = localStorage.getItem("usuarioRegistrado");
 
-    const SUPABASE_URL =
-    "https://TU-PROYECTO.supabase.co";
+if(!user){
+window.location.href="login.html";
+}
 
-    const SUPABASE_KEY =
-    "TU_ANON_PUBLIC_KEY";
+async function cargar(){
 
-    const clienteSupabase =
-    supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-    );
+const { data } = await supabaseClient
+.from("jugadores")
+.select("*")
+.eq("usuario", user)
+.single();
 
-    // ============================
-    // SESIÓN
-    // ============================
+document.getElementById("user").innerText = data.usuario;
+document.getElementById("rol").innerText = data.rol;
+document.getElementById("pts").innerText = data.puntos + " pts";
 
-    const usuarioGuardado =
-    localStorage.getItem(
-        "usuarioRegistrado"
-    );
+}
 
-    if(!usuarioGuardado){
+function salir(){
+localStorage.clear();
+window.location.href="login.html";
+}
 
-        window.location.href =
-        "index.html";
-    }
-
-    // ============================
-    // TEXTOS DE ROL
-    // ============================
-
-    const estilosCombate = {
-
-        "Medico":
-        "Tu misión es mantener vivo al equipo.",
-
-        "Ametrallador":
-        "Fuego de supresión y control.",
-
-        "Asalto":
-        "Primera línea ofensiva.",
-
-        "Tirador designado":
-        "Precisión y distancia.",
-
-        "AT":
-        "Especialista anti-fortificación."
-    };
-
-    const equiposPrestamo = {
-
-        "Medico":
-        "Subfusil + Chaleco médico",
-
-        "Ametrallador":
-        "LMG + Tambor + Bípode",
-
-        "Asalto":
-        "M4/AK + Mid Caps",
-
-        "Tirador designado":
-        "DMR + Mira + BBs 0.30",
-
-        "AT":
-        "Lanzagranadas + Cartuchos"
-    };
-
-    let datosMiUsuario = null;
-
-    // ============================
-    // CARGAR PERFIL
-    // ============================
-
-    async function cargarPerfilInteligente(){
-
-        const { data, error } =
-        await clienteSupabase
-        .from("jugadores")
-        .select("*")
-        .eq(
-            "usuario",
-            usuarioGuardado
-        )
-        .single();
-
-        if(error || !data){
-
-            console.error(error);
-
-            alert(
-                "Error cargando perfil"
-            );
-
-            return;
-        }
-
-        datosMiUsuario = data;
-
-        // DATOS PERFIL
-
-        document.getElementById(
-            "id-usuario"
-        ).innerText =
-        "#" + data.id;
-
-        document.getElementById(
-            "nombre-usuario"
-        ).innerText =
-        data.usuario;
-
-        document.getElementById(
-            "rol-usuario"
-        ).innerText =
-        data.rol;
-
-        document.getElementById(
-            "puntos-usuario"
-        ).innerText =
-        data.puntos + " PTS";
-
-        // ADMIN
-
-        if(
-            usuarioGuardado
-            .toLowerCase()
-            .includes("admin")
-        ){
-
-            document.getElementById(
-                "icono-perfil"
-            ).innerText = "👑";
-
-            document.getElementById(
-                "panel-secreto-admin"
-            ).style.display = "block";
-
-            document.getElementById(
-                "contenedor-estilo"
-            ).innerHTML = `
-                <p>
-                    Rango:
-                    Mando de Campo
-                </p>
-            `;
-
-            actualizarBotonJuggernautUI(
-                data.en_partida
-            );
-
-            cargarDatosPartidaAdmin();
-
-            listarJugadoresAdmin();
-
-        }else{
-
-            // USUARIO NORMAL
-
-            const texto =
-            estilosCombate[data.rol];
-
-            if(texto){
-
-                document.getElementById(
-                    "contenedor-estilo"
-                ).innerHTML = `
-
-                    <div class="estilo-juego">
-
-                        <h4>
-                            Estilo de Combate
-                        </h4>
-
-                        <p>
-                            ${texto}
-                        </p>
-
-                    </div>
-                `;
-            }
-        }
-
-        comprobarAlertaJuggernautPublica();
-    }
-
-    // ============================
-    // JUGGERNAUT
-    // ============================
-
-    async function cambiarModoJuggernaut(){
-
-        const nuevoEstado =
-        !datosMiUsuario.en_partida;
-
-        const { error } =
-        await clienteSupabase
-        .from("jugadores")
-        .update({
-            en_partida:nuevoEstado
-        })
-        .eq(
-            "usuario",
-            usuarioGuardado
-        );
-
-        if(error){
-
-            alert(
-                "Error actualizando modo"
-            );
-
-            console.error(error);
-
-            return;
-        }
-
-        datosMiUsuario.en_partida =
-        nuevoEstado;
-
-        actualizarBotonJuggernautUI(
-            nuevoEstado
-        );
-
-        comprobarAlertaJuggernautPublica();
-    }
-
-    function actualizarBotonJuggernautUI(
-        estado
-    ){
-
-        const btn =
-        document.getElementById(
-            "btn-toggle-juggernaut"
-        );
-
-        btn.innerText = estado
-        ? "💥 JUGGERNAUT ACTIVO"
-        : "Activar Modo Juggernaut 🚀";
-
-        btn.style.backgroundColor =
-        estado
-        ? "#ff0000"
-        : "#962d2d";
-    }
-
-    // ============================
-    // ALERTA GLOBAL
-    // ============================
-
-    async function comprobarAlertaJuggernautPublica(){
-
-        const { data } =
-        await clienteSupabase
-        .from("jugadores")
-        .select("*");
-
-        let activo = false;
-
-        if(data){
-
-            data.forEach(j => {
-
-                if(
-                    j.usuario
-                    .toLowerCase()
-                    .includes("admin")
-                    &&
-                    j.en_partida
-                ){
-
-                    activo = true;
-                }
-            });
-        }
-
-        document.getElementById(
-            "alerta-boss-perfil"
-        ).style.display =
-        activo
-        ? "block"
-        : "none";
-    }
-
-    // ============================
-    // PARTIDA ADMIN
-    // ============================
-
-    async function cargarDatosPartidaAdmin(){
-
-        const { data } =
-        await clienteSupabase
-        .from("partidas")
-        .select("*")
-        .eq("activa", true)
-        .maybeSingle();
-
-        if(data){
-
-            document.getElementById(
-                "nombre-partida"
-            ).value =
-            data.nombre;
-
-            document.getElementById(
-                "fecha-partida"
-            ).value =
-            data.fecha;
-        }
-    }
-
-    async function guardarPartida(){
-
-        const nombre =
-        document.getElementById(
-            "nombre-partida"
-        ).value;
-
-        const fecha =
-        document.getElementById(
-            "fecha-partida"
-        ).value;
-
-        if(!nombre || !fecha){
-
-            alert(
-                "Completa todos los campos"
-            );
-
-            return;
-        }
-
-        // DESACTIVAR ANTIGUAS
-
-        await clienteSupabase
-        .from("partidas")
-        .update({
-            activa:false
-        })
-        .eq("activa", true);
-
-        // CREAR NUEVA
-
-        const { error } =
-        await clienteSupabase
-        .from("partidas")
-        .insert([
-            {
-                nombre,
-                fecha,
-                activa:true
-            }
-        ]);
-
-        if(error){
-
-            alert(
-                "Error creando partida"
-            );
-
-            console.error(error);
-
-            return;
-        }
-
-        alert(
-            "Partida programada"
-        );
-    }
-
-    // ============================
-    // TABLA ADMIN
-    // ============================
-
-    async function listarJugadoresAdmin(){
-
-        const { data } =
-        await clienteSupabase
-        .from("jugadores")
-        .select("*")
-        .order(
-            "puntos",
-            { ascending:false }
-        );
-
-        const tbody =
-        document.getElementById(
-            "tabla-gestion-jugadores"
-        );
-
-        tbody.innerHTML = "";
-
-        if(data){
-
-            data.forEach(jugador => {
-
-                const necesitaEquipo =
-                jugador.tipo_entrada
-                === "25";
-
-                const material =
-                necesitaEquipo
-                ? (
-                    equiposPrestamo[
-                        jugador.rol
-                    ]
-                    || "Equipo básico"
-                )
-                : "Trae réplica propia";
-
-                const fila =
-                document.createElement(
-                    "tr"
-                );
-
-                fila.innerHTML = `
-
-                    <td>
-                        ${jugador.usuario}
-                    </td>
-
-                    <td>
-                        ${jugador.rol}
-                    </td>
-
-                    <td>
-                        ${
-                            necesitaEquipo
-                            ? "25€"
-                            : "5€"
-                        }
-                    </td>
-
-                    <td class="
-                    texto-prestamo
-                    ">
-                        ${material}
-                    </td>
-
-                    <td>
-                        ${jugador.puntos}
-                    </td>
-
-                    <td>
-
-                        <button
-                            class="btn-militar"
-                            onclick="
-                            sumarPuntos(
-                                '${jugador.usuario}',
-                                ${jugador.puntos}
-                            )
-                            "
-                        >
-                            +10
-                        </button>
-
-                    </td>
-                `;
-
-                tbody.appendChild(fila);
-            });
-        }
-    }
-
-    // ============================
-    // SUMAR PUNTOS
-    // ============================
-
-    async function sumarPuntos(
-        usuario,
-        puntosActuales
-    ){
-
-        const nuevosPuntos =
-        puntosActuales + 10;
-
-        const { error } =
-        await clienteSupabase
-        .from("jugadores")
-        .update({
-            puntos:nuevosPuntos
-        })
-        .eq(
-            "usuario",
-            usuario
-        );
-
-        if(error){
-
-            console.error(error);
-
-            alert(
-                "Error actualizando"
-            );
-
-            return;
-        }
-
-        listarJugadoresAdmin();
-    }
-
-    // ============================
-    // CERRAR SESIÓN
-    // ============================
-
-    function cerrarSesion(){
-
-        localStorage.removeItem(
-            "usuarioRegistrado"
-        );
-
-        localStorage.removeItem(
-            "sesionActiva"
-        );
-
-        window.location.href =
-        "login.html";
-    }
-
-    // ============================
-    // INICIO
-    // ============================
-
-    cargarPerfilInteligente();
+cargar();
 
 </script>
 
 </body>
 </html>
-```
