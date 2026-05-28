@@ -1,119 +1,355 @@
+```html id="2v8kqm"
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Login - Airsoft Negreira</title>
+
     <style>
-        body {
-            background-color: #1a1a1a;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
         }
-        .contenedor-login {
-            background-color: #0b0b0b;
-            padding: 30px;
-            border-radius: 8px;
-            border: 3px solid #4a5d4e;
-            width: 100%;
-            max-width: 400px;
+
+        body{
+
+            background:#1a1a1a;
+
+            color:white;
+
+            font-family:Arial, sans-serif;
+
+            display:flex;
+
+            justify-content:center;
+            align-items:center;
+
+            min-height:100vh;
+
+            padding:20px;
         }
-        h2 {
-            color: #7fa984;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-            text-align: center;
+
+        .contenedor-login{
+
+            background:#0b0b0b;
+
+            width:100%;
+            max-width:420px;
+
+            padding:35px;
+
+            border-radius:10px;
+
+            border:3px solid #4a5d4e;
+
+            box-shadow:0 0 20px rgba(0,0,0,0.5);
         }
-        .form-grupo {
-            margin-bottom: 15px;
+
+        h2{
+
+            color:#7fa984;
+
+            text-transform:uppercase;
+
+            text-align:center;
+
+            margin-bottom:25px;
+
+            letter-spacing:1px;
         }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #ccc;
+
+        .form-grupo{
+            margin-bottom:18px;
         }
-        input {
-            width: 100%;
-            padding: 10px;
-            background-color: #2b2b2b;
-            border: 1px solid #4a5d4e;
-            border-radius: 4px;
-            color: #fff;
-            box-sizing: border-box;
+
+        label{
+
+            display:block;
+
+            margin-bottom:6px;
+
+            color:#ccc;
+
+            font-size:0.95rem;
         }
-        .btn-accion {
-            width: 100%;
-            background-color: #4a5d4e;
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background 0.3s;
-            margin-top: 10px;
+
+        input{
+
+            width:100%;
+
+            padding:12px;
+
+            background:#2b2b2b;
+
+            border:1px solid #4a5d4e;
+
+            border-radius:5px;
+
+            color:white;
+
+            font-size:1rem;
+
+            outline:none;
+
+            transition:0.3s;
         }
-        .btn-accion:hover {
-            background-color: #637d68;
+
+        input:focus{
+
+            border-color:#7fa984;
+
+            box-shadow:0 0 5px #7fa984;
         }
-        .enlace-volver {
-            display: block;
-            text-align: center;
-            margin-top: 15px;
-            color: #7fa984;
-            text-decoration: none;
-            font-size: 0.9rem;
+
+        .btn-accion{
+
+            width:100%;
+
+            background:#4a5d4e;
+
+            color:white;
+
+            padding:12px;
+
+            border:none;
+
+            border-radius:5px;
+
+            font-weight:bold;
+
+            font-size:1rem;
+
+            cursor:pointer;
+
+            transition:0.3s;
+
+            margin-top:10px;
         }
+
+        .btn-accion:hover{
+            background:#637d68;
+        }
+
+        .estado{
+
+            margin-top:15px;
+
+            text-align:center;
+
+            color:#ccc;
+
+            font-size:0.95rem;
+        }
+
+        .enlace-volver{
+
+            display:block;
+
+            text-align:center;
+
+            margin-top:20px;
+
+            color:#7fa984;
+
+            text-decoration:none;
+
+            font-size:0.9rem;
+
+            transition:0.3s;
+        }
+
+        .enlace-volver:hover{
+            color:white;
+        }
+
+        @media(max-width:480px){
+
+            .contenedor-login{
+                padding:25px;
+            }
+
+            h2{
+                font-size:1.4rem;
+            }
+        }
+
     </style>
+
 </head>
+
 <body>
 
-    <div class="contenedor-login">
-        <h2>Acceso Operadores</h2>
-        
-        <form id="formLogin">
-            <div class="form-grupo">
-                <label for="login-usuario">Usuario:</label>
-                <input type="text" id="login-usuario" required>
-            </div>
-            
-            <div class="form-grupo">
-                <label for="login-contra">Contraseña:</label>
-                <input type="password" id="login-contra" required>
-            </div>
-            
-            <button type="submit" class="btn-accion">Iniciar Sesión</button>
-        </form>
+<div class="contenedor-login">
 
-        <a href="index.html" class="enlace-volver">Volver al Inicio</a>
+    <h2>Acceso Operadores</h2>
+
+    <!-- =========================
+         FORMULARIO LOGIN
+    ========================== -->
+
+    <form id="formLogin">
+
+        <div class="form-grupo">
+
+            <label for="login-usuario">
+                Usuario
+            </label>
+
+            <input
+                type="text"
+                id="login-usuario"
+                placeholder="Introduce tu usuario"
+                required
+            >
+
+        </div>
+
+        <div class="form-grupo">
+
+            <label for="login-contra">
+                Contraseña
+            </label>
+
+            <input
+                type="password"
+                id="login-contra"
+                placeholder="Introduce tu contraseña"
+                required
+            >
+
+        </div>
+
+        <button
+            type="submit"
+            class="btn-accion"
+        >
+            Iniciar Sesión
+        </button>
+
+    </form>
+
+    <!-- MENSAJES -->
+
+    <div id="estado-login"
+         class="estado">
     </div>
 
-    <script>
-        document.getElementById('formLogin').addEventListener('submit', function(e) {
-            e.preventDefault();
+    <!-- VOLVER -->
 
-            const usuarioIngresado = document.getElementById('login-usuario').value;
-            const contraIngresada = document.getElementById('login-contra').value;
+    <a href="index.html"
+       class="enlace-volver">
 
-            // Recuperamos las credenciales guardadas en el registro
-            const usuarioGuardado = localStorage.getItem('usuarioRegistrado');
-            const contraGuardada = localStorage.getItem('contraRegistrada');
+        ← Volver al Inicio
 
-            // Validamos si coinciden
-            if (usuarioIngresado === usuarioGuardado && contraIngresada === contraGuardada) {
-                alert('¡Acceso autorizado!');
-                window.location.href = 'partidas.html'; // Te envía a la nueva página de partidas
-            } else {
-                alert('Usuario o contraseña incorrectos. Regístrate si aún no tienes cuenta.');
-            }
-        });
-    </script>
+    </a>
+
+</div>
+
+<script>
+
+    // ============================
+    // LOGIN
+    // ============================
+
+    document
+    .getElementById("formLogin")
+    .addEventListener(
+        "submit",
+        function(e){
+
+        e.preventDefault();
+
+        const usuarioIngresado =
+        document
+        .getElementById(
+            "login-usuario"
+        )
+        .value
+        .trim();
+
+        const contraIngresada =
+        document
+        .getElementById(
+            "login-contra"
+        )
+        .value;
+
+        const estado =
+        document.getElementById(
+            "estado-login"
+        );
+
+        // DATOS GUARDADOS
+
+        const usuarioGuardado =
+        localStorage.getItem(
+            "usuarioRegistrado"
+        );
+
+        const contraGuardada =
+        localStorage.getItem(
+            "contraRegistrada"
+        );
+
+        // VALIDAR EXISTENCIA
+
+        if(
+            !usuarioGuardado ||
+            !contraGuardada
+        ){
+
+            estado.innerText =
+            "No existe ningún usuario registrado.";
+
+            return;
+        }
+
+        // VALIDACIÓN LOGIN
+
+        if(
+            usuarioIngresado ===
+            usuarioGuardado &&
+
+            contraIngresada ===
+            contraGuardada
+        ){
+
+            // CREAR SESIÓN
+
+            localStorage.setItem(
+                "sesionActiva",
+                "true"
+            );
+
+            estado.innerText =
+            "¡Acceso autorizado!";
+
+            // REDIRECCIÓN
+
+            setTimeout(() => {
+
+                window.location.href =
+                "partidas.html";
+
+            }, 1200);
+
+        }else{
+
+            estado.innerText =
+            "Usuario o contraseña incorrectos.";
+        }
+    });
+
+</script>
 
 </body>
 </html>
+```
