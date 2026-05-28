@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partidas</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<style>
+body{background:#1a1a1a;color:white;font-family:Arial;padding:20px}
+.box{background:#0b0b0b;padding:20px;border-radius:10px}
+button{padding:10px;background:#4a5d4e;color:white;border:none}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>Partidas activas</h2>
+
+<input id="nombre" placeholder="Nombre partida">
+<input id="fecha" type="date">
+
+<button onclick="crear()">Crear partida</button>
+
+<div id="lista"></div>
+
+</div>
+
+<script>
+
+async function crear(){
+
+await supabaseClient
+.from("partidas")
+.update({activa:false})
+.eq("activa",true);
+
+const nombre = document.getElementById("nombre").value;
+const fecha = document.getElementById("fecha").value;
+
+await supabaseClient
+.from("partidas")
+.insert([{nombre,fecha,activa:true}]);
+
+cargar();
+
+}
+
+async function cargar(){
+
+const { data } = await supabaseClient
+.from("partidas")
+.select("*")
+.eq("activa",true);
+
+document.getElementById("lista").innerHTML =
+data.map(p=>`<p>${p.nombre} - ${p.fecha}</p>`).join("");
+
+}
+
+cargar();
+
+</script>
+
+</body>
+</html>
