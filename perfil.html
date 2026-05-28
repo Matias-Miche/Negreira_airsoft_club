@@ -1,159 +1,539 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Perfil - Airsoft Negreira</title>
-    <script src="https://jsdelivr.net"></script>
-    <style>
-        body { background-color: #1a1a1a; color: #ffffff; font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-        .tarjeta-perfil { background-color: #0b0b0b; padding: 30px; border-radius: 8px; border: 3px solid #4a5d4e; width: 100%; max-width: 450px; text-align: center; margin-bottom: 25px; }
-        .panel-admin { background-color: #0b0b0b; padding: 30px; border-radius: 8px; border: 3px solid #962d2d; width: 100%; max-width: 850px; box-sizing: border-box; display: none; margin-bottom: 25px; }
-        h2, h3 { color: #7fa984; text-transform: uppercase; margin-top: 0; }
-        .panel-admin h2 { color: #962d2d; }
-        .avatar { width: 80px; height: 80px; background-color: #4a5d4e; border-radius: 50%; margin: 15px auto; display: flex; justify-content: center; align-items: center; font-size: 2rem; }
-        .btn-salir { display: inline-block; background-color: #b33939; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 20px; font-weight: bold; cursor: pointer; border: none; }
-        .info-caja { background: #1a1a1a; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #4a5d4e; }
-        .estilo-juego { background: #1a251c; padding: 15px; border-radius: 6px; border-left: 5px solid #7fa984; text-align: left; margin-top: 15px; }
-        .estilo-juego h4 { color: #7fa984; margin: 0 0 8px 0; text-transform: uppercase; font-size: 0.95rem; }
-        .estilo-juego p { margin: 0; font-size: 0.9rem; color: #ddd; line-height: 1.4; }
-        .caja-herramientas { background: #1a1a1a; padding: 15px; border-radius: 6px; border: 1px solid #4a5d4e; margin-bottom: 20px; text-align: left; }
-        input, select { padding: 10px; background-color: #2b2b2b; border: 1px solid #4a5d4e; border-radius: 4px; color: #fff; margin: 5px 10px 5px 0; }
-        .btn-militar { background-color: #4a5d4e; color: white; border: none; padding: 10px 15px; font-weight: bold; border-radius: 4px; cursor: pointer; }
-        .btn-militar:hover { background-color: #637d68; }
-        .btn-juggernaut { background-color: #962d2d; color: white; border: none; padding: 12px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; width: 100%; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 20px; box-shadow: 0 0 10px rgba(150, 45, 45, 0.5); }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 10px; text-align: center; border-bottom: 1px solid #2b2b2b; font-size: 0.9rem; }
-        th { background-color: #4a5d4e; color: white; }
-        .texto-prestamo { font-size: 0.85rem; color: #eccc68; text-align: left; }
-        .alerta-juggernaut { display: none; background-color: #962d2d; border: 3px dashed #ff0000; padding: 15px; border-radius: 6px; text-align: center; font-weight: bold; font-size: 1.1rem; color: #fff; margin-bottom: 25px; width: 100%; max-width: 450px; box-sizing: border-box; animation: parpadeo 1.5s infinite; }
-        @keyframes parpadeo { 0% {opacity: 1;} 50% {opacity: 0.6;} 100% {opacity: 1;} }
-    </style>
-</head>
-<body>
+```html id="f1wd7v"
+<!-- SDK REAL DE SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <div id="alerta-boss-perfil" class="alerta-juggernaut">
-        ⚠️ ATENCIÓN OPERADOR ⚠️<br>
-        ¡Un Administrador ha entrado a la partida como JUGGERNAUT!
-    </div>
+<script>
 
-    <div class="tarjeta-perfil" id="tarjeta-visual-operador">
-        <h2>Panel de Operador</h2>
-        <div class="avatar" id="icono-perfil">🪖</div>
-        <p>Bienvenido de nuevo, soldado:</p>
-        <h3 id="nombre-usuario" style="color: #7fa984; font-size: 1.5rem; margin: 5px 0;">Buscando...</h3>
-        
-        <div class="info-caja">
-            <p style="margin: 5px 0;">ID de Operador: <strong id="id-usuario" style="color: #eccc68;">...</strong></p>
-        </div>
-        <div class="info-caja">
-            <p style="margin: 5px 0;">Rol asignado: <strong id="rol-usuario" style="color: #7fa984;">...</strong></p>
-        </div>
-        <div class="info-caja">
-            <p style="margin: 5px 0;">Puntos de Victoria: <strong id="puntos-usuario">0 PTS</strong></p>
-        </div>
-        <div id="contenedor-estilo"></div>
-        <button id="btn-cerrar-normal" onclick="cerrarSesion()" class="btn-salir">Cerrar Sesión</button>
-    </div>
+    // ============================
+    // CONFIGURACIÓN SUPABASE
+    // ============================
 
-    <div class="panel-admin" id="panel-secreto-admin">
-        <h2>Panel de Mando Central (ADMIN)</h2>
-        <button id="btn-toggle-juggernaut" class="btn-juggernaut" onclick="cambiarModoJuggernaut()">Activar Modo Juggernaut 🚀</button>
+    const SUPABASE_URL =
+    "https://TU-PROYECTO.supabase.co";
 
-        <div class="caja-herramientas">
-            <h3>📅 Programar / Modificar Próxima Partida</h3>
-            <input type="text" id="nombre-partida" placeholder="Nombre (Ej: Operación Negreira)">
-            <input type="date" id="fecha-partida">
-            <button class="btn-militar" onclick="guardarPartida()">Programar Partida</button>
-        </div>
+    const SUPABASE_KEY =
+    "TU_ANON_PUBLIC_KEY";
 
-        <div class="caja-herramientas">
-            <h3>👥 Control de Alistados y Suministro del Campo</h3>
-            <table>
-                <thead>
-                    <tr><th>Operador</th><th>Rol</th><th>Tipo de Entrada</th><th>Arsenales a Prestar 📦</th><th>Puntos</th><th>Acción</th></tr>
-                </thead>
-                <tbody id="tabla-gestion-jugadores"></tbody>
-            </table>
-        </div>
-    </div>
+    const clienteSupabase =
+    supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
 
-    <script>
-        const SUPABASE_URL = "https://supabase.co";
-        const SUPABASE_KEY = "sb_publishable_CH_3b10nSrV6PolJp3Q85w_sFCTAjrp";
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // ============================
+    // SESIÓN
+    // ============================
 
-        const usuarioGuardado = localStorage.getItem('usuarioRegistrado');
-        if (!usuarioGuardado) { window.location.href = 'index.html'; }
+    const usuarioGuardado =
+    localStorage.getItem(
+        "usuarioRegistrado"
+    );
 
-        const estilosCombate = {
-            "Medico": "Tu misión es la supervivencia del grupo. Muévete rápido entre coberturas y reanima compañeros.",
-            "Ametrallador": "Tu estilo es defensivo. Gana posiciones clave para retener el avance enemigo con fuego continuo.",
-            "Asalto": "Punta de lanza del equipo. Estilo ofensivo para limpiar esquinas y avanzar la línea.",
-            "Tirador designado": "Paciencia y sigilo. Mantén la distancia y elimina objetivos estratégicos.",
-            "AT": "Especialista táctico contra escudos y fortificaciones. Busca flancos limpios."
-        };
+    if(!usuarioGuardado){
 
-        const equiposPrestamo = {
-            "Medico": "Subfusil compacto + Chaleco ligero + Distintivo médico.",
-            "Ametrallador": "Réplica pesada (LMG) + Cargador de tambor + Bípode.",
-            "Asalto": "Fusil estándar (M4/AK) + 3 Cargadores + Punto rojo.",
-            "Tirador designado": "Fusil DMR + Mira con aumentos + Bolas pesadas 0.30g.",
-            "AT": "Fusil compacto + Lanzagranadas acoplado + 2 Cartuchos."
-        };
+        window.location.href =
+        "index.html";
+    }
 
-        let datosMiUsuario = null;
+    // ============================
+    // TEXTOS DE ROL
+    // ============================
 
-        async function cargarPerfilInteligente() {
-            const { data } = await supabase.from('jugadores').select('*').eq('usuario', usuarioGuardado).single();
-            if (!data) return;
-            datosMiUsuario = data;
+    const estilosCombate = {
 
-            document.getElementById('id-usuario').innerText = "#" + data.id;
-            document.getElementById('nombre-usuario').innerText = data.usuario;
-            document.getElementById('rol-usuario').innerText = data.rol;
-            document.getElementById('puntos-usuario').innerText = data.puntos + " PTS";
+        "Medico":
+        "Tu misión es mantener vivo al equipo.",
 
-            if (usuarioGuardado.toLowerCase().includes('admin')) {
-                document.getElementById('icono-perfil').innerText = "👑";
-                document.getElementById('panel-secreto-admin').style.display = "block";
-                document.getElementById('contenedor-estilo').innerHTML = `<p>Rango: Mando de Campo. Tienes acceso al panel inferior.</p>`;
-                actualizarBotonJuggernautUI(data.en_partida);
-                cargarDatosPartidaAdmin();
-                listarJugadoresAdmin();
-            } else {
-                const textoEstilo = estilosCombate[data.rol];
-                if (textoEstilo) document.getElementById('contenedor-estilo').innerHTML = `<div class="estilo-juego"><p>${textoEstilo}</p></div>`;
+        "Ametrallador":
+        "Fuego de supresión y control.",
+
+        "Asalto":
+        "Primera línea ofensiva.",
+
+        "Tirador designado":
+        "Precisión y distancia.",
+
+        "AT":
+        "Especialista anti-fortificación."
+    };
+
+    const equiposPrestamo = {
+
+        "Medico":
+        "Subfusil + Chaleco médico",
+
+        "Ametrallador":
+        "LMG + Tambor + Bípode",
+
+        "Asalto":
+        "M4/AK + Mid Caps",
+
+        "Tirador designado":
+        "DMR + Mira + BBs 0.30",
+
+        "AT":
+        "Lanzagranadas + Cartuchos"
+    };
+
+    let datosMiUsuario = null;
+
+    // ============================
+    // CARGAR PERFIL
+    // ============================
+
+    async function cargarPerfilInteligente(){
+
+        const { data, error } =
+        await clienteSupabase
+        .from("jugadores")
+        .select("*")
+        .eq(
+            "usuario",
+            usuarioGuardado
+        )
+        .single();
+
+        if(error || !data){
+
+            console.error(error);
+
+            alert(
+                "Error cargando perfil"
+            );
+
+            return;
+        }
+
+        datosMiUsuario = data;
+
+        // DATOS PERFIL
+
+        document.getElementById(
+            "id-usuario"
+        ).innerText =
+        "#" + data.id;
+
+        document.getElementById(
+            "nombre-usuario"
+        ).innerText =
+        data.usuario;
+
+        document.getElementById(
+            "rol-usuario"
+        ).innerText =
+        data.rol;
+
+        document.getElementById(
+            "puntos-usuario"
+        ).innerText =
+        data.puntos + " PTS";
+
+        // ADMIN
+
+        if(
+            usuarioGuardado
+            .toLowerCase()
+            .includes("admin")
+        ){
+
+            document.getElementById(
+                "icono-perfil"
+            ).innerText = "👑";
+
+            document.getElementById(
+                "panel-secreto-admin"
+            ).style.display = "block";
+
+            document.getElementById(
+                "contenedor-estilo"
+            ).innerHTML = `
+                <p>
+                    Rango:
+                    Mando de Campo
+                </p>
+            `;
+
+            actualizarBotonJuggernautUI(
+                data.en_partida
+            );
+
+            cargarDatosPartidaAdmin();
+
+            listarJugadoresAdmin();
+
+        }else{
+
+            // USUARIO NORMAL
+
+            const texto =
+            estilosCombate[data.rol];
+
+            if(texto){
+
+                document.getElementById(
+                    "contenedor-estilo"
+                ).innerHTML = `
+
+                    <div class="estilo-juego">
+
+                        <h4>
+                            Estilo de Combate
+                        </h4>
+
+                        <p>
+                            ${texto}
+                        </p>
+
+                    </div>
+                `;
             }
-            comprobarAlertaJuggernautPublica();
         }
 
-        async function cambiarModoJuggernaut() {
-            const nuevoEstado = !datosMiUsuario.en_partida;
-            await supabase.from('jugadores').update({ en_partida: nuevoEstado }).eq('usuario', usuarioGuardado);
-            location.reload();
+        comprobarAlertaJuggernautPublica();
+    }
+
+    // ============================
+    // JUGGERNAUT
+    // ============================
+
+    async function cambiarModoJuggernaut(){
+
+        const nuevoEstado =
+        !datosMiUsuario.en_partida;
+
+        const { error } =
+        await clienteSupabase
+        .from("jugadores")
+        .update({
+            en_partida:nuevoEstado
+        })
+        .eq(
+            "usuario",
+            usuarioGuardado
+        );
+
+        if(error){
+
+            alert(
+                "Error actualizando modo"
+            );
+
+            console.error(error);
+
+            return;
         }
 
-        function actualizarBotonJuggernautUI(estado) {
-            const btn = document.getElementById('btn-toggle-juggernaut');
-            btn.innerText = estado ? "💥 JUGGERNAUT ACTIVO (Apagar) 💥" : "Activar Modo Juggernaut 🚀";
-            btn.style.backgroundColor = estado ? "#ff0000" : "#962d2d";
+        datosMiUsuario.en_partida =
+        nuevoEstado;
+
+        actualizarBotonJuggernautUI(
+            nuevoEstado
+        );
+
+        comprobarAlertaJuggernautPublica();
+    }
+
+    function actualizarBotonJuggernautUI(
+        estado
+    ){
+
+        const btn =
+        document.getElementById(
+            "btn-toggle-juggernaut"
+        );
+
+        btn.innerText = estado
+        ? "💥 JUGGERNAUT ACTIVO"
+        : "Activar Modo Juggernaut 🚀";
+
+        btn.style.backgroundColor =
+        estado
+        ? "#ff0000"
+        : "#962d2d";
+    }
+
+    // ============================
+    // ALERTA GLOBAL
+    // ============================
+
+    async function comprobarAlertaJuggernautPublica(){
+
+        const { data } =
+        await clienteSupabase
+        .from("jugadores")
+        .select("*");
+
+        let activo = false;
+
+        if(data){
+
+            data.forEach(j => {
+
+                if(
+                    j.usuario
+                    .toLowerCase()
+                    .includes("admin")
+                    &&
+                    j.en_partida
+                ){
+
+                    activo = true;
+                }
+            });
         }
 
-        async function cargarDatosPartidaAdmin() {
-            const { data } = await supabase.from('partidas').select('*').eq('activa', true).maybeSingle();
-            if(data) {
-                document.getElementById('nombre-partida').value = data.nombre;
-                document.getElementById('fecha-partida').value = data.fecha;
+        document.getElementById(
+            "alerta-boss-perfil"
+        ).style.display =
+        activo
+        ? "block"
+        : "none";
+    }
+
+    // ============================
+    // PARTIDA ADMIN
+    // ============================
+
+    async function cargarDatosPartidaAdmin(){
+
+        const { data } =
+        await clienteSupabase
+        .from("partidas")
+        .select("*")
+        .eq("activa", true)
+        .maybeSingle();
+
+        if(data){
+
+            document.getElementById(
+                "nombre-partida"
+            ).value =
+            data.nombre;
+
+            document.getElementById(
+                "fecha-partida"
+            ).value =
+            data.fecha;
+        }
+    }
+
+    async function guardarPartida(){
+
+        const nombre =
+        document.getElementById(
+            "nombre-partida"
+        ).value;
+
+        const fecha =
+        document.getElementById(
+            "fecha-partida"
+        ).value;
+
+        if(!nombre || !fecha){
+
+            alert(
+                "Completa todos los campos"
+            );
+
+            return;
+        }
+
+        // DESACTIVAR ANTIGUAS
+
+        await clienteSupabase
+        .from("partidas")
+        .update({
+            activa:false
+        })
+        .eq("activa", true);
+
+        // CREAR NUEVA
+
+        const { error } =
+        await clienteSupabase
+        .from("partidas")
+        .insert([
+            {
+                nombre,
+                fecha,
+                activa:true
             }
+        ]);
+
+        if(error){
+
+            alert(
+                "Error creando partida"
+            );
+
+            console.error(error);
+
+            return;
         }
 
-        async function guardarPartida() {
-            const nombre = document.getElementById('nombre-partida').value;
-            const fecha = document.getElementById('fecha-partida').value;
-            await supabase.from('partidas').update({ activa: false }).eq('activa', true);
-            await supabase.from('partidas').insert([{ nombre, fecha, activa: true }]);
-            location.reload();
+        alert(
+            "Partida programada"
+        );
+    }
+
+    // ============================
+    // TABLA ADMIN
+    // ============================
+
+    async function listarJugadoresAdmin(){
+
+        const { data } =
+        await clienteSupabase
+        .from("jugadores")
+        .select("*")
+        .order(
+            "puntos",
+            { ascending:false }
+        );
+
+        const tbody =
+        document.getElementById(
+            "tabla-gestion-jugadores"
+        );
+
+        tbody.innerHTML = "";
+
+        if(data){
+
+            data.forEach(jugador => {
+
+                const necesitaEquipo =
+                jugador.tipo_entrada
+                === "25";
+
+                const material =
+                necesitaEquipo
+                ? (
+                    equiposPrestamo[
+                        jugador.rol
+                    ]
+                    || "Equipo básico"
+                )
+                : "Trae réplica propia";
+
+                const fila =
+                document.createElement(
+                    "tr"
+                );
+
+                fila.innerHTML = `
+
+                    <td>
+                        ${jugador.usuario}
+                    </td>
+
+                    <td>
+                        ${jugador.rol}
+                    </td>
+
+                    <td>
+                        ${
+                            necesitaEquipo
+                            ? "25€"
+                            : "5€"
+                        }
+                    </td>
+
+                    <td class="
+                    texto-prestamo
+                    ">
+                        ${material}
+                    </td>
+
+                    <td>
+                        ${jugador.puntos}
+                    </td>
+
+                    <td>
+
+                        <button
+                            class="btn-militar"
+                            onclick="
+                            sumarPuntos(
+                                '${jugador.usuario}',
+                                ${jugador.puntos}
+                            )
+                            "
+                        >
+                            +10
+                        </button>
+
+                    </td>
+                `;
+
+                tbody.appendChild(fila);
+            });
+        }
+    }
+
+    // ============================
+    // SUMAR PUNTOS
+    // ============================
+
+    async function sumarPuntos(
+        usuario,
+        puntosActuales
+    ){
+
+        const nuevosPuntos =
+        puntosActuales + 10;
+
+        const { error } =
+        await clienteSupabase
+        .from("jugadores")
+        .update({
+            puntos:nuevosPuntos
+        })
+        .eq(
+            "usuario",
+            usuario
+        );
+
+        if(error){
+
+            console.error(error);
+
+            alert(
+                "Error actualizando"
+            );
+
+            return;
         }
 
-        async function listarJugadoresAdmin() {
+        listarJugadoresAdmin();
+    }
+
+    // ============================
+    // CERRAR SESIÓN
+    // ============================
+
+    function cerrarSesion(){
+
+        localStorage.removeItem(
+            "usuarioRegistrado"
+        );
+
+        localStorage.removeItem(
+            "sesionActiva"
+        );
+
+        window.location.href =
+        "login.html";
+    }
+
+    // ============================
+    // INICIO
+    // ============================
+
+    cargarPerfilInteligente();
+
+</script>
+
+</body>
+</html>
+```
