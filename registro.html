@@ -1,482 +1,106 @@
-```html
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Crear Cuenta - Airsoft Negreira</title>
-
-    <!-- SDK REAL DE SUPABASE -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <style>
-
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-        }
-
-        body{
-
-            background:#1a1a1a;
-
-            color:white;
-
-            font-family:Arial, sans-serif;
-
-            display:flex;
-
-            justify-content:center;
-            align-items:center;
-
-            min-height:100vh;
-
-            padding:20px;
-        }
-
-        .contenedor-registro{
-
-            background:#0b0b0b;
-
-            width:100%;
-            max-width:450px;
-
-            padding:35px;
-
-            border-radius:10px;
-
-            border:3px solid #4a5d4e;
-
-            box-shadow:0 0 20px rgba(0,0,0,0.5);
-        }
-
-        h2{
-
-            color:#7fa984;
-
-            text-transform:uppercase;
-
-            text-align:center;
-
-            margin-bottom:25px;
-        }
-
-        .form-grupo{
-            margin-bottom:18px;
-        }
-
-        label{
-
-            display:block;
-
-            margin-bottom:6px;
-
-            color:#ccc;
-        }
-
-        input,
-        select{
-
-            width:100%;
-
-            padding:12px;
-
-            background:#2b2b2b;
-
-            border:1px solid #4a5d4e;
-
-            border-radius:5px;
-
-            color:white;
-
-            font-size:1rem;
-
-            outline:none;
-
-            transition:0.3s;
-        }
-
-        input:focus,
-        select:focus{
-
-            border-color:#7fa984;
-
-            box-shadow:0 0 5px #7fa984;
-        }
-
-        .btn-accion{
-
-            width:100%;
-
-            background:#4a5d4e;
-
-            color:white;
-
-            padding:12px;
-
-            border:none;
-
-            border-radius:5px;
-
-            font-weight:bold;
-
-            font-size:1rem;
-
-            cursor:pointer;
-
-            transition:0.3s;
-
-            margin-top:10px;
-        }
-
-        .btn-accion:hover{
-            background:#637d68;
-        }
-
-        .btn-accion:disabled{
-
-            background:#444;
-
-            color:#888;
-
-            cursor:not-allowed;
-        }
-
-        .estado{
-
-            margin-top:15px;
-
-            text-align:center;
-
-            color:#ccc;
-
-            min-height:20px;
-        }
-
-        .enlace-volver{
-
-            display:block;
-
-            text-align:center;
-
-            margin-top:20px;
-
-            color:#7fa984;
-
-            text-decoration:none;
-
-            transition:0.3s;
-        }
-
-        .enlace-volver:hover{
-            color:white;
-        }
-
-        @media(max-width:480px){
-
-            .contenedor-registro{
-                padding:25px;
-            }
-        }
-
-    </style>
-
-</head>
-
-<body>
-
-<div class="contenedor-registro">
-
-    <h2>Crear Nuevo Perfil</h2>
-
-    <form id="formRegistro">
-
-        <!-- USUARIO -->
-
-        <div class="form-grupo">
-
-            <label for="nuevo-usuario">
-                Nombre de Usuario
-            </label>
-
-            <input
-                type="text"
-                id="nuevo-usuario"
-                required
-                maxlength="20"
-                placeholder="Ej: Operador_X"
-            >
-
-        </div>
-
-        <!-- CONTRASEÑA -->
-
-        <div class="form-grupo">
-
-            <label for="nueva-contra">
-                Contraseña
-            </label>
-
-            <input
-                type="password"
-                id="nueva-contra"
-                required
-                minlength="6"
-                placeholder="Mínimo 6 caracteres"
-            >
-
-        </div>
-
-        <!-- ROL -->
-
-        <div class="form-grupo">
-
-            <label for="rol-juego">
-                Elige tu Rol
-            </label>
-
-            <select
-                id="rol-juego"
-                required
-            >
-
-                <option value="Medico">
-                    Médico 🩹
-                </option>
-
-                <option value="Ametrallador">
-                    Ametrallador 🪖
-                </option>
-
-                <option value="Asalto">
-                    Asalto 💥
-                </option>
-
-                <option value="Tirador designado">
-                    Tirador Designado 🎯
-                </option>
-
-                <option value="AT">
-                    AT Anti-Tanque 🚀
-                </option>
-
-            </select>
-
-        </div>
-
-        <!-- BOTÓN -->
-
-        <button
-            type="submit"
-            id="btn-registro"
-            class="btn-accion"
-        >
-
-            Registrar Operador
-
-        </button>
-
-    </form>
-
-    <!-- MENSAJES -->
-
-    <div id="estado-registro"
-         class="estado">
-    </div>
-
-    <!-- VOLVER -->
-
-    <a href="index.html"
-       class="enlace-volver">
-
-        ← Volver al Inicio
-
-    </a>
-
-</div>
-
 <script>
 
-    // ============================
-    // CONFIGURACIÓN SUPABASE
-    // ============================
+const SUPABASE_URL =
+"https://wbcfszivrbuqfqnizarq.supabase.co";
 
-    const SUPABASE_URL =
-    "https://TU-PROYECTO.supabase.co";
+const SUPABASE_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMjEsImV4cCI6MjA5NTQ3NTIyMX0.2iX7Twex3d96A9Iawg3zxvGAjFNLBqt81tSZgrzqA9s";
 
-    const SUPABASE_KEY =
-    "TU_ANON_PUBLIC_KEY";
+const clienteSupabase =
+supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
 
-    const clienteSupabase =
-    supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
+document
+.getElementById("formRegistro")
+.addEventListener(
+    "submit",
+    async function(e){
+
+    e.preventDefault();
+
+    const usuario =
+    document
+    .getElementById("nuevo-usuario")
+    .value
+    .trim();
+
+    const contra =
+    document
+    .getElementById("nueva-contra")
+    .value;
+
+    const rol =
+    document
+    .getElementById("rol-juego")
+    .value;
+
+    const estado =
+    document.getElementById(
+        "estado-registro"
     );
 
-    // ============================
-    // REGISTRO
-    // ============================
+    const {
+        data:usuarioExistente
+    } =
+    await clienteSupabase
+    .from("jugadores")
+    .select("*")
+    .eq("usuario", usuario)
+    .maybeSingle();
 
-    document
-    .getElementById("formRegistro")
-    .addEventListener(
-        "submit",
-        async function(e){
-
-        e.preventDefault();
-
-        const btn =
-        document.getElementById(
-            "btn-registro"
-        );
-
-        const estado =
-        document.getElementById(
-            "estado-registro"
-        );
-
-        btn.disabled = true;
-
-        btn.innerText =
-        "Conectando...";
-
-        // DATOS
-
-        const usuario =
-        document
-        .getElementById(
-            "nuevo-usuario"
-        )
-        .value
-        .trim();
-
-        const contra =
-        document
-        .getElementById(
-            "nueva-contra"
-        )
-        .value;
-
-        const rol =
-        document
-        .getElementById(
-            "rol-juego"
-        )
-        .value;
-
-        // VALIDACIÓN
-
-        if(usuario.length < 3){
-
-            estado.innerText =
-            "El usuario es demasiado corto.";
-
-            resetBoton();
-
-            return;
-        }
-
-        if(contra.length < 6){
-
-            estado.innerText =
-            "La contraseña debe tener mínimo 6 caracteres.";
-
-            resetBoton();
-
-            return;
-        }
-
-        // COMPROBAR SI EXISTE
-
-        const {
-            data:usuarioExistente
-        } = await clienteSupabase
-        .from("jugadores")
-        .select("usuario")
-        .eq("usuario", usuario)
-        .maybeSingle();
-
-        if(usuarioExistente){
-
-            estado.innerText =
-            "Ese usuario ya existe.";
-
-            resetBoton();
-
-            return;
-        }
-
-        // INSERTAR USUARIO
-
-        const { error } =
-        await clienteSupabase
-        .from("jugadores")
-        .insert([
-            {
-                usuario:usuario,
-                contrasena:contra,
-                rol:rol,
-                puntos:0,
-                en_partida:false,
-                tipo_entrada:"5"
-            }
-        ]);
-
-        if(error){
-
-            console.error(error);
-
-            estado.innerText =
-            "Error de conexión.";
-
-            resetBoton();
-
-            return;
-        }
-
-        // GUARDAR SESIÓN
-
-        localStorage.setItem(
-            "usuarioRegistrado",
-            usuario
-        );
-
-        localStorage.setItem(
-            "sesionActiva",
-            "true"
-        );
+    if(usuarioExistente){
 
         estado.innerText =
-        "¡Operador registrado correctamente!";
+        "Ese usuario ya existe.";
 
-        // REDIRECCIÓN
+        return;
+    }
 
-        setTimeout(() => {
-
-            window.location.href =
-            "perfil.html";
-
-        }, 1200);
-
-        // RESETEAR BOTÓN
-
-        function resetBoton(){
-
-            btn.disabled = false;
-
-            btn.innerText =
-            "Registrar Operador";
+    const { error } =
+    await clienteSupabase
+    .from("jugadores")
+    .insert([
+        {
+            usuario:usuario,
+            contrasena:contra,
+            rol:rol,
+            puntos:0,
+            en_partida:false,
+            tipo_entrada:"5"
         }
-    });
+    ]);
+
+    if(error){
+
+        estado.innerText =
+        "Error registrando usuario";
+
+        console.error(error);
+
+        return;
+    }
+
+    localStorage.setItem(
+        "usuarioRegistrado",
+        usuario
+    );
+
+    localStorage.setItem(
+        "sesionActiva",
+        "true"
+    );
+
+    estado.innerText =
+    "¡Registro completado!";
+
+    setTimeout(() => {
+
+        window.location.href =
+        "perfil.html";
+
+    }, 1200);
+});
 
 </script>
-
-</body>
-</html>
-```
