@@ -1,355 +1,89 @@
-```html id="2v8kqm"
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Login - Airsoft Negreira</title>
-
-    <style>
-
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-        }
-
-        body{
-
-            background:#1a1a1a;
-
-            color:white;
-
-            font-family:Arial, sans-serif;
-
-            display:flex;
-
-            justify-content:center;
-            align-items:center;
-
-            min-height:100vh;
-
-            padding:20px;
-        }
-
-        .contenedor-login{
-
-            background:#0b0b0b;
-
-            width:100%;
-            max-width:420px;
-
-            padding:35px;
-
-            border-radius:10px;
-
-            border:3px solid #4a5d4e;
-
-            box-shadow:0 0 20px rgba(0,0,0,0.5);
-        }
-
-        h2{
-
-            color:#7fa984;
-
-            text-transform:uppercase;
-
-            text-align:center;
-
-            margin-bottom:25px;
-
-            letter-spacing:1px;
-        }
-
-        .form-grupo{
-            margin-bottom:18px;
-        }
-
-        label{
-
-            display:block;
-
-            margin-bottom:6px;
-
-            color:#ccc;
-
-            font-size:0.95rem;
-        }
-
-        input{
-
-            width:100%;
-
-            padding:12px;
-
-            background:#2b2b2b;
-
-            border:1px solid #4a5d4e;
-
-            border-radius:5px;
-
-            color:white;
-
-            font-size:1rem;
-
-            outline:none;
-
-            transition:0.3s;
-        }
-
-        input:focus{
-
-            border-color:#7fa984;
-
-            box-shadow:0 0 5px #7fa984;
-        }
-
-        .btn-accion{
-
-            width:100%;
-
-            background:#4a5d4e;
-
-            color:white;
-
-            padding:12px;
-
-            border:none;
-
-            border-radius:5px;
-
-            font-weight:bold;
-
-            font-size:1rem;
-
-            cursor:pointer;
-
-            transition:0.3s;
-
-            margin-top:10px;
-        }
-
-        .btn-accion:hover{
-            background:#637d68;
-        }
-
-        .estado{
-
-            margin-top:15px;
-
-            text-align:center;
-
-            color:#ccc;
-
-            font-size:0.95rem;
-        }
-
-        .enlace-volver{
-
-            display:block;
-
-            text-align:center;
-
-            margin-top:20px;
-
-            color:#7fa984;
-
-            text-decoration:none;
-
-            font-size:0.9rem;
-
-            transition:0.3s;
-        }
-
-        .enlace-volver:hover{
-            color:white;
-        }
-
-        @media(max-width:480px){
-
-            .contenedor-login{
-                padding:25px;
-            }
-
-            h2{
-                font-size:1.4rem;
-            }
-        }
-
-    </style>
-
-</head>
-
-<body>
-
-<div class="contenedor-login">
-
-    <h2>Acceso Operadores</h2>
-
-    <!-- =========================
-         FORMULARIO LOGIN
-    ========================== -->
-
-    <form id="formLogin">
-
-        <div class="form-grupo">
-
-            <label for="login-usuario">
-                Usuario
-            </label>
-
-            <input
-                type="text"
-                id="login-usuario"
-                placeholder="Introduce tu usuario"
-                required
-            >
-
-        </div>
-
-        <div class="form-grupo">
-
-            <label for="login-contra">
-                Contraseña
-            </label>
-
-            <input
-                type="password"
-                id="login-contra"
-                placeholder="Introduce tu contraseña"
-                required
-            >
-
-        </div>
-
-        <button
-            type="submit"
-            class="btn-accion"
-        >
-            Iniciar Sesión
-        </button>
-
-    </form>
-
-    <!-- MENSAJES -->
-
-    <div id="estado-login"
-         class="estado">
-    </div>
-
-    <!-- VOLVER -->
-
-    <a href="index.html"
-       class="enlace-volver">
-
-        ← Volver al Inicio
-
-    </a>
-
-</div>
-
 <script>
 
-    // ============================
-    // LOGIN
-    // ============================
+const SUPABASE_URL =
+"https://wbcfszivrbuqfqnizarq.supabase.co";
 
+const SUPABASE_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMjEsImV4cCI6MjA5NTQ3NTIyMX0.2iX7Twex3d96A9Iawg3zxvGAjFNLBqt81tSZgrzqA9s";
+
+const clienteSupabase =
+supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+document
+.getElementById("formLogin")
+.addEventListener(
+    "submit",
+    async function(e){
+
+    e.preventDefault();
+
+    const usuario =
     document
-    .getElementById("formLogin")
-    .addEventListener(
-        "submit",
-        function(e){
+    .getElementById("login-usuario")
+    .value
+    .trim();
 
-        e.preventDefault();
+    const contra =
+    document
+    .getElementById("login-contra")
+    .value;
 
-        const usuarioIngresado =
-        document
-        .getElementById(
-            "login-usuario"
-        )
-        .value
-        .trim();
+    const estado =
+    document.getElementById(
+        "estado-login"
+    );
 
-        const contraIngresada =
-        document
-        .getElementById(
-            "login-contra"
-        )
-        .value;
+    estado.innerText =
+    "Verificando acceso...";
 
-        const estado =
-        document.getElementById(
-            "estado-login"
+    const { data, error } =
+    await clienteSupabase
+    .from("jugadores")
+    .select("*")
+    .eq("usuario", usuario)
+    .eq("contrasena", contra)
+    .maybeSingle();
+
+    if(error){
+
+        estado.innerText =
+        "Error de conexión";
+
+        console.error(error);
+
+        return;
+    }
+
+    if(data){
+
+        localStorage.setItem(
+            "usuarioRegistrado",
+            usuario
         );
 
-        // DATOS GUARDADOS
-
-        const usuarioGuardado =
-        localStorage.getItem(
-            "usuarioRegistrado"
+        localStorage.setItem(
+            "sesionActiva",
+            "true"
         );
 
-        const contraGuardada =
-        localStorage.getItem(
-            "contraRegistrada"
-        );
+        estado.innerText =
+        "¡Acceso autorizado!";
 
-        // VALIDAR EXISTENCIA
+        setTimeout(() => {
 
-        if(
-            !usuarioGuardado ||
-            !contraGuardada
-        ){
+            window.location.href =
+            "perfil.html";
 
-            estado.innerText =
-            "No existe ningún usuario registrado.";
+        }, 1200);
 
-            return;
-        }
+    }else{
 
-        // VALIDACIÓN LOGIN
-
-        if(
-            usuarioIngresado ===
-            usuarioGuardado &&
-
-            contraIngresada ===
-            contraGuardada
-        ){
-
-            // CREAR SESIÓN
-
-            localStorage.setItem(
-                "sesionActiva",
-                "true"
-            );
-
-            estado.innerText =
-            "¡Acceso autorizado!";
-
-            // REDIRECCIÓN
-
-            setTimeout(() => {
-
-                window.location.href =
-                "partidas.html";
-
-            }, 1200);
-
-        }else{
-
-            estado.innerText =
-            "Usuario o contraseña incorrectos.";
-        }
-    });
+        estado.innerText =
+        "Usuario o contraseña incorrectos.";
+    }
+});
 
 </script>
-
-</body>
-</html>
-```
