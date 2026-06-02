@@ -1,57 +1,213 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login</title>
+
+<title>Login - Airsoft Negreira</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
 
 <style>
-body{background:#1a1a1a;color:white;font-family:Arial;display:flex;justify-content:center;align-items:center;height:100vh}
-.box{background:#0b0b0b;padding:30px;border:2px solid #4a5d4e;border-radius:10px;width:100%;max-width:400px}
-input{width:100%;padding:10px;margin:10px 0;background:#2b2b2b;color:white}
-button{width:100%;padding:10px;background:#4a5d4e;color:white;border:none}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    background:#1a1a1a;
+    color:white;
+    font-family:Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+}
+
+.box{
+    background:#0b0b0b;
+    padding:30px;
+    border:2px solid #4a5d4e;
+    border-radius:10px;
+    width:100%;
+    max-width:400px;
+}
+
+h2{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-bottom:15px;
+    background:#2b2b2b;
+    color:white;
+    border:1px solid #444;
+    border-radius:5px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    background:#4a5d4e;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+button:hover{
+    opacity:0.9;
+}
+
+#msg{
+    margin-top:15px;
+    text-align:center;
+    color:#ff8a8a;
+}
+
+.links{
+    margin-top:20px;
+    text-align:center;
+}
+
+.links a{
+    color:#8dc891;
+    text-decoration:none;
+}
+
+.links a:hover{
+    text-decoration:underline;
+}
+
 </style>
+
 </head>
 
 <body>
 
 <div class="box">
-<h2>Login</h2>
 
-<input id="user">
-<input id="pass" type="password">
+<h2>Iniciar Sesión</h2>
 
-<button onclick="login()">Entrar</button>
+<input
+id="user"
+type="text"
+placeholder="Usuario">
+
+<input
+id="pass"
+type="password"
+placeholder="Contraseña">
+
+<button onclick="login()">
+Entrar
+</button>
+
 <p id="msg"></p>
+
+<div class="links">
+<a href="registro.html">
+Crear cuenta
+</a>
+</div>
+
 </div>
 
 <script>
 
+document.addEventListener(
+    "DOMContentLoaded",
+    comprobarSesion
+);
+
+async function comprobarSesion(){
+
+    const {
+        data:{session}
+    } = await supabaseClient.auth.getSession();
+
+    if(session){
+
+        window.location.href =
+        "perfil.html";
+
+    }
+
+}
+
 async function login(){
 
-const user = document.getElementById("user").value;
-const pass = document.getElementById("pass").value;
+    const user =
+    document.getElementById("user")
+    .value
+    .trim()
+    .toLowerCase();
 
-const { data, error } = await supabaseClient
-.from("jugadores")
-.select("*")
-.eq("usuario", user)
-.eq("contrasena", pass)
-.single();
+    const pass =
+    document.getElementById("pass")
+    .value;
 
-if(data){
+    const msg =
+    document.getElementById("msg");
 
-localStorage.setItem("usuarioRegistrado", user);
-window.location.href="perfil.html";
+    msg.innerText = "";
 
-}else{
-document.getElementById("msg").innerText="Error login";
+    if(!user || !pass){
+
+        msg.innerText =
+        "Completa todos los campos";
+
+        return;
+    }
+
+    const email =
+    user + "@airsoft.local";
+
+    const {
+        error
+    } = await supabaseClient.auth.signInWithPassword({
+
+        email: email,
+        password: pass
+
+    });
+
+    if(error){
+
+        msg.innerText =
+        "Usuario o contraseña incorrectos";
+
+        return;
+    }
+
+    window.location.href =
+    "perfil.html";
+
 }
 
-}
+document
+.getElementById("pass")
+.addEventListener(
+    "keydown",
+    function(e){
+
+        if(e.key==="Enter"){
+
+            login();
+
+        }
+
+    }
+);
 
 </script>
 
