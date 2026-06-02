@@ -1,6 +1,6 @@
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<html src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></html>
 
-<script>
+<html>
 const SUPABASE_URL = "https://wbcfszivrbuqfqnizarq.supabase.co";
 
 const SUPABASE_KEY =
@@ -8,4 +8,4 @@ const SUPABASE_KEY =
 
 window.supabaseClient =
 supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-</script>
+</html>
