@@ -171,9 +171,10 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
+        // Validación preventiva de que exista window.supabaseClient antes de hacer nada
         if (!window.supabaseClient) {
-            console.error("Error: window.supabaseClient no encontrado.");
-            document.getElementById("info-partida").innerText = "Error: Fallo de conexión con la base de datos";
+            console.error("Error crítico: window.supabaseClient no está definido. Revisa supabase.js");
+            document.getElementById("info-partida").innerText = "Error: Fallo de conexión con el servidor";
             return;
         }
 
@@ -187,7 +188,7 @@
                 `;
             }
         } catch (e) {
-            console.error(e);
+            console.error("Error comprobando sesión activa:", e);
         }
 
         cargarSistema();
@@ -202,8 +203,9 @@
 
         divError.style.display = "none";
 
-        // LIMPIEZA ABSOLUTA DE CARACTERES MALEVOLOS (Elimina comillas simples, dobles y espacios)
-        let usuario = usuarioInput.value.replace(/['"“”‘’\s]/g, "").trim().toLowerCase();
+        // PURGA RADICAL ANTI-COMILLAS Y ANTI-ESPACIOS
+        // Convierte a minúsculas y elimina CUALQUIER carácter que NO sea una letra, número, @, punto, guion o barra baja.
+        let usuario = usuarioInput.value.toLowerCase().replace(/[^a-z0-9@._-]/g, "");
         const contra = passwordInput.value;
 
         if (!usuario || !contra) {
@@ -215,7 +217,7 @@
         btnEntrar.disabled = true;
         btnEntrar.innerText = "Autenticando...";
 
-        // Formateo del correo de forma limpia sin comillas parasitarias
+        // Formateo del correo sin riesgo de comillas parasitarias o espacios ocultos
         const emailFinal = usuario.includes("@") ? usuario : usuario + "@airsoft.local";
 
         try {
@@ -225,7 +227,7 @@
             });
 
             if (error) {
-                // Si Supabase devuelve un error de formato a pesar de todo, te lo pinta limpio
+                // Si la autenticación falla, mostramos el error limpio sin colgar la interfaz
                 divError.innerText = "Acceso denegado: " + error.message;
                 divError.style.display = "block";
                 btnEntrar.disabled = false;
@@ -233,10 +235,12 @@
                 return;
             }
 
+            // Redirección directa e instantánea
             window.location.href = "perfil.html";
 
         } catch (err) {
-            divError.innerText = "Fallo crítico en el servidor de autenticación.";
+            console.error("Excepción en Login:", err);
+            divError.innerText = "Fallo crítico de comunicación con el servidor.";
             divError.style.display = "block";
             btnEntrar.disabled = false;
             btnEntrar.innerText = "Entrar al Perfil";
@@ -245,6 +249,7 @@
 
     async function cargarSistema() {
         try {
+            // Sincronizar estado de partida activa
             const { data: partidaActiva, error: errPartida } = await window.supabaseClient
                 .from("partidas")
                 .select("*")
@@ -259,6 +264,7 @@
                 document.getElementById("fecha-partida").innerText = "";
             }
 
+            // Extraer competidores y puntuaciones desde la tabla "profiles"
             const { data: jugadores, error: errJugadores } = await window.supabaseClient
                 .from("profiles")
                 .select("*")
@@ -276,6 +282,7 @@
 
             if (jugadores && jugadores.length > 0) {
                 jugadores.forEach(j => {
+                    // Si es cuenta de administrador, controla si el Juggernaut está en partida
                     if (j.username && j.username.toLowerCase().includes("admin")) {
                         if (j.en_partida === true) bossActivo = true; 
                         return;
@@ -288,7 +295,7 @@
                     let estilo = "rol-defecto";
                     if (rolJuego === "Médico") estilo = "rol-medico";
                     if (rolJuego === "Asalto") estilo = "rol-asalto";
-                    if (rolJuego === "Ametrallador") estilo = "rol-ametrallador";
+                    if (rolJuego === "Ametrallador") style = "rol-ametrallador";
                     if (rolJuego === "Tirador designado") estilo = "rol-tirador";
 
                     tbody.innerHTML += `
@@ -306,7 +313,7 @@
             document.getElementById("alerta-boss").style.display = bossActivo ? "block" : "none";
 
         } catch (ex) {
-            console.error(ex);
+            console.error("Excepción en actualización automática:", ex);
         }
     }
 </script>
