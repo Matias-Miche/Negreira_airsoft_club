@@ -1,114 +1,30 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Control - Airsoft Negreira</title>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    <script src="supabase.js"></script>
     <style>
-        body {
-            background-color: #1a1a1a;
-            color: white;
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-
-        .contenedor {
-            max-width: 1100px;
-            margin: auto;
-            background: #0b0b0b;
-            padding: 25px;
-            border: 3px solid #7fa984;
-            border-radius: 10px;
-        }
-
-        h1, h2 {
-            color: #7fa984;
-            text-align: center;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-        }
-
-        .formulario {
-            background: #1a1a1a;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #4a5d4e;
-            margin-bottom: 30px;
-        }
-
-        input {
-            width: 100%;
-            margin-bottom: 15px;
-            padding: 12px;
-            background: #2b2b2b;
-            color: white;
-            border: 1px solid #4a5d4e;
-            border-radius: 5px;
-        }
-
-        .btn {
-            background: #7fa984;
-            color: black;
-            border: none;
-            padding: 12px 18px;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn:hover {
-            background: #637d68;
-            color: white;
-        }
-
-        .tabla-responsive {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #4a5d4e;
-            text-align: center;
-        }
-
-        th {
-            background: #4a5d4e;
-        }
-
-        .texto-prestamo {
-            text-align: left;
-            color: #f7d794;
-            font-size: 0.9rem;
-        }
-
-        .estado {
-            margin-top: 15px;
-            text-align: center;
-            color: #ccc;
-        }
-
-        @media(max-width:768px) {
-            table {
-                font-size: 0.85rem;
-            }
-            th, td {
-                padding: 8px;
-            }
-        }
+        body { background-color: #1a1a1a; color: white; font-family: Arial, sans-serif; padding: 20px; }
+        .contenedor { max-width: 1100px; margin: auto; background: #0b0b0b; padding: 25px; border: 3px solid #7fa984; border-radius: 10px; }
+        h1, h2 { color: #7fa984; text-align: center; text-transform: uppercase; margin-bottom: 20px; }
+        .formulario { background: #1a1a1a; padding: 20px; border-radius: 8px; border: 1px solid #4a5d4e; margin-bottom: 30px; }
+        input { width: 100%; margin-bottom: 15px; padding: 12px; background: #2b2b2b; color: white; border: 1px solid #444; border-radius: 5px; box-sizing: border-box; }
+        .btn { padding: 10px 15px; background: #4a5d4e; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .btn:hover { background: #5d7562; }
+        .btn-danger { background: #a94444; }
+        .btn-danger:hover { background: #c45252; }
+        .tabla-responsive { overflow-x: auto; margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; background: #151515; text-align: left; }
+        th, td { padding: 12px; border-bottom: 1px solid #333; }
+        th { background: #222; color: #7fa984; text-transform: uppercase; font-size: 0.9rem; }
+        .input-tabla { width: 80px; padding: 6px; background: #2b2b2b; color: white; border: 1px solid #444; border-radius: 4px; text-align: center; }
+        .input-arsenal { width: 140px; padding: 6px; background: #2b2b2b; color: white; border: 1px solid #444; border-radius: 4px; }
+        .estado { text-align: center; font-weight: bold; margin-top: 10px; color: #7fa984; }
     </style>
 </head>
-
 <body>
 
 <div class="contenedor">
@@ -128,20 +44,149 @@
             <thead>
                 <tr>
                     <th>Operador</th>
-                    <th>Rol</th>
+                    <th>Rol de Juego</th>
                     <th>Entrada</th>
                     <th>Arsenal Prestado</th>
                     <th>Puntos</th>
-                    <th>Acción</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody id="tabla-jugadores"></tbody>
+            <tbody id="tabla-jugadores">
+                </tbody>
         </table>
     </div>
 </div>
 
 <script>
-    // ============================
-    // CONFIGURACIÓN SUPABASE (CONECTADO)
-    // ============================
-    const
+    document.addEventListener("DOMContentLoaded", verificarYCargar);
+
+    async function verificarYCargar() {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        // Validar rol de administrador
+        const { data: perfil } = await supabaseClient
+            .from("perfiles")
+            .select("rol")
+            .eq("id", user.id)
+            .single();
+
+        if (!perfil || perfil.role === "usuario" && perfil.rol !== "administración") {
+            alert("Acceso denegado: No tienes permisos de administración.");
+            window.location.href = "perfil.html";
+            return;
+        }
+
+        cargarOperadores();
+    }
+
+    async function cargarOperadores() {
+        const { data: operadores, error } = await supabaseClient
+            .from("perfiles")
+            .select("*")
+            .order("usuario", { ascending: true });
+
+        if (error) {
+            console.error("Error cargando operadores:", error);
+            return;
+        }
+
+        const tbody = document.getElementById("tabla-jugadores");
+        tbody.innerHTML = "";
+
+        operadores.forEach(op => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${op.usuario.toUpperCase()}</strong></td>
+                    <td>${op.rol_juego}</td>
+                    <td>${op.tipo_entrada}€</td>
+                    <td>
+                        <input type="text" class="input-arsenal" id="ars-${op.id}" value="${op.arsenal_prestado || ''}" placeholder="Ninguno">
+                    </td>
+                    <td>
+                        <input type="number" class="input-tabla" id="pts-${op.id}" value="${op.puntos}">
+                    </td>
+                    <td>
+                        <span style="color: ${op.en_partida ? '#7fa984' : '#a94444'}">
+                            ${op.en_partida ? '🟢 En Partida' : '🔴 Fuera'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn" onclick="guardarCambios('${op.id}')">💾 Guardar</button>
+                        <button class="btn btn-danger" onclick="cambiarEstadoPartida('${op.id}', ${op.en_partida})">
+                            ${op.en_partida ? 'Sacar' : 'Meter'}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    async function guardarCambios(id) {
+        const nuevosPuntos = parseInt(document.getElementById(`pts-${id}`).value) || 0;
+        const nuevoArsenal = document.getElementById(`ars-${id}`).value.trim();
+
+        const { error } = await supabaseClient
+            .from("perfiles")
+            .update({
+                puntos: nuevosPuntos,
+                arsenal_prestado: nuevoArsenal
+            })
+            .eq("id", id);
+
+        if (error) {
+            alert("Error al actualizar datos: " + error.message);
+        } else {
+            alert("Datos actualizados correctamente.");
+            cargarOperadores();
+        }
+    }
+
+    async function cambiarEstadoPartida(id, estadoActual) {
+        const { error } = await supabaseClient
+            .from("perfiles")
+            .update({ en_partida: !estadoActual })
+            .eq("id", id);
+
+        if (error) {
+            alert("Error al cambiar estado: " + error.message);
+        } else {
+            cargarOperadores();
+        }
+    }
+
+    async function crearPartida() {
+        const nombre = document.getElementById("nombre-partida").value.trim();
+        const fecha = document.getElementById("fecha-partida").value;
+        const estadoPanel = document.getElementById("estado-panel");
+
+        if (!nombre || !fecha) {
+            alert("Por favor rellena todos los campos para la nueva partida.");
+            return;
+        }
+
+        // Desactivar todas las anteriores
+        await supabaseClient.from("partidas").update({ activa: false }).eq("activa", true);
+        
+        // Crear la nueva
+        const { error } = await supabaseClient.from("partidas").insert([{ nombre, fecha, activa: true }]);
+
+        if (error) {
+            estadoPanel.innerText = "Error: " + error.message;
+        } else {
+            // Reiniciar asistencia de todos los jugadores para empezar limpios en el nuevo evento
+            await supabaseClient.from("perfiles").update({ en_partida: false, rol_juego: 'Sin asignar' }).neq("rol", "administración");
+            
+            estadoPanel.innerText = "¡Partida publicada con éxito! Estado de operadores restablecido.";
+            document.getElementById("nombre-partida").value = "";
+            document.getElementById("fecha-partida").value = "";
+            cargarOperadores();
+        }
+    }
+</script>
+</body>
+</html>
