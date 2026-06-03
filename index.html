@@ -39,7 +39,7 @@
             margin-bottom: 20px;
         }
 
-        input, select {
+        input {
             width: 100%;
             padding: 12px;
             margin-bottom: 15px;
@@ -66,11 +66,18 @@
             background: #5c7461;
         }
 
+        .btn:disabled {
+            background: #333;
+            color: #777;
+            cursor: not-allowed;
+        }
+
         .barra-registro {
             margin-top: 15px;
             text-align: center;
             padding-top: 10px;
             border-top: 1px solid #2b2b2b;
+            color: #aaa;
         }
 
         .barra-registro a {
@@ -90,6 +97,7 @@
             text-align: center;
             margin-bottom: 15px;
             display: none;
+            border: 1px solid #a93c3c;
         }
 
         table {
@@ -118,6 +126,7 @@
         .rol-asalto { background: #ce2029; }
         .rol-ametrallador { background: #d2691e; }
         .rol-tirador { background: #008080; }
+        .rol-defecto { background: #555; }
     </style>
 </head>
 
@@ -127,9 +136,9 @@
         <h2>Ingreso de Operadores</h2>
         <div class="alerta" id="error-login"></div>
         
-        <input type="text" id="login-usuario" placeholder="Nombre de Usuario">
+        <input type="text" id="login-usuario" placeholder="Nombre de Usuario o Correo">
         <input type="password" id="login-password" placeholder="Contraseña">
-        <button class="btn" onclick="iniciarSesion()">Entrar al Perfil</button>
+        <button class="btn" id="btn-entrar" onclick="iniciarSesion()">Entrar al Perfil</button>
 
         <div class="barra-registro">
             ¿Eres nuevo? <a href="registro.html">Crear una cuenta de Operador</a>
@@ -137,10 +146,10 @@
     </div>
 
     <div class="contenedor-marcador">
-        <h3 id="info-partida">Cargando partida activa...</h3>
+        <h3 id="info-partida">Buscando señales tácticas...</h3>
         <p id="fecha-partida" style="text-align:center; color:#aaa;"></p>
         
-        <div id="alerta-boss" style="display:none; background:#b33939; padding:10px; text-align:center; font-weight:bold; margin-bottom:10px;">
+        <div id="alerta-boss" style="display:none; background:#b33939; padding:10px; text-align:center; font-weight:bold; margin-bottom:10px; border-radius:5px;">
             ⚠️ ¡ATENCIÓN: EL JUGGERNAUT ESTÁ EN EL CAMPO!
         </div>
 
@@ -154,108 +163,165 @@
             </thead>
             <tbody id="tabla-marcador">
                 <tr>
-                    <td colspan="3" style="text-align:center;">Buscando datos de la señal...</td>
+                    <td colspan="3" style="text-align:center; color: #888;">Cargando datos del marcador...</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
 <script>
-    // Comprobar si el usuario ya tiene sesión activa al entrar
+    // Ejecución inicial segura al cargar la web
     document.addEventListener("DOMContentLoaded", async () => {
-        const { data: { session } } = await window.supabaseClient.auth.getSession();
-        if (session) {
-            // Si ya está logueado, ocultamos el formulario de login de la vista mas no el marcador
-            document.getElementById("bloque-login").innerHTML = `
-                <h2>Sesión Activa</h2>
-                <button class="btn" onclick="window.location.href='perfil.html'">Ir a mi Perfil</button>
-            `;
+        // Validación preventiva de la existencia del SDK de Supabase
+        if (!window.supabaseClient) {
+            console.error("Error crítico: El archivo 'supabase.js' no está cargado correctamente o no inicializó window.supabaseClient.");
+            document.getElementById("info-partida").innerText = "Error: Fallo de conexión con la base de datos";
+            return;
         }
+
+        try {
+            const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+            if (!error && session) {
+                // Si ya está logueado de antes, transformamos la tarjeta para evitar que vuelva a meter datos
+                document.getElementById("bloque-login").innerHTML = `
+                    <h2>Sesión Detectada</h2>
+                    <p style="text-align:center; margin-bottom:15px; color:#aaa;">Tienes una sesión táctica abierta.</p>
+                    <button class="btn" onclick="window.location.href='perfil.html'">Ir a mi Perfil</button>
+                `;
+            }
+        } catch (e) {
+            console.error("Error al comprobar sesión previa:", e);
+        }
+
+        // Lanzamiento inicial y bucle en segundo plano cada 10 segundos
         cargarSistema();
-        setInterval(cargarSistema, 10000); // Actualiza el marcador cada 10 segundos
+        setInterval(cargarSistema, 10000);
     });
 
-    // Función de Login unificada con Supabase Auth (.auth.local)
+    // Función de Login Blindada contra la doble arroba (@) e inyecciones vacías
     async function iniciarSesion() {
-        const usuario = document.getElementById("login-usuario").value.trim().toLowerCase();
-        const contra = document.getElementById("login-password").value;
+        const usuarioInput = document.getElementById("login-usuario");
+        const passwordInput = document.getElementById("login-password");
+        const btnEntrar = document.getElementById("btn-entrar");
         const divError = document.getElementById("error-login");
+
+        const usuario = usuarioInput.value.trim().toLowerCase();
+        const contra = passwordInput.value;
 
         divError.style.display = "none";
 
+        // Protección 1: Campos vacíos
         if (!usuario || !contra) {
-            divError.innerText = "Introduce tu usuario y contraseña.";
+            divError.innerText = "Error: Introduce tu operador/correo y contraseña.";
             divError.style.display = "block";
             return;
         }
 
-        // Construimos el correo virtual usado en el archivo registro.html
-        const emailVirtual = usuario + "@airsoft.local";
+        // Protección 2: Evitar que el botón sea pulsado varias veces durante el proceso
+        btnEntrar.disabled = true;
+        btnEntrar.innerText = "Autenticando...";
 
-        const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-            email: emailVirtual,
-            password: contra
-        });
+        // Protección 3: Análisis inteligente del identificador (¿Es correo o usuario estándar?)
+        const emailFinal = usuario.includes("@") ? usuario : usuario + "@airsoft.local";
 
-        if (error) {
-            divError.innerText = "Usuario o contraseña incorrectos.";
+        try {
+            const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+                email: emailFinal,
+                password: contra
+            });
+
+            if (error) {
+                divError.innerText = "Acceso denegado: Usuario o contraseña incorrectos.";
+                divError.style.display = "block";
+                btnEntrar.disabled = false;
+                btnEntrar.innerText = "Entrar al Perfil";
+                return;
+            }
+
+            // Redirección limpia e inmediata si todo es correcto
+            window.location.href = "perfil.html";
+
+        } catch (err) {
+            console.error("Excepción en Login:", err);
+            divError.innerText = "Fallo crítico en el servidor de autenticación. Inténtalo de nuevo.";
             divError.style.display = "block";
-            return;
+            btnEntrar.disabled = false;
+            btnEntrar.innerText = "Entrar al Perfil";
         }
-
-        // Redirección limpia al perfil real de Supabase
-        window.location.href = "perfil.html";
     }
 
-    // Carga dinámica del marcador desde la tabla "profiles"
+    // Carga de datos del marcador en tiempo real unificado desde la tabla "profiles"
     async function cargarSistema() {
-        // PARTIDA ACTIVA
-        const { data: partidaActiva } = await window.supabaseClient
-            .from("partidas")
-            .select("*")
-            .eq("activa", true)
-            .maybeSingle();
+        try {
+            // Consulta 1: Estado de las partidas públicas activas
+            const { data: partidaActiva, error: errPartida } = await window.supabaseClient
+                .from("partidas")
+                .select("*")
+                .eq("activa", true)
+                .maybeSingle();
 
-        if (partidaActiva) {
-            document.getElementById("info-partida").innerText = "Partida: " + partidaActiva.nombre;
-            document.getElementById("fecha-partida").innerText = "Fecha: " + partidaActiva.fecha;
+            if (!errPartida && partidaActiva) {
+                document.getElementById("info-partida").innerText = "Partida: " + partidaActiva.nombre;
+                document.getElementById("fecha-partida").innerText = "Fecha/Hora: " + (partidaActiva.fecha || "No indicada");
+            } else {
+                document.getElementById("info-partida").innerText = "Sin partidas activas en el radar";
+                document.getElementById("fecha-partida").innerText = "";
+            }
+
+            // Consulta 2: Extracción de competidores y puntuaciones desde "profiles" (Unificado)
+            const { data: jugadores, error: errJugadores } = await window.supabaseClient
+                .from("profiles")
+                .select("*")
+                .order("puntos", { ascending: false });
+
+            const tbody = document.getElementById("tabla-marcador");
+            
+            if (errJugadores) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#7f2d2d;">Error al sincronizar el marcador.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = "";
+            let bossActivo = false;
+
+            if (jugadores && jugadores.length > 0) {
+                jugadores.forEach(j => {
+                    // Si es cuenta de administrador, verifica si actúa de Juggernaut en el campo sin mostrar sus puntos
+                    if (j.username && j.username.toLowerCase().includes("admin")) {
+                        if (j.en_partida === true) bossActivo = true; 
+                        return;
+                    }
+
+                    // Protección contra columnas nulas o indefinidas en tu base de datos
+                    const nombreOperador = j.username || "Operador Desconocido";
+                    const puntosOperador = j.puntos !== undefined && j.puntos !== null ? j.puntos : 0;
+                    const rolJuego = j.rol_juego ? j.rol_juego.trim() : "Sin Asignar";
+
+                    // Asignación dinámica y segura de estilos CSS por rol de juego
+                    let estilo = "rol-defecto";
+                    if (rolJuego === "Médico") estilo = "rol-medico";
+                    if (rolJuego === "Asalto") estilo = "rol-asalto";
+                    if (rolJuego === "Ametrallador") estilo = "rol-ametrallador";
+                    if (rolJuego === "Tirador designado") estilo = "rol-tirador";
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><strong>${nombreOperador}</strong></td>
+                            <td><span class="etiqueta-rol ${estilo}">${rolJuego}</span></td>
+                            <td><strong>${puntosOperador} PTS</strong></td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#888;">No hay operadores alistados actualmente.</td></tr>`;
+            }
+            
+            // Switch de alerta Juggernaut
+            document.getElementById("alerta-boss").style.display = bossActivo ? "block" : "none";
+
+        } catch (ex) {
+            console.error("Excepción en la actualización automática:", ex);
         }
-
-        // JUGADORES (Desde la tabla profiles unificada)
-        const { data: jugadores } = await window.supabaseClient
-            .from("profiles")
-            .select("*")
-            .order("puntos", { ascending: false });
-
-        const tbody = document.getElementById("tabla-marcador");
-        tbody.innerHTML = "";
-        let bossActivo = false;
-
-        if (jugadores) {
-            jugadores.forEach(j => {
-                // Filtramos cuentas de administración del marcador público si es necesario
-                if (j.username.toLowerCase().includes("admin")) {
-                    if (j.en_partida) bossActivo = true; 
-                    return;
-                }
-
-                let estilo = "rol-asalto";
-                if (j.rol_juego === "Médico") estilo = "rol-medico";
-                if (j.rol_juego === "Asalto") estilo = "rol-asalto";
-                if (j.rol_juego === "Ametrallador") estilo = "rol-ametrallador";
-                if (j.rol_juego === "Tirador designado") estilo = "rol-tirador";
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td><strong>${j.username}</strong></td>
-                        <td><span class="etiqueta-rol ${estilo}">${j.rol_juego || 'Sin Rol'}</span></td>
-                        <td><strong>${j.puntos || 0} PTS</strong></td>
-                    </tr>
-                `;
-            });
-        }
-        
-        document.getElementById("alerta-boss").style.display = bossActivo ? "block" : "none";
     }
 </script>
 
