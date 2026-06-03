@@ -3,74 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Partidas - Airsoft Negreira</title>
+    <title>Partidas</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <style>
-        body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; padding: 20px; }
-        .box { background: #0b0b0b; padding: 20px; border-radius: 10px; max-width: 500px; margin: auto; border: 2px solid #4a5d4e; }
-        h2 { color: #7fa984; text-align: center; margin-bottom: 15px; }
-        input { width: 100%; padding: 10px; margin-bottom: 10px; background: #222; color: white; border: 1px solid #444; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #4a5d4e; color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; }
-        #lista { margin-top: 20px; background: #151515; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; border-left: 4px solid #7fa984; }
+        body { background: #1a1a1a; color: white; font-family: Arial; padding: 20px; }
+        .box { background: #0b0b0b; padding: 20px; border-radius: 10px; border: 2px solid #4a5d4e; }
+        input { padding: 10px; margin-right: 10px; background: #2b2b2b; color: white; border: 1px solid #4a5d4e; }
+        button { padding: 10px; background: #4a5d4e; color: white; border: none; cursor: pointer; }
+        #lista { margin-top: 20px; }
     </style>
 </head>
 <body>
-
-<div class="box">
-    <h2>Gestión de Partida Activa</h2>
-    <input id="nombre" placeholder="Nombre de la operación (Ej: Operación Fénix)">
-    <input id="fecha" type="date">
-    <button onclick="crear()">Publicar y Activar Partida</button>
-
-    <div id="lista">Buscando partida en curso...</div>
-</div>
-
+    <div class="box">
+        <h2>Partidas activas</h2>
+        <input id="nombre" placeholder="Nombre partida">
+        <input id="fecha" type="date">
+        <button onclick="crear()">Crear partida</button>
+        <div id="lista"></div>
+    </div>
 <script>
-async function crear() {
-    const nombre = document.getElementById("nombre").value.trim();
-    const fecha = document.getElementById("fecha").value;
+    async function crear() {
+        await window.supabaseClient
+            .from("partidas")
+            .update({ activa: false })
+            .eq("activa", true);
 
-    if (!nombre || !fecha) {
-        alert("Introduce el nombre y la fecha de la partida");
-        return;
+        const nombre = document.getElementById("nombre").value;
+        const fecha = document.getElementById("fecha").value;
+
+        await window.supabaseClient
+            .from("partidas")
+            .insert([{ nombre, fecha, activa: true }]);
+
+        cargar();
     }
 
-    // 1. Desactivar todas las partidas anteriores
-    await supabaseClient
-        .from("partidas")
-        .update({ activa: false })
-        .eq("activa", true);
+    async function cargar() {
+        const { data } = await window.supabaseClient
+            .from("partidas")
+            .select("*")
+            .eq("activa", true);
 
-    // 2. Insertar la nueva partida activa
-    await supabaseClient
-        .from("partidas")
-        .insert([{ nombre, fecha, activa: true }]);
+        const lista = document.getElementById("lista");
+        if (data && data.length > 0) {
+            lista.innerHTML = data.map(p => `<p>⚔️ <strong>${p.nombre}</strong> - ${p.fecha}</p>`).join("");
+        } else {
+            lista.innerHTML = "<p>No hay partidas activas en este momento.</p>";
+        }
+    }
 
-    document.getElementById("nombre").value = "";
-    document.getElementById("fecha").value = "";
     cargar();
-}
-
-async function cargar() {
-    const { data } = await supabaseClient
-        .from("partidas")
-        .select("*")
-        .eq("activa", true)
-        .maybeSingle();
-
-    if (data) {
-        document.getElementById("lista").innerHTML = `
-            🟢 PARTIDA ACTIVA ACTUAL:<br>
-            <strong>${data.nombre}</strong><br>
-            <span>Fecha: ${data.fecha}</span>
-        `;
-    } else {
-        document.getElementById("lista").innerText = "No hay ninguna partida activa en el sistema.";
-    }
-}
-
-document.addEventListener("DOMContentLoaded", cargar);
 </script>
 </body>
 </html>
