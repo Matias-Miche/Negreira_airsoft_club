@@ -1,322 +1,182 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marcador - Airsoft Negreira</title>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase.js"></script>
-
     <style>
-        body {
-            background: #1a1a1a;
-            color: white;
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .contenedor-login,
-        .contenedor-marcador {
-            background: #0b0b0b;
-            padding: 25px;
-            border-radius: 10px;
-            border: 3px solid #4a5d4e;
-            width: 100%;
-            max-width: 650px;
-            margin-bottom: 25px;
-            box-sizing: border-box;
-        }
-
-        h2, h3 {
-            color: #7fa984;
-            text-transform: uppercase;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            background: #2b2b2b;
-            color: white;
-            border: 1px solid #444;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 12px;
-            background: #4a5d4e;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-
-        .btn:hover {
-            background: #5c7461;
-        }
-
-        .btn:disabled {
-            background: #333;
-            color: #777;
-            cursor: not-allowed;
-        }
-
-        .barra-registro {
-            margin-top: 15px;
-            text-align: center;
-            padding-top: 10px;
-            border-top: 1px solid #2b2b2b;
-            color: #aaa;
-        }
-
-        .barra-registro a {
-            color: #7fa984;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .barra-registro a:hover {
-            text-decoration: underline;
-        }
-
-        .alerta {
-            background: #7f2d2d;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-            margin-bottom: 15px;
-            display: none;
-            border: 1px solid #a93c3c;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #222;
-        }
-
-        th {
-            color: #7fa984;
-        }
-
-        .etiqueta-rol {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: bold;
-        }
-        .rol-medico { background: #8a2be2; }
-        .rol-asalto { background: #ce2029; }
-        .rol-ametrallador { background: #d2691e; }
-        .rol-tirador { background: #008080; }
-        .rol-defecto { background: #555; }
+        body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .contenedor-login, .contenedor-marcador { background: #0b0b0b; padding: 25px; border-radius: 10px; border: 3px solid #4a5d4e; width: 100%; max-width: 650px; margin-bottom: 25px; box-sizing: border-box; }
+        h2, h3 { color: #7fa984; text-transform: uppercase; text-align: center; margin-bottom: 20px; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 15px; background: #2b2b2b; color: white; border: 1px solid #4a5d4e; border-radius: 5px; box-sizing: border-box; }
+        .btn-accion { width: 100%; background: #4a5d4e; color: white; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-accion:hover { background: #637d68; }
+        .alerta-juggernaut { display: none; background: #962d2d; border: 3px dashed red; padding: 20px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 25px; width: 100%; max-width: 650px; animation: parpadeo 1.5s infinite; }
+        @keyframes parpadeo { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #2b2b2b; }
+        th { background: #4a5d4e; }
+        .etiqueta-rol { padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
+        .rol-medico { background: #962d2d; }
+        .rol-asalto { background: #3b5998; }
+        .rol-ametrallador { background: #b87333; }
+        .rol-tirador { background: #6b8e23; }
+        .rol-at { background: #ff8c00; color: black; }
+        .estado { text-align: center; color: #ccc; margin-top: 10px; }
+        @media(max-width:768px) { table { font-size: 0.8rem; } th, td { padding: 8px; } }
     </style>
 </head>
-
 <body>
 
-    <div class="contenedor-login" id="bloque-login">
-        <h2>Ingreso de Operadores</h2>
-        <div class="alerta" id="error-login"></div>
-        
-        <input type="text" id="login-usuario" placeholder="Nombre de Usuario o Correo">
-        <input type="password" id="login-password" placeholder="Contraseña">
-        <button class="btn" id="btn-entrar" onclick="iniciarSesion()">Entrar al Perfil</button>
+<div id="alerta-boss" class="alerta-juggernaut">
+    🚨 EVENTO ESPECIAL 🚨 <br><br> ¡Un administrador ha entrado como JUGGERNAUT!
+</div>
 
-        <div class="barra-registro">
-            ¿Eres nuevo? <a href="registro.html">Crear una cuenta de Operador</a>
-        </div>
-    </div>
+<div class="contenedor-login">
+    <h2>Ingreso de Operadores</h2>
+    <form id="formLogin">
+        <input type="text" id="usuario" placeholder="Tu usuario" required>
+        <input type="password" id="contra" placeholder="Tu contraseña" required>
+        <button type="submit" class="btn-accion">Entrar al Panel</button>
+    </form>
+    <a href="registro.html" style="color:#7fa984; display:block; text-align:center; margin-top:15px; text-decoration:none;">
+        ¿No tienes perfil? Regístrate
+    </a>
+    <div id="estado-login" class="estado"></div>
+</div>
 
-    <div class="contenedor-marcador">
-        <h3 id="info-partida">Buscando señales tácticas...</h3>
-        <p id="fecha-partida" style="text-align:center; color:#aaa;"></p>
-        
-        <div id="alerta-boss" style="display:none; background:#b33939; padding:10px; text-align:center; font-weight:bold; margin-bottom:10px; border-radius:5px;">
-            ⚠️ ¡ATENCIÓN: EL JUGGERNAUT ESTÁ EN EL CAMPO!
-        </div>
+<div class="contenedor-marcador" id="zona-partida" style="display:none;">
+    <h3 id="titulo-partida">Cargando partida...</h3>
+    <p id="fecha-partida" style="text-align:center;color:#ccc;"></p>
+    <label>Selecciona modalidad:</label>
+    <select id="tipo-pago">
+        <option value="5">5€ - Traigo réplica propia</option>
+        <option value="25">25€ - Alquiler completo</option>
+    </select>
+    <button class="btn-accion" onclick="unirseAPartida()">Confirmar Asistencia</button>
+</div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Operador</th>
-                    <th>Rol</th>
-                    <th>Puntos</th>
-                </tr>
-            </thead>
-            <tbody id="tabla-marcador">
-                <tr>
-                    <td colspan="3" style="text-align:center; color: #888;">Cargando datos del marcador...</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+<div class="contenedor-marcador">
+    <h3>Marcador General</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Operador</th>
+                <th>Rol</th>
+                <th>Puntos</th>
+            </tr>
+        </thead>
+        <tbody id="tabla-marcador"></tbody>
+    </table>
+</div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-        // Validación preventiva de que exista window.supabaseClient antes de hacer nada
-        if (!window.supabaseClient) {
-            console.error("Error crítico: window.supabaseClient no está definido. Revisa supabase.js");
-            document.getElementById("info-partida").innerText = "Error: Fallo de conexión con el servidor";
+    const SUPABASE_URL = "https://wbcfszivrbuqfqnizarq.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMjEsImV4cCI6MjA5NTQ3NTIyMX0.2iX7Twex3d96A9Iawg3zxvGAjFNLBqt81tSZgrzqA9s";
+    const clienteSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let usuarioLogueado = localStorage.getItem("usuarioRegistrado");
+    if (usuarioLogueado) {
+        document.getElementById("zona-partida").style.display = "block";
+    }
+
+    document.getElementById("formLogin").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const usuario = document.getElementById("usuario").value.trim().toLowerCase().replace(/[^a-z0-9@._-]/g, "");
+        const contra = document.getElementById("contra").value;
+        const estado = document.getElementById("estado-login");
+
+        estado.innerText = "Verificando acceso...";
+
+        const { data, error } = await clienteSupabase
+            .from("jugadores")
+            .select("*")
+            .eq("usuario", usuario)
+            .eq("contrasena", contra)
+            .maybeSingle();
+
+        if (error) {
+            estado.innerText = "Error de conexión";
             return;
         }
 
-        try {
-            const { data: { session }, error } = await window.supabaseClient.auth.getSession();
-            if (!error && session) {
-                document.getElementById("bloque-login").innerHTML = `
-                    <h2>Sesión Detectada</h2>
-                    <p style="text-align:center; margin-bottom:15px; color:#aaa;">Tienes una sesión táctica abierta.</p>
-                    <button class="btn" onclick="window.location.href='perfil.html'">Ir a mi Perfil</button>
-                `;
-            }
-        } catch (e) {
-            console.error("Error comprobando sesión activa:", e);
+        if (data) {
+            localStorage.setItem("usuarioRegistrado", usuario);
+            document.getElementById("zona-partida").style.display = "block";
+            estado.innerText = "Acceso autorizado";
+            usuarioLogueado = usuario;
+        } else {
+            estado.innerText = "Datos incorrectos";
         }
-
-        cargarSistema();
-        setInterval(cargarSistema, 10000);
     });
 
-    async function iniciarSesion() {
-        const usuarioInput = document.getElementById("login-usuario");
-        const passwordInput = document.getElementById("login-password");
-        const btnEntrar = document.getElementById("btn-entrar");
-        const divError = document.getElementById("error-login");
-
-        divError.style.display = "none";
-
-        // PURGA RADICAL ANTI-COMILLAS Y ANTI-ESPACIOS
-        // Convierte a minúsculas y elimina CUALQUIER carácter que NO sea una letra, número, @, punto, guion o barra baja.
-        let usuario = usuarioInput.value.toLowerCase().replace(/[^a-z0-9@._-]/g, "");
-        const contra = passwordInput.value;
-
-        if (!usuario || !contra) {
-            divError.innerText = "Error: Introduce tu operador/correo y contraseña.";
-            divError.style.display = "block";
+    async function unirseAPartida() {
+        if (!usuarioLogueado) {
+            alert("Debes iniciar sesión");
             return;
         }
+        const precio = document.getElementById("tipo-pago").value;
+        const { error } = await clienteSupabase
+            .from("jugadores")
+            .update({ tipo_entrada: precio, en_partida: true })
+            .eq("usuario", usuarioLogueado);
 
-        btnEntrar.disabled = true;
-        btnEntrar.innerText = "Autenticando...";
-
-        // Formateo del correo sin riesgo de comillas parasitarias o espacios ocultos
-        const emailFinal = usuario.includes("@") ? usuario : usuario + "@airsoft.local";
-
-        try {
-            const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-                email: emailFinal,
-                password: contra
-            });
-
-            if (error) {
-                // Si la autenticación falla, mostramos el error limpio sin colgar la interfaz
-                divError.innerText = "Acceso denegado: " + error.message;
-                divError.style.display = "block";
-                btnEntrar.disabled = false;
-                btnEntrar.innerText = "Entrar al Perfil";
-                return;
-            }
-
-            // Redirección directa e instantánea
-            window.location.href = "perfil.html";
-
-        } catch (err) {
-            console.error("Excepción en Login:", err);
-            divError.innerText = "Fallo crítico de comunicación con el servidor.";
-            divError.style.display = "block";
-            btnEntrar.disabled = false;
-            btnEntrar.innerText = "Entrar al Perfil";
+        if (error) {
+            alert("Error al alistarse");
+            return;
         }
+        alert("¡Te has alistado correctamente!");
     }
 
     async function cargarSistema() {
-        try {
-            // Sincronizar estado de partida activa
-            const { data: partidaActiva, error: errPartida } = await window.supabaseClient
-                .from("partidas")
-                .select("*")
-                .eq("activa", true)
-                .maybeSingle();
+        const { data: partida } = await clienteSupabase
+            .from("partidas")
+            .select("*")
+            .eq("activa", true)
+            .maybeSingle();
 
-            if (!errPartida && partidaActiva) {
-                document.getElementById("info-partida").innerText = "Partida: " + partidaActiva.nombre;
-                document.getElementById("fecha-partida").innerText = "Fecha/Hora: " + (partidaActiva.fecha || "No indicada");
-            } else {
-                document.getElementById("info-partida").innerText = "Sin partidas activas en el radar";
-                document.getElementById("fecha-partida").innerText = "";
-            }
-
-            // Extraer competidores y puntuaciones desde la tabla "profiles"
-            const { data: jugadores, error: errJugadores } = await window.supabaseClient
-                .from("profiles")
-                .select("*")
-                .order("puntos", { ascending: false });
-
-            const tbody = document.getElementById("tabla-marcador");
-            
-            if (errJugadores) {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#7f2d2d;">Error al sincronizar el marcador.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = "";
-            let bossActivo = false;
-
-            if (jugadores && jugadores.length > 0) {
-                jugadores.forEach(j => {
-                    // Si es cuenta de administrador, controla si el Juggernaut está en partida
-                    if (j.username && j.username.toLowerCase().includes("admin")) {
-                        if (j.en_partida === true) bossActivo = true; 
-                        return;
-                    }
-
-                    const nombreOperador = j.username || "Operador Desconocido";
-                    const puntosOperador = j.puntos !== undefined && j.puntos !== null ? j.puntos : 0;
-                    const rolJuego = j.rol_juego ? j.rol_juego.trim() : "Sin Asignar";
-
-                    let estilo = "rol-defecto";
-                    if (rolJuego === "Médico") estilo = "rol-medico";
-                    if (rolJuego === "Asalto") estilo = "rol-asalto";
-                    if (rolJuego === "Ametrallador") style = "rol-ametrallador";
-                    if (rolJuego === "Tirador designado") estilo = "rol-tirador";
-
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><strong>${nombreOperador}</strong></td>
-                            <td><span class="etiqueta-rol ${estilo}">${rolJuego}</span></td>
-                            <td><strong>${puntosOperador} PTS</strong></td>
-                        </tr>
-                    `;
-                });
-            } else {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#888;">No hay operadores alistados actualmente.</td></tr>`;
-            }
-            
-            document.getElementById("alerta-boss").style.display = bossActivo ? "block" : "none";
-
-        } catch (ex) {
-            console.error("Excepción en actualización automática:", ex);
+        if (partida) {
+            document.getElementById("titulo-partida").innerText = "⚔️ MISIÓN: " + partida.nombre;
+            document.getElementById("fecha-partida").innerText = "Fecha: " + partida.fecha;
         }
-    }
-</script>
 
+        const { data: jugadores } = await clienteSupabase
+            .from("jugadores")
+            .select("*")
+            .order("puntos", { ascending: false });
+
+        const tbody = document.getElementById("tabla-marcador");
+        tbody.innerHTML = "";
+        let juggernautActivo = false;
+
+        if (jugadores) {
+            jugadores.forEach(j => {
+                if (j.usuario.toLowerCase().includes("admin")) {
+                    if (j.en_partida) juggernautActivo = true;
+                    return;
+                }
+
+                let estilo = "rol-at";
+                if (j.rol === "Medico" || j.rol === "Médico") estilo = "rol-medico";
+                if (j.rol === "Asalto") estilo = "rol-asalto";
+                if (j.rol === "Ametrallador") estilo = "rol-ametrallador";
+                if (j.rol === "Tirador designado" || j.rol === "Tirador") estilo = "rol-tirador";
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${j.usuario}</strong></td>
+                        <td><span class="etiqueta-rol ${estilo}">${j.rol || 'Asalto'}</span></td>
+                        <td><strong>${j.puntos || 0} PTS</strong></td>
+                    </tr>
+                `;
+            });
+        }
+        document.getElementById("alerta-boss").style.display = juggernautActivo ? "block" : "none";
+    }
+
+    cargarSistema();
+    setInterval(cargarSistema, 10000);
+</script>
 </body>
 </html>
