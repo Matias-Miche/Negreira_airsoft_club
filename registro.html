@@ -4,194 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - Airsoft Negreira</title>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
-
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background: #1a1a1a;
-            color: white;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content:center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .box {
-            background: #0b0b0b;
-            padding: 30px;
-            border: 2px solid #4a5d4e;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 450px;
-            box-sizing: border-box;
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #7fa984;
-            text-transform: uppercase;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            background: #2b2b2b;
-            color: white;
-            border: 1px solid #444;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #4a5d4e;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-
-        button:hover {
-            background: #5c7461;
-        }
-
-        button:disabled {
-            background: #333;
-            color: #777;
-            cursor: not-allowed;
-        }
-
-        #estado {
-            margin-top: 15px;
-            text-align: center;
-            color: #ff5252;
-            font-weight: bold;
-        }
-
-        .links {
-            margin-top: 15px;
-            text-align: center;
-        }
-
-        .links a {
-            color: #7fa984;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .links a:hover {
-            text-decoration: underline;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .box { background: #0b0b0b; padding: 30px; border: 2px solid #4a5d4e; border-radius: 10px; width: 100%; max-width: 450px; }
+        h2 { text-align: center; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; background: #2b2b2b; color: white; border: 1px solid #444; border-radius: 5px; }
+        button { width: 100%; padding: 12px; background: #4a5d4e; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { opacity: 0.9; }
+        #estado { margin-top: 15px; text-align: center; }
+        .links { margin-top: 20px; text-align: center; }
+        .links a { color: #8dc891; text-decoration: none; }
     </style>
 </head>
-
 <body>
-
     <div class="box">
-        <h2>Registro de Operador</h2>
-        
-        <input id="usuario" type="text" placeholder="Nombre de Usuario o Correo">
+        <h2>Crear Cuenta</h2>
+        <input id="usuario" type="text" placeholder="Usuario">
         <input id="password" type="password" placeholder="Contraseña">
-        <input id="password2" type="password" placeholder="Repetir Contraseña">
-        
+        <input id="password2" type="password" placeholder="Repetir contraseña">
         <button id="btnRegistro" onclick="registrar()">Crear cuenta</button>
-        
         <p id="estado"></p>
-        
-        <div class="links">
-            <a href="login.html">Ya tengo cuenta</a>
-        </div>
+        <div class="links"><a href="login.html">Ya tengo cuenta</a></div>
     </div>
-
 <script>
-    async function registrar(){
-        const estado = document.getElementById("estado");
-        const btnRegistro = document.getElementById("btnRegistro");
-        
-        // Restablecer estilos por defecto de alertas
-        estado.style.color = "#ff5252";
-        estado.innerText = "";
-
-        // Verificación preventiva del cliente de base de datos
-        const clienteSupabase = window.supabaseClient || window.supabase;
-        if(!clienteSupabase){
-            estado.innerText = "Error: Conexión con Supabase no inicializada.";
-            return;
-        }
-
-        // PURGA RADICAL ANTI-COMILLAS Y ANTI-ESPACIOS
-        // Limpia cualquier carácter extraño del teclado o autocompletado antes de procesar
-        let usuario = document.getElementById("usuario").value.toLowerCase().replace(/[^a-z0-9@._-]/g, "");
+    async function registrar() {
+        // Desinfectante estricto contra espacios invisibles o comillas móviles
+        let usuario = document.getElementById("usuario").value.trim().toLowerCase().replace(/[^a-z0-9@._-]/g, "");
         const password = document.getElementById("password").value;
         const password2 = document.getElementById("password2").value;
+        const estado = document.getElementById("estado");
 
-        // Validaciones de seguridad en el cliente
-        if(!usuario || !password || !password2){
+        estado.innerText = "";
+
+        if (!usuario || !password) {
             estado.innerText = "Completa todos los campos";
             return;
         }
-
-        if(password !== password2){
+        if (password !== password2) {
             estado.innerText = "Las contraseñas no coinciden";
             return;
         }
-
-        if(password.length < 6){
-            estado.innerText = "Mínimo 6 caracteres de contraseña";
+        if (password.length < 6) {
+            estado.innerText = "Mínimo 6 caracteres";
             return;
         }
 
-        // Bloqueo preventivo de doble envío de formulario
-        btnRegistro.disabled = true;
-        btnRegistro.innerText = "Procesando Alistamiento...";
+        document.getElementById("btnRegistro").disabled = true;
 
-        // Formateo inteligente: Evita la doble arroba si ponen un correo real
-        const emailFinal = usuario.includes("@") ? usuario : usuario + "@airsoft.local";
+        // Permite registrar tanto si escriben un email completo como si es solo el alias
+        const email = usuario.includes("@") ? usuario : usuario + "@airsoft.local";
 
-        try {
-            const { error } = await clienteSupabase.auth.signUp({
-                email: emailFinal,
-                password: password
-            });
+        const { error } = await window.supabaseClient.auth.signUp({
+            email: email,
+            password: password
+        });
 
-            if(error){
-                estado.innerText = "Fallo en el registro: " + error.message;
-                btnRegistro.disabled = false;
-                btnRegistro.innerText = "Crear cuenta";
-                return;
-            }
-
-            // Éxito en el registro
-            estado.style.color = "#7fa984";
-            estado.innerText = "Cuenta creada correctamente. Abriendo login...";
-            
-            setTimeout(()=>{
-                window.location.href = "login.html";
-            }, 1500);
-
-        } catch (err) {
-            console.error("Excepción detectada en Registro:", err);
-            estado.innerText = "Fallo crítico al conectar con el servidor.";
-            btnRegistro.disabled = false;
-            btnRegistro.innerText = "Crear cuenta";
+        if (error) {
+            estado.innerText = error.message;
+            document.getElementById("btnRegistro").disabled = false;
+            return;
         }
+
+        estado.innerText = "Cuenta creada correctamente";
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 1500);
     }
 </script>
-
 </body>
 </html>
