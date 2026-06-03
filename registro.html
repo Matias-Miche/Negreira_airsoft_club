@@ -1,214 +1,88 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Registro - Airsoft Negreira</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js"></script>
-
-<style>
-
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-}
-
-body{
-    background:#1a1a1a;
-    color:white;
-    font-family:Arial,sans-serif;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
-    padding:20px;
-}
-
-.box{
-    background:#0b0b0b;
-    padding:30px;
-    border:2px solid #4a5d4e;
-    border-radius:10px;
-    width:100%;
-    max-width:450px;
-}
-
-h2{
-    text-align:center;
-    margin-bottom:20px;
-}
-
-input{
-    width:100%;
-    padding:12px;
-    margin-bottom:15px;
-    background:#2b2b2b;
-    color:white;
-    border:1px solid #444;
-    border-radius:5px;
-}
-
-button{
-    width:100%;
-    padding:12px;
-    background:#4a5d4e;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-}
-
-button:hover{
-    opacity:0.9;
-}
-
-#estado{
-    margin-top:15px;
-    text-align:center;
-}
-
-.links{
-    margin-top:20px;
-    text-align:center;
-}
-
-.links a{
-    color:#8dc891;
-    text-decoration:none;
-}
-
-</style>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro - Negreira Airsoft Club</title>
 </head>
-
 <body>
+  <form id="formRegistro">
+    <input type="text" id="nuevo-usuario" placeholder="Usuario" required>
+    <input type="password" id="nueva-contra" placeholder="Contraseña" required>
+    <select id="rol-juego" required>
+      <option value="">Selecciona un rol</option>
+      <option value="jugador">Jugador</option>
+      <option value="admin">Admin</option>
+    </select>
+    <button type="submit" id="btn-registro">Registrarse</button>
+    <div id="estado-registro"></div>
+  </form>
 
-<div class="box">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabaseClient = supabase.createClient(
+      "https://wbcfszivrbuqfqnizarq.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMjEsImV4cCI6MjA5NTQ3NTIyMX0.2iX7Twex3d96A9Iawg3zxvGAjFNLBqt8[...]"
+    );
 
-<h2>Crear Cuenta</h2>
+    document.getElementById("formRegistro").addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-<input
-id="usuario"
-type="text"
-placeholder="Usuario">
+      const usuario = document.getElementById("nuevo-usuario").value.trim();
+      const contra = document.getElementById("nueva-contra").value;
+      const rol = document.getElementById("rol-juego").value;
 
-<input
-id="password"
-type="password"
-placeholder="Contraseña">
+      const estado = document.getElementById("estado-registro");
+      const btn = document.getElementById("btn-registro");
 
-<input
-id="password2"
-type="password"
-placeholder="Repetir contraseña">
+      btn.disabled = true;
+      estado.innerText = "Creando cuenta...";
 
-<button
-id="btnRegistro"
-onclick="registrar()">
-Crear cuenta
-</button>
+      try {
+        // Usar autenticación de Supabase en lugar de guardar contraseña
+        const { data, error: errorRegistro } = await supabaseClient.auth.signUp({
+          email: usuario + "@airsoft.club", // Genera un email del usuario
+          password: contra
+        });
 
-<p id="estado"></p>
+        if (errorRegistro) {
+          console.log(errorRegistro);
+          estado.innerText = "Error: " + errorRegistro.message;
+          btn.disabled = false;
+          return;
+        }
 
-<div class="links">
-<a href="login.html">
-Ya tengo cuenta
-</a>
-</div>
+        // Guarda el perfil del jugador
+        const { error: errorPerfil } = await supabaseClient
+          .from("jugadores")
+          .insert([{
+            usuario: usuario,
+            rol: rol,
+            puntos: 0,
+            en_partida: false,
+            tipo_entrada: "5"
+          }]);
 
-</div>
+        if (errorPerfil) {
+          console.log(errorPerfil);
+          estado.innerText = "Error creando perfil";
+          btn.disabled = false;
+          return;
+        }
 
-<script>
+        localStorage.setItem("usuarioRegistrado", usuario);
+        estado.innerText = "Cuenta creada ✔";
 
-async function registrar(){
+        setTimeout(() => {
+          window.location.href = "perfil.html";
+        }, 1000);
 
-    const usuario =
-    document.getElementById("usuario")
-    .value
-    .trim()
-    .toLowerCase();
-
-    const password =
-    document.getElementById("password")
-    .value;
-
-    const password2 =
-    document.getElementById("password2")
-    .value;
-
-    const estado =
-    document.getElementById("estado");
-
-    estado.innerText = "";
-
-    if(!usuario || !password){
-
-        estado.innerText =
-        "Completa todos los campos";
-
-        return;
-    }
-
-    if(password !== password2){
-
-        estado.innerText =
-        "Las contraseñas no coinciden";
-
-        return;
-    }
-
-    if(password.length < 6){
-
-        estado.innerText =
-        "Mínimo 6 caracteres";
-
-        return;
-    }
-
-    document.getElementById("btnRegistro")
-    .disabled = true;
-
-    const email =
-    usuario + "@airsoft.local";
-
-    const {
-        error
-    } = await supabaseClient.auth.signUp({
-
-        email: email,
-        password: password
-
+      } catch (err) {
+        console.log(err);
+        estado.innerText = "Error inesperado";
+        btn.disabled = false;
+      }
     });
-
-    if(error){
-
-        estado.innerText =
-        error.message;
-
-        document.getElementById("btnRegistro")
-        .disabled = false;
-
-        return;
-    }
-
-    estado.innerText =
-    "Cuenta creada correctamente";
-
-    setTimeout(()=>{
-
-        window.location.href =
-        "login.html";
-
-    },1500);
-
-}
-
-</script>
-
+  </script>
 </body>
 </html>
