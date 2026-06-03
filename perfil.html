@@ -9,74 +9,65 @@
     <style>
         body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; padding: 20px; }
         .box { max-width: 700px; margin: auto; background: #0b0b0b; border: 2px solid #4a5d4e; border-radius: 10px; padding: 25px; }
-        h2 { text-align: center; color: #7fa984; text-transform: uppercase; margin-bottom: 10px; }
-        .info { margin-top: 15px; padding: 12px; background: #222; border-radius: 6px; border-left: 4px solid #4a5d4e; }
-        button { margin-top: 20px; padding: 12px 20px; border: none; background: #a94444; color: white; cursor: pointer; border-radius: 5px; font-weight: bold; width: 100%; }
+        h2 { text-align: center; color: #7fa984; }
+        .info { margin-top: 15px; padding: 12px; background: #222; border-radius: 6px; }
+        button { margin-top: 15px; padding: 12px; border: none; background: #4a5d4e; color: white; cursor: pointer; border-radius: 5px; }
         button:hover { opacity: 0.9; }
-        .admin-btn { background: #7fa984; color: black; margin-bottom: 10px; }
-        #panelAdmin { margin-top: 20px; }
+        .admin-btn { background: #7fa984; color: black; }
     </style>
 </head>
 <body>
-
-<div class="box">
-    <h2>Ficha Oficial de Operador</h2>
-    
-    <div class="info" id="usuario">Cargando...</div>
-    <div class="info" id="rol">Cargando...</div>
-    <div class="info" id="rolJuego">Cargando...</div>
-    <div class="info" id="entrada">Cargando...</div>
-    <div class="info" id="puntos">Cargando...</div>
-    <div class="info" id="arsenal">Cargando...</div>
-
-    <div id="panelAdmin"></div>
-
-    <button onclick="cerrarSesion()">Cerrar sesión</button>
-</div>
-
+    <div class="box">
+        <h2>Mi Perfil</h2>
+        <div class="info" id="usuario">Cargando...</div>
+        <div class="info" id="rol"></div>
+        <div class="info" id="rolJuego"></div>
+        <div class="info" id="entrada"></div>
+        <div class="info" id="puntos"></div>
+        <div id="panelAdmin"></div>
+        <button onclick="cerrarSesion()">Cerrar sesión</button>
+    </div>
 <script>
-document.addEventListener("DOMContentLoaded", cargarPerfil);
+    async function cargarPerfil() {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) {
+            window.location.href = "login.html";
+            return;
+        }
 
-async function cargarPerfil() {
-    const { data: { user } } = await supabaseClient.auth.getUser();
+        const { data, error } = await window.supabaseClient
+            .from("profiles")
+            .select("*")
+            .eq("id", user.id)
+            .single();
 
-    if (!user) {
+        if (error) {
+            console.error(error);
+            document.getElementById("usuario").innerText = "Error al cargar el perfil.";
+            return;
+        }
+
+        document.getElementById("usuario").innerText = "Usuario: " + (data.username || "Sin nombre");
+        document.getElementById("rol").innerText = "Permiso: " + (data.rol || "Usuario");
+        document.getElementById("rolJuego").innerText = "Rol de juego: " + (data.rol_juego || "No asignado");
+        document.getElementById("entrada").innerText = "Entrada: " + (data.tipo_entrada || 0) + "€";
+        document.getElementById("puntos").innerText = "Puntos acumulados: " + (data.puntos || 0);
+
+        if (data.rol === "administración" || data.rol === "administracion") {
+            document.getElementById("panelAdmin").innerHTML = `
+                <button class="admin-btn" onclick="window.location.href='admin.html'">
+                    Panel de Administración
+                </button>
+            `;
+        }
+    }
+
+    async function cerrarSesion() {
+        await window.supabaseClient.auth.signOut();
         window.location.href = "login.html";
-        return;
     }
 
-    const { data, error } = await supabaseClient
-        .from("perfiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-    if (error) {
-        console.error(error);
-        document.getElementById("usuario").innerText = "Error al cargar los datos del perfil.";
-        return;
-    }
-
-    document.getElementById("usuario").innerHTML = "<strong>Operador:</strong> " + data.usuario.toUpperCase();
-    document.getElementById("rol").innerHTML = "<strong>Permiso de Cuenta:</strong> " + data.rol;
-    document.getElementById("rolJuego").innerHTML = "<strong>Rol de Combate:</strong> " + data.rol_juego;
-    document.getElementById("entrada").innerHTML = "<strong>Precio de Entrada:</strong> " + data.tipo_entrada + "€";
-    document.getElementById("puntos").innerHTML = "<strong>Puntos Acumulados:</strong> " + data.puntos + " PTS";
-    document.getElementById("arsenal").innerHTML = "<strong>Arsenal Prestado:</strong> " + (data.arsenal_prestado || "Ninguno");
-
-    if (data.rol === "administración") {
-        document.getElementById("panelAdmin").innerHTML = `
-            <button class="admin-btn" onclick="window.location.href='admin.html'">
-                🛡️ PANEL DE ADMINISTRACIÓN SECRETO
-            </button>
-        `;
-    }
-}
-
-async function cerrarSesion() {
-    await supabaseClient.auth.signOut();
-    window.location.href = "login.html";
-}
+    cargarPerfil();
 </script>
 </body>
 </html>
