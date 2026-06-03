@@ -1,655 +1,312 @@
-```html id="9d4lpk"
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marcador - Airsoft Negreira</title>
-
-    <!-- SDK REAL DE SUPABASE -->
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-
-        body{
-            background:#1a1a1a;
-            color:white;
-            font-family:Arial, sans-serif;
-
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-
-            padding:20px;
+        body {
+            background: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
         }
 
         .contenedor-login,
-        .contenedor-marcador{
-
-            background:#0b0b0b;
-
-            padding:25px;
-
-            border-radius:10px;
-
-            border:3px solid #4a5d4e;
-
-            width:100%;
-            max-width:650px;
-
-            margin-bottom:25px;
-
-            box-sizing:border-box;
+        .contenedor-marcador {
+            background: #0b0b0b;
+            padding: 25px;
+            border-radius: 10px;
+            border: 3px solid #4a5d4e;
+            width: 100%;
+            max-width: 650px;
+            margin-bottom: 25px;
+            box-sizing: border-box;
         }
 
-        h2,h3{
-            color:#7fa984;
-            text-transform:uppercase;
-            text-align:center;
-            margin-bottom:20px;
+        h2, h3 {
+            color: #7fa984;
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 20px;
         }
 
-        input,
-        select{
-
-            width:100%;
-
-            padding:12px;
-
-            margin-bottom:15px;
-
-            background:#2b2b2b;
-            color:white;
-
-            border:1px solid #4a5d4e;
-            border-radius:5px;
-
-            box-sizing:border-box;
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            background: #2b2b2b;
+            color: white;
+            border: 1px solid #4a5d4e;
+            border-radius: 5px;
+            box-sizing: border-box;
         }
 
-        .btn-accion{
-
-            width:100%;
-
-            background:#4a5d4e;
-            color:white;
-
-            padding:12px;
-
-            border:none;
-            border-radius:5px;
-
-            font-weight:bold;
-
-            cursor:pointer;
-
-            transition:0.3s;
+        .btn-accion {
+            width: 100%;
+            background: #4a5d4e;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
         }
 
-        .btn-accion:hover{
-            background:#637d68;
+        .btn-accion:hover {
+            background: #637d68;
         }
 
-        .alerta-juggernaut{
-
-            display:none;
-
-            background:#962d2d;
-
-            border:3px dashed red;
-
-            padding:20px;
-
-            border-radius:8px;
-
-            text-align:center;
-
-            font-weight:bold;
-
-            margin-bottom:25px;
-
-            width:100%;
-            max-width:650px;
-
-            animation:parpadeo 1.5s infinite;
+        .alerta-juggernaut {
+            display: none;
+            background: #962d2d;
+            border: 3px dashed red;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 25px;
+            width: 100%;
+            max-width: 650px;
+            animation: parpadeo 1.5s infinite;
         }
 
-        @keyframes parpadeo{
-
-            0%{opacity:1;}
-            50%{opacity:0.6;}
-            100%{opacity:1;}
+        @keyframes parpadeo {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
         }
 
-        table{
-            width:100%;
-            border-collapse:collapse;
+        table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        th,td{
-
-            padding:12px;
-
-            text-align:center;
-
-            border-bottom:1px solid #2b2b2b;
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #2b2b2b;
         }
 
-        th{
-            background:#4a5d4e;
+        th {
+            background: #4a5d4e;
         }
 
-        .etiqueta-rol{
-
-            padding:5px 10px;
-
-            border-radius:5px;
-
-            font-size:0.8rem;
-
-            font-weight:bold;
-
-            text-transform:uppercase;
+        .etiqueta-rol {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
         }
 
-        .rol-medico{
-            background:#962d2d;
+        .rol-medico { background: #962d2d; }
+        .rol-asalto { background: #3b5998; }
+        .rol-ametrallador { background: #b87333; }
+        .rol-tirador { background: #6b8e23; }
+        .rol-at { background: #ff8c00; color: black; }
+
+        .estado {
+            text-align: center;
+            color: #ccc;
+            margin-top: 10px;
         }
 
-        .rol-asalto{
-            background:#3b5998;
-        }
-
-        .rol-ametrallador{
-            background:#b87333;
-        }
-
-        .rol-tirador{
-            background:#6b8e23;
-        }
-
-        .rol-at{
-            background:#ff8c00;
-            color:black;
-        }
-
-        .estado{
-            text-align:center;
-            color:#ccc;
-            margin-top:10px;
-        }
-
-        @media(max-width:768px){
-
-            table{
-                font-size:0.8rem;
+        @media(max-width:768px) {
+            table {
+                font-size: 0.8rem;
             }
-
-            th,td{
-                padding:8px;
+            th, td {
+                padding: 8px;
             }
         }
-
     </style>
-
 </head>
 
 <body>
 
-<!-- =========================
-     ALERTA JUGGERNAUT
-========================= -->
-
-<div id="alerta-boss"
-     class="alerta-juggernaut">
-
-    🚨 EVENTO ESPECIAL 🚨
-    <br><br>
-    ¡Un administrador ha entrado como JUGGERNAUT!
-
+<div id="alerta-boss" class="alerta-juggernaut">
+    🚨 EVENTO ESPECIAL 🚨 <br><br> ¡Un administrador ha entrado como JUGGERNAUT!
 </div>
-
-<!-- =========================
-     LOGIN
-========================= -->
 
 <div class="contenedor-login">
-
     <h2>Ingreso de Operadores</h2>
-
     <form id="formLogin">
-
-        <input
-            type="text"
-            id="usuario"
-            placeholder="Tu usuario"
-            required
-        >
-
-        <input
-            type="password"
-            id="contra"
-            placeholder="Tu contraseña"
-            required
-        >
-
-        <button
-            type="submit"
-            class="btn-accion"
-        >
-            Entrar al Panel
-        </button>
-
+        <input type="text" id="usuario" placeholder="Tu usuario" required>
+        <input type="password" id="contra" placeholder="Tu contraseña" required>
+        <button type="submit" class="btn-accion">Entrar al Panel</button>
     </form>
-
-    <a href="registro.html"
-       style="
-       color:#7fa984;
-       display:block;
-       text-align:center;
-       margin-top:15px;
-       text-decoration:none;
-       ">
-
+    <a href="registro.html" style="color:#7fa984; display:block; text-align:center; margin-top:15px; text-decoration:none;">
         ¿No tienes perfil? Regístrate
-
     </a>
-
-    <div id="estado-login"
-         class="estado">
-    </div>
-
+    <div id="estado-login" class="estado"></div>
 </div>
 
-<!-- =========================
-     PARTIDA
-========================= -->
+<div class="contenedor-marcador" id="zona-partida" style="display:none;">
+    <h3 id="titulo-partida">Cargando partida...</h3>
+    <p id="fecha-partida" style="text-align:center;color:#ccc;"></p>
 
-<div class="contenedor-marcador"
-     id="zona-partida"
-     style="display:none;">
-
-    <h3 id="titulo-partida">
-
-        Cargando partida...
-
-    </h3>
-
-    <p id="fecha-partida"
-       style="text-align:center;color:#ccc;">
-    </p>
-
-    <label>
-        Selecciona modalidad:
-    </label>
-
+    <label>Selecciona modalidad:</label>
     <select id="tipo-pago">
-
-        <option value="5">
-            5€ - Traigo réplica propia
-        </option>
-
-        <option value="25">
-            25€ - Alquiler completo
-        </option>
-
+        <option value="5">5€ - Traigo réplica propia</option>
+        <option value="25">25€ - Alquiler completo</option>
     </select>
-
-    <button
-        class="btn-accion"
-        onclick="unirseAPartida()"
-    >
-        Confirmar Asistencia
-    </button>
-
+    <button class="btn-accion" onclick="unirseAPartida()">Confirmar Asistencia</button>
 </div>
-
-<!-- =========================
-     MARCADOR
-========================= -->
 
 <div class="contenedor-marcador">
-
-    <h3>
-        Marcador General
-    </h3>
-
+    <h3>Marcador General</h3>
     <table>
-
         <thead>
-
             <tr>
-
                 <th>Operador</th>
                 <th>Rol</th>
                 <th>Puntos</th>
-
             </tr>
-
         </thead>
-
-        <tbody id="tabla-marcador">
-
-        </tbody>
-
+        <tbody id="tabla-marcador"></tbody>
     </table>
-
 </div>
 
 <script>
-
     // ============================
-    // CONFIGURACIÓN SUPABASE
+    // CONFIGURACIÓN SUPABASE (CONECTADO)
     // ============================
+    const SUPABASE_URL = "https://wbcfszivrbuqfqnizarq.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMjEsImV4cCI6MjA5NTQ3NTIyMX0.2iX7Twex3d96A9Iawg3zxvGAjFNLBqt81tSZgrzqA9s";
 
-    const SUPABASE_URL =
-    "https://TU-PROYECTO.supabase.co";
+    const clienteSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const SUPABASE_KEY =
-    "TU_ANON_PUBLIC_KEY";
-
-    const clienteSupabase =
-    supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-    );
-
-    // ============================
     // SESIÓN
-    // ============================
-
-    let usuarioLogueado =
-    localStorage.getItem(
-        "usuarioRegistrado"
-    );
-
-    if(usuarioLogueado){
-
-        document.getElementById(
-            "zona-partida"
-        ).style.display = "block";
+    let usuarioLogueado = localStorage.getItem("usuarioRegistrado");
+    if (usuarioLogueado) {
+        document.getElementById("zona-partida").style.display = "block";
     }
 
     // ============================
     // LOGIN
     // ============================
-
-    document
-    .getElementById("formLogin")
-    .addEventListener(
-        "submit",
-        async function(e){
-
+    document.getElementById("formLogin").addEventListener("submit", async function(e) {
         e.preventDefault();
+        const usuario = document.getElementById("usuario").value.trim();
+        const contra = document.getElementById("contra").value;
+        const estado = document.getElementById("estado-login");
 
-        const usuario =
-        document.getElementById(
-            "usuario"
-        ).value.trim();
+        estado.innerText = "Verificando acceso...";
 
-        const contra =
-        document.getElementById(
-            "contra"
-        ).value;
+        const { data, error } = await clienteSupabase
+            .from("jugadores")
+            .select("*")
+            .eq("usuario", usuario)
+            .eq("contrasena", contra)
+            .maybeSingle();
 
-        const estado =
-        document.getElementById(
-            "estado-login"
-        );
-
-        estado.innerText =
-        "Verificando acceso...";
-
-        const { data, error } =
-        await clienteSupabase
-        .from("jugadores")
-        .select("*")
-        .eq("usuario", usuario)
-        .eq("contrasena", contra)
-        .maybeSingle();
-
-        if(error){
-
-            estado.innerText =
-            "Error de conexión";
-
+        if (error) {
+            estado.innerText = "Error de conexión";
             console.error(error);
-
             return;
         }
 
-        if(data){
-
-            localStorage.setItem(
-                "usuarioRegistrado",
-                usuario
-            );
-
-            estado.innerText =
-            "Acceso autorizado";
-
+        if (data) {
+            localStorage.setItem("usuarioRegistrado", usuario);
+            estado.innerText = "Acceso autorizado";
             setTimeout(() => {
-
-                window.location.href =
-                "perfil.html";
-
+                window.location.href = "perfil.html";
             }, 1000);
-
-        }else{
-
-            estado.innerText =
-            "Datos incorrectos";
+        } else {
+            estado.innerText = "Datos incorrectos";
         }
     });
 
     // ============================
     // UNIRSE A PARTIDA
     // ============================
-
-    async function unirseAPartida(){
-
-        if(!usuarioLogueado){
-
-            alert(
-                "Debes iniciar sesión"
-            );
-
+    async function unirseAPartida() {
+        if (!usuarioLogueado) {
+            alert("Debes iniciar sesión");
             return;
         }
 
-        const precio =
-        document.getElementById(
-            "tipo-pago"
-        ).value;
+        const precio = document.getElementById("tipo-pago").value;
 
-        const { error } =
-        await clienteSupabase
-        .from("jugadores")
-        .update({
-            tipo_entrada:precio,
-            en_partida:true
-        })
-        .eq(
-            "usuario",
-            usuarioLogueado
-        );
+        const { error } = await clienteSupabase
+            .from("jugadores")
+            .update({ tipo_entrada: precio, en_partida: true })
+            .eq("usuario", usuarioLogueado);
 
-        if(error){
-
-            alert(
-                "Error al alistarse"
-            );
-
+        if (error) {
+            alert("Error al alistarse");
             console.error(error);
-
             return;
         }
 
-        alert(
-            "¡Te has unido correctamente!"
-        );
+        alert("¡Te has unido correctamente!");
     }
 
     // ============================
     // SISTEMA TIEMPO REAL
     // ============================
-
-    async function cargarSistema(){
-
+    async function cargarSistema() {
         // PARTIDA ACTIVA
+        const { data: partida } = await clienteSupabase
+            .from("partidas")
+            .select("*")
+            .eq("activa", true)
+            .maybeSingle();
 
-        const { data:partida } =
-        await clienteSupabase
-        .from("partidas")
-        .select("*")
-        .eq("activa", true)
-        .maybeSingle();
-
-        if(partida){
-
-            document.getElementById(
-                "titulo-partida"
-            ).innerText =
-            "⚔️ MISIÓN: " +
-            partida.nombre;
-
-            document.getElementById(
-                "fecha-partida"
-            ).innerText =
-            "Fecha: " +
-            partida.fecha;
+        if (partida) {
+            document.getElementById("titulo-partida").innerText = "⚔️ MISIÓN: " + partida.nombre;
+            document.getElementById("fecha-partida").innerText = "Fecha: " + partida.fecha;
         }
 
         // JUGADORES
+        const { data: jugadores } = await clienteSupabase
+            .from("jugadores")
+            .select("*")
+            .order("puntos", { ascending: false });
 
-        const { data:jugadores } =
-        await clienteSupabase
-        .from("jugadores")
-        .select("*")
-        .order(
-            "puntos",
-            { ascending:false }
-        );
-
-        const tbody =
-        document.getElementById(
-            "tabla-marcador"
-        );
-
+        const tbody = document.getElementById("tabla-marcador");
         tbody.innerHTML = "";
+        let juggernautActivo = false;
 
-        let juggernautActivo =
-        false;
-
-        if(jugadores){
-
+        if (jugadores) {
             jugadores.forEach(j => {
-
-                // DETECTAR ADMIN
-
-                if(
-                    j.usuario
-                    .toLowerCase()
-                    .includes("admin")
-                ){
-
-                    if(j.en_partida){
-
-                        juggernautActivo =
-                        true;
-                    }
-
+                if (j.usuario.toLowerCase().includes("admin")) {
+                    if (j.en_partida) juggernautActivo = true;
                     return;
                 }
 
-                // ESTILO DE ROL
-
-                let estilo =
-                "rol-at";
-
-                if(j.rol === "Medico")
-                    estilo = "rol-medico";
-
-                if(j.rol === "Asalto")
-                    estilo = "rol-asalto";
-
-                if(j.rol === "Ametrallador")
-                    estilo = "rol-ametrallador";
-
-                if(
-                    j.rol ===
-                    "Tirador designado"
-                )
-                    estilo = "rol-tirador";
-
-                // FILA
+                let estilo = "rol-at";
+                if (j.rol === "Medico") estilo = "rol-medico";
+                if (j.rol === "Asalto") estilo = "rol-asalto";
+                if (j.rol === "Ametrallador") estilo = "rol-ametrallador";
+                if (j.rol === "Tirador designado") estilo = "rol-tirador";
 
                 tbody.innerHTML += `
-
                     <tr>
-
-                        <td>
-                            <strong>
-                                ${j.usuario}
-                            </strong>
-                        </td>
-
-                        <td>
-
-                            <span class="
-                            etiqueta-rol
-                            ${estilo}
-                            ">
-
-                                ${j.rol}
-
-                            </span>
-
-                        </td>
-
-                        <td>
-
-                            <strong>
-                                ${j.puntos} PTS
-                            </strong>
-
-                        </td>
-
+                        <td><strong>${j.usuario}</strong></td>
+                        <td><span class="etiqueta-rol ${estilo}">${j.rol}</span></td>
+                        <td><strong>${j.puntos} PTS</strong></td>
                     </tr>
                 `;
             });
         }
 
-        // ALERTA JUGGERNAUT
-
-        document.getElementById(
-            "alerta-boss"
-        ).style.display =
-        juggernautActivo
-        ? "block"
-        : "none";
+        document.getElementById("alerta-boss").style.display = juggernautActivo ? "block" : "none";
     }
 
-    // ============================
-    // ACTUALIZACIÓN AUTOMÁTICA
-    // ============================
-
+    // Bucles automáticos
     cargarSistema();
-
-    setInterval(
-        cargarSistema,
-        10000
-    );
-
+    setInterval(cargarSistema, 10000);
 </script>
 
 </body>
 </html>
-```
-
