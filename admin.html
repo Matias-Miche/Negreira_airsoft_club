@@ -75,7 +75,8 @@
             .eq("id", user.id)
             .single();
 
-        if (!perfil || perfil.role === "usuario" && perfil.rol !== "administración") {
+        // REVISADO: Condición de seguridad corregida e infalible
+        if (!perfil || perfil.rol !== "administración") {
             alert("Acceso denegado: No tienes permisos de administración.");
             window.location.href = "perfil.html";
             return;
