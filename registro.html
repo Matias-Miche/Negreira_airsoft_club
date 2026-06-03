@@ -10,11 +10,11 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
         .box { background: #0b0b0b; padding: 30px; border: 2px solid #4a5d4e; border-radius: 10px; width: 100%; max-width: 450px; }
-        h2 { text-align: center; margin-bottom: 20px; }
+        h2 { text-align: center; margin-bottom: 20px; color: #7fa984; }
         input { width: 100%; padding: 12px; margin-bottom: 15px; background: #2b2b2b; color: white; border: 1px solid #444; border-radius: 5px; }
-        button { width: 100%; padding: 12px; background: #4a5d4e; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button { width: 100%; padding: 12px; background: #4a5d4e; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         button:hover { opacity: 0.9; }
-        #estado { margin-top: 15px; text-align: center; }
+        #estado { margin-top: 15px; text-align: center; font-weight: bold; }
         .links { margin-top: 20px; text-align: center; }
         .links a { color: #8dc891; text-decoration: none; }
     </style>
@@ -31,30 +31,31 @@
     </div>
 <script>
     async function registrar() {
-        // Desinfectante estricto contra espacios invisibles o comillas móviles
         let usuario = document.getElementById("usuario").value.trim().toLowerCase().replace(/[^a-z0-9@._-]/g, "");
         const password = document.getElementById("password").value;
         const password2 = document.getElementById("password2").value;
         const estado = document.getElementById("estado");
 
         estado.innerText = "";
+        estado.style.color = "white";
 
         if (!usuario || !password) {
             estado.innerText = "Completa todos los campos";
+            estado.style.color = "#ff8a8a";
             return;
         }
         if (password !== password2) {
             estado.innerText = "Las contraseñas no coinciden";
+            estado.style.color = "#ff8a8a";
             return;
         }
         if (password.length < 6) {
             estado.innerText = "Mínimo 6 caracteres";
+            estado.style.color = "#ff8a8a";
             return;
         }
 
         document.getElementById("btnRegistro").disabled = true;
-
-        // Permite registrar tanto si escriben un email completo como si es solo el alias
         const email = usuario.includes("@") ? usuario : usuario + "@airsoft.local";
 
         const { error } = await window.supabaseClient.auth.signUp({
@@ -63,12 +64,19 @@
         });
 
         if (error) {
-            estado.innerText = error.message;
+            // Captura el maldito bloqueo de correos y te avisa en español norteño claro
+            if (error.message.includes("rate limit") || error.status === 429) {
+                estado.innerText = "⚠️ Límite de Supabase alcanzado. Espera unos minutos o desactiva 'Confirm Email' en tu panel.";
+            } else {
+                estado.innerText = error.message;
+            }
+            estado.style.color = "#ff8a8a";
             document.getElementById("btnRegistro").disabled = false;
             return;
         }
 
         estado.innerText = "Cuenta creada correctamente";
+        estado.style.color = "#8dc891";
         setTimeout(() => {
             window.location.href = "login.html";
         }, 1500);
