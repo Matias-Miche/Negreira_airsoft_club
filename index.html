@@ -170,11 +170,9 @@
     </div>
 
 <script>
-    // Ejecución inicial segura al cargar la web
     document.addEventListener("DOMContentLoaded", async () => {
-        // Validación preventiva de la existencia del SDK de Supabase
         if (!window.supabaseClient) {
-            console.error("Error crítico: El archivo 'supabase.js' no está cargado correctamente o no inicializó window.supabaseClient.");
+            console.error("Error: window.supabaseClient no encontrado.");
             document.getElementById("info-partida").innerText = "Error: Fallo de conexión con la base de datos";
             return;
         }
@@ -182,7 +180,6 @@
         try {
             const { data: { session }, error } = await window.supabaseClient.auth.getSession();
             if (!error && session) {
-                // Si ya está logueado de antes, transformamos la tarjeta para evitar que vuelva a meter datos
                 document.getElementById("bloque-login").innerHTML = `
                     <h2>Sesión Detectada</h2>
                     <p style="text-align:center; margin-bottom:15px; color:#aaa;">Tienes una sesión táctica abierta.</p>
@@ -190,38 +187,35 @@
                 `;
             }
         } catch (e) {
-            console.error("Error al comprobar sesión previa:", e);
+            console.error(e);
         }
 
-        // Lanzamiento inicial y bucle en segundo plano cada 10 segundos
         cargarSistema();
         setInterval(cargarSistema, 10000);
     });
 
-    // Función de Login Blindada contra la doble arroba (@) e inyecciones vacías
     async function iniciarSesion() {
         const usuarioInput = document.getElementById("login-usuario");
         const passwordInput = document.getElementById("login-password");
         const btnEntrar = document.getElementById("btn-entrar");
         const divError = document.getElementById("error-login");
 
-        const usuario = usuarioInput.value.trim().toLowerCase();
-        const contra = passwordInput.value;
-
         divError.style.display = "none";
 
-        // Protección 1: Campos vacíos
+        // LIMPIEZA ABSOLUTA DE CARACTERES MALEVOLOS (Elimina comillas simples, dobles y espacios)
+        let usuario = usuarioInput.value.replace(/['"“”‘’\s]/g, "").trim().toLowerCase();
+        const contra = passwordInput.value;
+
         if (!usuario || !contra) {
             divError.innerText = "Error: Introduce tu operador/correo y contraseña.";
             divError.style.display = "block";
             return;
         }
 
-        // Protección 2: Evitar que el botón sea pulsado varias veces durante el proceso
         btnEntrar.disabled = true;
         btnEntrar.innerText = "Autenticando...";
 
-        // Protección 3: Análisis inteligente del identificador (¿Es correo o usuario estándar?)
+        // Formateo del correo de forma limpia sin comillas parasitarias
         const emailFinal = usuario.includes("@") ? usuario : usuario + "@airsoft.local";
 
         try {
@@ -231,29 +225,26 @@
             });
 
             if (error) {
-                divError.innerText = "Acceso denegado: Usuario o contraseña incorrectos.";
+                // Si Supabase devuelve un error de formato a pesar de todo, te lo pinta limpio
+                divError.innerText = "Acceso denegado: " + error.message;
                 divError.style.display = "block";
                 btnEntrar.disabled = false;
                 btnEntrar.innerText = "Entrar al Perfil";
                 return;
             }
 
-            // Redirección limpia e inmediata si todo es correcto
             window.location.href = "perfil.html";
 
         } catch (err) {
-            console.error("Excepción en Login:", err);
-            divError.innerText = "Fallo crítico en el servidor de autenticación. Inténtalo de nuevo.";
+            divError.innerText = "Fallo crítico en el servidor de autenticación.";
             divError.style.display = "block";
             btnEntrar.disabled = false;
             btnEntrar.innerText = "Entrar al Perfil";
         }
     }
 
-    // Carga de datos del marcador en tiempo real unificado desde la tabla "profiles"
     async function cargarSistema() {
         try {
-            // Consulta 1: Estado de las partidas públicas activas
             const { data: partidaActiva, error: errPartida } = await window.supabaseClient
                 .from("partidas")
                 .select("*")
@@ -268,7 +259,6 @@
                 document.getElementById("fecha-partida").innerText = "";
             }
 
-            // Consulta 2: Extracción de competidores y puntuaciones desde "profiles" (Unificado)
             const { data: jugadores, error: errJugadores } = await window.supabaseClient
                 .from("profiles")
                 .select("*")
@@ -286,18 +276,15 @@
 
             if (jugadores && jugadores.length > 0) {
                 jugadores.forEach(j => {
-                    // Si es cuenta de administrador, verifica si actúa de Juggernaut en el campo sin mostrar sus puntos
                     if (j.username && j.username.toLowerCase().includes("admin")) {
                         if (j.en_partida === true) bossActivo = true; 
                         return;
                     }
 
-                    // Protección contra columnas nulas o indefinidas en tu base de datos
                     const nombreOperador = j.username || "Operador Desconocido";
                     const puntosOperador = j.puntos !== undefined && j.puntos !== null ? j.puntos : 0;
                     const rolJuego = j.rol_juego ? j.rol_juego.trim() : "Sin Asignar";
 
-                    // Asignación dinámica y segura de estilos CSS por rol de juego
                     let estilo = "rol-defecto";
                     if (rolJuego === "Médico") estilo = "rol-medico";
                     if (rolJuego === "Asalto") estilo = "rol-asalto";
@@ -316,11 +303,10 @@
                 tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#888;">No hay operadores alistados actualmente.</td></tr>`;
             }
             
-            // Switch de alerta Juggernaut
             document.getElementById("alerta-boss").style.display = bossActivo ? "block" : "none";
 
         } catch (ex) {
-            console.error("Excepción en la actualización automática:", ex);
+            console.error(ex);
         }
     }
 </script>
