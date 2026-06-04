@@ -68,7 +68,7 @@
             .order("usuario", { ascending: true });
 
         if (error) {
-            console.error(error);
+            console.error("Error al cargar operadores:", error);
             return;
         }
 
@@ -118,10 +118,10 @@
             .from("jugadores")
             .update({
                 rol: nuevoRol,
-                tipo_entrada: nuevaEntrada,
+                tipo_entrada: Number(nuevaEntrada),
                 arsenal_prestado: nuevoArsenal,
                 arsenal: nuevoArsenal,
-                puntos: nuevosPuntos
+                puntos: Number(nuevosPuntos)
             })
             .eq("usuario", usuario);
 
@@ -145,6 +145,7 @@
 
         estado.innerText = "Publicando...";
 
+        // CORRECCIÓN: Añadido 'await' para asegurar que finaliza la desactivación de partidas viejas antes de insertar la nueva
         await clienteSupabase
             .from("partidas")
             .update({ activa: false })
