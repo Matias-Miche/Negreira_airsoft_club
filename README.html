@@ -1,3 +1,9 @@
+Aquí tienes el código completo integrado y adaptado para que se conecte directamente con tu base de datos de Supabase.
+
+He sustituido la validación estática local (validarID()) por una consulta asíncrona real. Ahora el formulario buscará el ID introducido en tu base de datos, comprobará si existe el operador y le mostrará un mensaje personalizado (o un error si no se encuentra o las credenciales fallan).
+
+Código Completo Integrado
+HTML
 
 <!DOCTYPE html>
 <html lang="es">
@@ -7,367 +13,358 @@
 
     <title>Club Airsoft Negreira</title>
 
-    <style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <style>
         /* =========================
            ESTILOS GENERALES
         ========================== */
-
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        html{
-            scroll-behavior:smooth;
+        html {
+            scroll-behavior: smooth;
         }
 
-        body{
-            background-color:#1a1a1a;
-            color:white;
-            line-height:1.6;
+        body {
+            background-color: #1a1a1a;
+            color: white;
+            line-height: 1.6;
         }
 
-        ul{
-            padding-left:20px;
+        ul {
+            padding-left: 20px;
         }
 
         /* =========================
            HEADER / NAVEGACIÓN
         ========================== */
-
-        header{
-            background-color:#0b0b0b;
-            border-bottom:3px solid #4a5d4e;
-            position:fixed;
-            width:100%;
-            top:0;
-            z-index:1000;
-            padding:20px;
+        header {
+            background-color: #0b0b0b;
+            border-bottom: 3px solid #4a5d4e;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            padding: 20px;
         }
 
-        nav{
-            max-width:1200px;
-            margin:auto;
-
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            flex-wrap:wrap;
+        nav {
+            max-width: 1200px;
+            margin: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
-        .logo{
-            color:#7fa984;
-            font-size:1.5rem;
-            font-weight:bold;
+        .logo {
+            color: #7fa984;
+            font-size: 1.5rem;
+            font-weight: bold;
         }
 
-        .nav-links{
-            list-style:none;
-            display:flex;
-            gap:20px;
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 20px;
         }
 
-        .nav-links a{
-            color:white;
-            text-decoration:none;
-            transition:0.3s;
-            font-weight:500;
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: 0.3s;
+            font-weight: 500;
         }
 
-        .nav-links a:hover{
-            color:#7fa984;
+        .nav-links a:hover {
+            color: #7fa984;
         }
 
         /* =========================
            SECCIONES
         ========================== */
-
-        section{
-            max-width:1000px;
-            margin:auto;
-            padding:110px 20px 60px 20px;
-            min-height:80vh;
+        section {
+            max-width: 1000px;
+            margin: auto;
+            padding: 110px 20px 60px 20px;
+            min-height: 80vh;
         }
 
-        h1,h2{
-            color:#7fa984;
-            margin-bottom:20px;
-            text-transform:uppercase;
+        h1, h2, h3 {
+            color: #7fa984;
+            margin-bottom: 20px;
+            text-transform: uppercase;
         }
 
         /* =========================
            INICIO
         ========================== */
-
-        #inicio{
-
-            display:flex;
-            flex-direction:column;
-            justify-content:center;
-            align-items:center;
-            text-align:center;
-
-            background-image:
-            linear-gradient(rgba(0,0,0,0.65),
-            rgba(0,0,0,0.65)),
-            url('https://images.unsplash.com/photo-1511884642898-4c92249e20b6?q=80&w=1200');
-
-            background-size:cover;
-            background-position:center;
+        #inicio {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background-image: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1511884642898-4c92249e20b6?q=80&w=1200');
+            background-size: cover;
+            background-position: center;
         }
 
-        #inicio p{
-            max-width:700px;
+        #inicio p {
+            max-width: 700px;
         }
 
         /* =========================
-           BOTONES
+           BOTONES Y COMPONENTES
         ========================== */
-
-        .btn-accion{
-            display:inline-block;
-            margin-top:20px;
-
-            background-color:#4a5d4e;
-            color:white;
-
-            padding:12px 24px;
-
-            border-radius:5px;
-            text-decoration:none;
-            font-weight:bold;
-
-            transition:0.3s;
+        .btn-accion {
+            display: inline-block;
+            margin-top: 20px;
+            background-color: #4a5d4e;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
         }
 
-        .btn-accion:hover{
-            background-color:#637d68;
+        .btn-accion:hover {
+            background-color: #637d68;
         }
 
-        button.btn-accion{
-            border:none;
-            cursor:pointer;
-            font-size:1rem;
+        button.btn-accion {
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
         }
 
         /* =========================
-           FORMULARIO
+           FORMULARIO Y RESPUESTA
         ========================== */
-
-        .form-grupo{
-            margin-bottom:15px;
+        .form-grupo {
+            margin-bottom: 15px;
         }
 
-        label{
-            display:block;
-            margin-bottom:5px;
-            color:#ccc;
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ccc;
         }
 
-        input[type="text"]{
-            width:100%;
-            padding:10px;
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #2b2b2b;
+            color: white;
+            border: 1px solid #4a5d4e;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
 
-            background-color:#2b2b2b;
-            color:white;
+        #feedback-registro {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+            font-weight: 500;
+        }
 
-            border:1px solid #4a5d4e;
-            border-radius:4px;
+        .feedback-espera {
+            display: block !important;
+            background-color: #333333;
+            color: #7fa984;
+        }
+
+        .feedback-exito {
+            display: block !important;
+            background-color: rgba(127, 169, 132, 0.2);
+            border: 1px solid #7fa984;
+            color: #a3cfa7;
+        }
+
+        .feedback-error {
+            display: block !important;
+            background-color: rgba(217, 83, 79, 0.2);
+            border: 1px solid #d9534f;
+            color: #f59c9a;
         }
 
         /* =========================
            FOOTER
         ========================== */
-
-        footer{
-            background-color:#0b0b0b;
-            text-align:center;
-            padding:20px;
-            color:#777;
-            font-size:0.9rem;
+        footer {
+            background-color: #0b0b0b;
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9rem;
         }
 
         /* =========================
            RESPONSIVE
         ========================== */
-
-        @media(max-width:768px){
-
-            nav{
-                flex-direction:column;
-                gap:15px;
+        @media(max-width:768px) {
+            nav {
+                flex-direction: column;
+                gap: 15px;
             }
 
-            .nav-links{
-                flex-direction:column;
-                text-align:center;
+            .nav-links {
+                flex-direction: column;
+                text-align: center;
             }
 
-            h1{
-                font-size:1.8rem;
+            h1 {
+                font-size: 1.8rem;
             }
         }
-
     </style>
 </head>
 
 <body>
 
-    <!-- =========================
-         MENÚ
-    ========================== -->
-
     <header>
-
         <nav>
-
             <div class="logo">
                 Airsoft Negreira
             </div>
-
             <ul class="nav-links">
                 <li><a href="#inicio">Inicio</a></li>
                 <li><a href="#informacion">El Club</a></li>
                 <li><a href="#registro">Inscripción</a></li>
             </ul>
-
         </nav>
-
     </header>
 
-    <!-- =========================
-         INICIO
-    ========================== -->
-
     <section id="inicio">
-
-        <h1>
-            Bienvenidos al Club de Airsoft de Negreira
-        </h1>
-
+        <h1>Bienvenidos al Club de Airsoft de Negreira</h1>
         <p>
             Táctica, estrategia y adrenalina en la comarca de Barcala.
             Únete a nuestras partidas de fin de semana.
         </p>
-
-        <!-- BOTÓN CORREGIDO -->
-
         <a href="#registro" class="btn-accion">
-            Obtener mi ID de Miembro
+            Verificar mi ID de Miembro
         </a>
-
     </section>
 
-    <!-- =========================
-         INFORMACIÓN
-    ========================== -->
-
     <section id="informacion">
-
         <h2>Sobre el Club</h2>
-
         <p>
             Somos una asociación de airsoft con sede en Negreira.
             Organizamos eventos en entornos naturales controlados
             y campos autorizados, priorizando siempre la seguridad,
             el compañerismo y el juego limpio.
         </p>
-
         <br>
-
         <h3>Requisitos para participar:</h3>
-
         <ul>
             <li>Ser mayor de edad o disponer de autorización paterna.</li>
             <li>Uso obligatorio de gafas homologadas.</li>
             <li>Control estricto de potencia mediante cronógrafo.</li>
         </ul>
-
     </section>
-
-    <!-- =========================
-         REGISTRO
-    ========================== -->
 
     <section id="registro">
-
         <h2>Registro de Jugadores</h2>
-
         <p>
-            Introduce tu credencial para verificar
-            tu asistencia a la próxima partida.
+            Introduce tu credencial para verificar tu asistencia a la próxima partida.
         </p>
-
         <br>
 
-        <form onsubmit="return validarID()">
-
+        <form onsubmit="return validarID(event)">
             <div class="form-grupo">
-
-                <label for="jugador-id">
-                    Introduce tu ID de Operador:
-                </label>
-
-                <input
-                    type="text"
-                    id="jugador-id"
-                    placeholder="Ej: AN-9823"
-                    maxlength="50"
+                <label for="jugador-id">Introduce tu ID de Operador:</label>
+                <input 
+                    type="text" 
+                    id="jugador-id" 
+                    placeholder="Ej: AN-9823" 
+                    maxlength="50" 
                     required
                 >
-
             </div>
-
-            <button type="submit" class="btn-accion">
-                Verificar ID
-            </button>
-
+            <button type="submit" class="btn-accion">Verificar ID</button>
         </form>
 
+        <div id="feedback-registro"></div>
     </section>
 
-    <!-- =========================
-         FOOTER
-    ========================== -->
-
     <footer>
-
         <p>
-            &copy; 2026 Airsoft Negreira |
-            Proyecto educativo desarrollado en HTML, CSS y JavaScript
+            &copy; 2026 Airsoft Negreira | Proyecto educativo desarrollado en HTML, CSS y JavaScript
         </p>
-
     </footer>
 
-    <!-- =========================
-         JAVASCRIPT
-    ========================== -->
-
     <script>
+        // =========================================================================
+        // CONFIGURACIÓN DE TU SUPABASE (Cambia estos datos por los tuyos)
+        // =========================================================================
+        const SUPABASE_URL = "https://TU_PROYECTO_ID.supabase.co"; 
+        const SUPABASE_ANON_KEY = "TU_CLAVE_PUBLICA_ANON_KEY";
+        const TABLA_OPERADORES = "nombre_de_tu_tabla"; // Reemplaza por tu tabla (ej: "operadores")
+        const COLUMNA_ID = "id_operador";             // Reemplaza por la columna que guarda el ID (ej: "id")
 
-        function validarID(){
+        // Inicializar cliente Supabase
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            const id =
-            document.getElementById("jugador-id").value;
+        // Función asíncrona ligada al submit del formulario
+        async function validarID(event) {
+            // Evita que la página web se recargue por el formulario
+            event.preventDefault();
 
-            if(id.startsWith("AN-")){
+            const idInput = document.getElementById("jugador-id").value.trim();
+            const feedback = document.getElementById("feedback-registro");
 
-                alert("ID validado correctamente");
+            // Limpieza visual inicial de estados previos
+            feedback.className = "feedback-espera";
+            feedback.innerHTML = "Consultando base de datos central...";
 
-            }else{
+            // Validación de formato básica en cliente antes de consultar
+            if (!idInput.startsWith("AN-")) {
+                feedback.className = "feedback-error";
+                feedback.innerHTML = "Formato incorrecto en memoria local. Asegúrate de empezar con 'AN-' (Ej: AN-9823).";
+                return false;
+            }
 
-                alert("Formato incorrecto. Usa AN-XXXX");
+            try {
+                // Consulta directa a Supabase buscando coincidencia exacta
+                const { data, error } = await supabaseClient
+                    .from(TABLA_OPERADORES)
+                    .select("*")
+                    .eq(COLUMNA_ID, idInput);
 
+                if (error) {
+                    feedback.className = "feedback-error";
+                    feedback.innerHTML = `<strong>Error de conexión:</strong> ${error.message}`;
+                    console.error(error);
+                    return false;
+                }
+
+                // Evaluar si devolvió registros o la respuesta llegó vacía
+                if (data && data.length > 0) {
+                    const operador = data[0];
+                    feedback.className = "feedback-exito";
+                    // Si tu tabla tiene columnas como 'nombre', puedes usarlas aquí de forma dinámica
+                    feedback.innerHTML = `✓ ID verificado con éxito. ¡Bienvenido de nuevo, Operador (${idInput})!`;
+                } else {
+                    feedback.className = "feedback-error";
+                    feedback.innerHTML = "❌ Operador no encontrado. El ID no figura en el registro del Club.";
+                }
+
+            } catch (err) {
+                feedback.className = "feedback-error";
+                feedback.innerHTML = "No se pudo establecer contacto con el servidor perimetral.";
+                console.error(err);
             }
 
             return false;
         }
-
     </script>
 
 </body>
 </html>
-```
