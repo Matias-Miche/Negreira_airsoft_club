@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Comando - Airsoft Negreira</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase.js"></script>
+    <title>Panel de Comando - Negreira</title>
+    <link rel="icon" href="data:,">
     <style>
         body {
             background: #080b09; color: #d1dad2; font-family: 'Courier New', Courier, monospace;
@@ -15,173 +14,173 @@
                 linear-gradient(to right, #162419 1px, transparent 1px), linear-gradient(to bottom, #162419 1px, transparent 1px);
             background-size: 100% 100%, 40px 40px, 40px 40px;
         }
-        .contenedor-admin { width: 100%; max-width: 650px; background: #040605; border: 2px solid #bfa054; border-top: 6px solid #bfa054; border-radius: 4px; padding: 30px; box-sizing: border-box; box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.8); }
-        h2 { color: #bfa054; text-transform: uppercase; margin-top: 0; letter-spacing: 2px; font-size: 1.4rem; text-align: center; border-bottom: 1px dashed #bfa054; padding-bottom: 12px; }
+        .contenedor-admin { width: 100%; max-width: 650px; background: #040605; border: 2px solid #223526; border-top: 6px solid #ff6b6b; border-radius: 4px; padding: 30px; box-sizing: border-box; box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.8); }
+        h2 { color: #ff6b6b; text-transform: uppercase; margin-top: 0; letter-spacing: 2px; font-size: 1.4rem; text-align: center; border-bottom: 1px dashed #223526; padding-bottom: 12px; }
+        .seccion-form { background: #0f1712; border: 1px solid #2d4533; padding: 20px; border-radius: 3px; margin-bottom: 20px; }
         .campo { margin-bottom: 15px; }
         label { color: #a4b3a7; display: block; margin-bottom: 6px; font-size: 0.8rem; text-transform: uppercase; font-weight: bold; }
-        input, select { width: 100%; padding: 11px; background: #0f1712; color: #e2e8e3; border: 1px solid #2d4533; border-radius: 3px; box-sizing: border-box; font-family: inherit; }
-        input:focus, select:focus { outline: none; border-color: #bfa054; background: #142018; }
-        .btn-buscar { background: #1e3825; color: #6da077; border: 1px solid #4a6b52; padding: 11px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; margin-bottom: 20px; }
-        .btn-buscar:hover { background: #274930; color: #e2e8e3; }
-        .seccion-edicion { display: none; border-top: 1px dashed #2d4533; padding-top: 20px; margin-top: 20px; }
-        .btn-guardar { width: 100%; padding: 12px; background: #2b220f; color: #bfa054; border: 1px solid #bfa054; border-radius: 3px; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 0.9rem; }
-        .btn-guardar:hover { background: #bfa054; color: #040605; }
-        .nav-links { display: flex; justify-content: space-between; margin-top: 20px; border-top: 1px dashed #2d4533; padding-top: 15px; font-size: 0.8rem; }
+        input[type="text"] { width: 100%; padding: 11px; background: #040605; color: #e2e8e3; border: 1px solid #2d4533; border-radius: 3px; box-sizing: border-box; font-family: inherit; }
+        .grid-checkbox { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 5px; }
+        .opcion-check { display: flex; align-items: center; gap: 8px; background: #040605; padding: 8px; border: 1px solid #1c2e21; border-radius: 3px; font-size: 0.8rem; }
+        .opcion-check input { cursor: pointer; }
+        button { width: 100%; padding: 12px; background: #3d1e1e; color: #ff6b6b; border: 1px solid #6b4a4a; border-radius: 3px; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 0.9rem; margin-top: 10px; }
+        button:hover { background: #522727; color: #ff8787; }
+        .lista-misiones { margin-top: 20px; max-height: 200px; overflow-y: auto; }
+        .mision-item { display: flex; justify-content: space-between; align-items: center; background: #090f0b; padding: 10px; border: 1px solid #1c2e21; margin-bottom: 8px; border-radius: 3px; font-size: 0.85rem; }
+        .nav-links { display: flex; justify-content: space-between; margin-top: 20px; border-top: 1px dashed #223526; padding-top: 15px; font-size: 0.8rem; }
         .link-btn { color: #6da077; text-decoration: none; text-transform: uppercase; font-weight: bold; }
-        .link-btn:hover { color: #bfa054; }
+        .link-btn:hover { color: #ff6b6b; }
     </style>
 </head>
 <body>
 
     <div class="contenedor-admin">
-        <h2>⚡ Panel de Comando de Alto Mando</h2>
+        <h2>⚡ Panel de Comando: Crear Partida</h2>
         
-        <div class="campo">
-            <label>🔍 Buscar Operador (Indicativo Exacto):</label>
-            <input type="text" id="busquedaUsuario" placeholder="Ej: operador1, admin...">
+        <div class="seccion-form">
+            <div class="campo">
+                <label>🗺️ Nombre Clave de la Misión:</label>
+                <input type="text" id="nombreMision" placeholder="Ej: OPERACIÓN TORMENTA VERDE">
+            </div>
+
+            <div class="campo">
+                <label>⚠️ Variables Especiales Activas:</label>
+                <div class="grid-checkbox">
+                    <div class="opcion-check">
+                        <input type="checkbox" id="varJuggernaut">
+                        <label for="varJuggernaut" style="margin:0; cursor:pointer;">🛡️ Juggernauts</label>
+                    </div>
+                    <div class="opcion-check">
+                        <input type="checkbox" id="varVehiculos">
+                        <label for="varVehiculos" style="margin:0; cursor:pointer;">🚜 Vehículos Pesados</label>
+                    </div>
+                    <div class="opcion-check">
+                        <input type="checkbox" id="varMedicos">
+                        <label for="varMedicos" style="margin:0; cursor:pointer;">🩹 Médicos</label>
+                    </div>
+                    <div class="opcion-check">
+                        <input type="checkbox" id="varRespawn">
+                        <label for="varRespawn" style="margin:0; cursor:pointer;">🔄 Respawn Limitado</label>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="registrarNuevaPartida()">Desplegar Misión</button>
         </div>
-        <button class="btn-buscar" onclick="buscarOperador()">Sincronizar Expediente</button>
 
-        <div id="seccionEdicion" class="seccion-edicion">
-            <h3 style="color:#6da077; font-size:1rem; text-transform:uppercase; margin-top:0; margin-bottom:15px;">📝 Modificando Registro</h3>
-            
-            <input type="hidden" id="editId">
-
-            <div class="campo">
-                <label>🌲 Indicativo Militar (Usuario):</label>
-                <input type="text" id="editUsuario">
+        <div class="seccion-form" style="border-color: #1a291f;">
+            <label style="color: #6da077;">🛰️ Historial de Misiones:</label>
+            <div class="lista-misiones" id="contenedorListaMisiones">
+                <div style="text-align: center; color: #728576; font-size: 0.8rem; padding: 10px;">Sincronizando...</div>
             </div>
-
-            <div class="campo">
-                <label>🔒 Contraseña de Acceso:</label>
-                <input type="text" id="editContrasena">
-            </div>
-
-            <div class="campo">
-                <label>⚔️ Especialidad de Combate:</label>
-                <select id="editRol">
-                    <option value="Asalto">Asalto</option>
-                    <option value="Médico">Médico</option>
-                    <option value="Tirador Selecto">Tirador Selecto (DMR)</option>
-                    <option value="Sniper">Sniper</option>
-                    <option value="Apoyo">Apoyo</option>
-                    <option value="Mando">Mando</option>
-                </select>
-            </div>
-
-            <div class="campo">
-                <label>📊 Puntos de Honor (Ranking):</label>
-                <input type="number" id="editPuntos">
-            </div>
-
-            <div class="campo">
-                <label>🛰️ Estado de Despliegue:</label>
-                <select id="editEstado">
-                    <option value="false">En Base (Falso)</option>
-                    <option value="true">En Combate / Radar (Verdadero)</option>
-                </select>
-            </div>
-
-            <div class="campo">
-                <label>👑 Permisos de Consola Administrativa:</label>
-                <select id="editAdmin">
-                    <option value="false">Operador de Campo</option>
-                    <option value="true">Alto Mando (Administrador)</option>
-                </select>
-            </div>
-
-            <button class="btn-guardar" onclick="guardarCambiosOperador()">Sobrescribir Datos de Red</button>
         </div>
-        
+
         <div class="nav-links">
             <a href="index.html" class="link-btn">🛰️ Volver al Radar</a>
-            <a href="perfil.html" class="link-btn">🪪 Mi Perfil</a>
+            <a href="perfil.html" class="link-btn" style="color:#bfa054;">🪪 Mi Perfil</a>
         </div>
     </div>
 
-<script>
-    let miUsuario = localStorage.getItem("usuarioLogueado");
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    window.onload = function() {
-        if (!miUsuario) {
-            window.location.href = "login.html";
-            return;
-        }
-        verificarRangoAdmin();
-    };
+    <script>
+        const SUPABASE_URL = "https://wbcfszivrbuqfqnizarq.supabase.co"; 
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMjEsImV4cCI6MjA5NTQ3NTIyMX0.2iX7Twex3d96A9Iawg3zxvGAjFNLBqt81tSZgrzqA9s";
 
-    async function verificarRangoAdmin() {
-        try {
-            const { data: jugador } = await window.supabaseClient
-                .from("jugadores")
-                .select("es_admin")
-                .eq("usuario", miUsuario.toLowerCase().trim())
-                .maybeSingle();
+        let supabaseLocal;
 
-            if (!jugador || !jugador.es_admin) {
-                alert("Acceso denegado: Se requieren credenciales de Alto Mando.");
-                window.location.href = "index.html";
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(() => {
+                try {
+                    supabaseLocal = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                    obtenerMisionesActuales();
+                } catch (e) {
+                    console.error(e);
+                }
+            }, 100);
+        });
+
+        async function obtenerMisionesActuales() {
+            try {
+                const { data: misiones, error } = await supabaseLocal
+                    .from("partidas")
+                    .select("*")
+                    .order('id', { ascending: false });
+
+                if (error) throw error;
+
+                const contenedor = document.getElementById("contenedorListaMisiones");
+                if (!misiones || misiones.length === 0) {
+                    contenedor.innerHTML = "<div style='text-align: center; color: #728576; font-size:0.8rem;'>No hay misiones.</div>";
+                    return;
+                }
+
+                let html = "";
+                misiones.forEach(m => {
+                    const distintivoEstado = m.activa ? "<span style='color:#6da077; font-weight:bold;'>[ACTIVA]</span>" : "<span style='color:#728576;'>[CONCLUIDA]</span>";
+                    
+                    let detalles = [];
+                    if (m.juggernauts) detalles.push("Juggernauts");
+                    if (m.vehiculos) detalles.push("Vehículos");
+                    if (m.medicos) detalles.push("Médicos");
+                    if (m.respawn_limitado) detalles.push("Respawn");
+                    const textoDetalles = detalles.length > 0 ? " (" + detalles.join(", ") + ")" : "";
+
+                    html += `<div class="mision-item">
+                        <div><strong>${m.nombre.toUpperCase()}</strong>${textoDetalles}</div>
+                        <div>${distintivoEstado}</div>
+                    </div>`;
+                });
+                contenedor.innerHTML = html;
+            } catch (err) {
+                console.error(err);
             }
-        } catch (e) { window.location.href = "index.html"; }
-    }
+        }
 
-    async function buscarOperador() {
-        const busqueda = document.getElementById("busquedaUsuario").value.trim().toLowerCase();
-        if (!busqueda) return;
-
-        try {
-            const { data: objetivo, error } = await window.supabaseClient
-                .from("jugadores")
-                .select("id, usuario, contrasena, rol_juego, puntos, en_partida, es_admin")
-                .eq("usuario", busqueda)
-                .maybeSingle();
-
-            if (error || !objetivo) {
-                alert("No se ha localizado ningún operador bajo ese indicativo.");
-                document.getElementById("seccionEdicion").style.display = "none";
+        async function registrarNuevaPartida() {
+            const nombre = document.getElementById("nombreMision").value.trim();
+            if (!nombre) {
+                alert("Introduce un nombre.");
                 return;
             }
 
-            // Cargamos los datos en el formulario oculto
-            document.getElementById("editId").value = objetivo.id;
-            document.getElementById("editUsuario").value = objetivo.usuario;
-            document.getElementById("editContrasena").value = objetivo.contrasena;
-            document.getElementById("editRol").value = objetivo.rol_juego || "Asalto";
-            document.getElementById("editPuntos").value = objetivo.puntos || 0;
-            document.getElementById("editEstado").value = objetivo.en_partida ? "true" : "false";
-            document.getElementById("editAdmin").value = objetivo.es_admin ? "true" : "false";
+            const jugg = document.getElementById("varJuggernaut").checked;
+            const vehic = document.getElementById("varVehiculos").checked;
+            const med = document.getElementById("varMedicos").checked;
+            const resp = document.getElementById("varRespawn").checked;
 
-            document.getElementById("seccionEdicion").style.display = "block";
-        } catch (e) { alert("Error al conectar con la base de datos."); }
-    }
+            try {
+                await supabaseLocal
+                    .from("partidas")
+                    .update({ activa: false })
+                    .eq("activa", true);
 
-    async function guardarCambiosOperador() {
-        const id = document.getElementById("editId").value;
-        const usuario = document.getElementById("editUsuario").value.trim().toLowerCase();
-        const contrasena = document.getElementById("editContrasena").value;
-        const rol_juego = document.getElementById("editRol").value;
-        const puntos = parseInt(document.getElementById("editPuntos").value) || 0;
-        const en_partida = document.getElementById("editEstado").value === "true";
-        const es_admin = document.getElementById("editAdmin").value === "true";
+                const { error } = await supabaseLocal
+                    .from("partidas")
+                    .insert([{
+                        nombre: nombre,
+                        activa: true,
+                        juggernauts: jugg,
+                        vehiculos: vehic,
+                        medicos: med,
+                        respawn_limitado: resp
+                    }]);
 
-        try {
-            const { error } = await window.supabaseClient
-                .from("jugadores")
-                .update({ usuario, contrasena, rol_juego, puntos, en_partida, es_admin })
-                .eq("id", id);
+                if (error) throw error;
 
-            if (error) throw error;
+                alert("🟢 Misión desplegada.");
+                document.getElementById("nombreMision").value = "";
+                document.getElementById("varJuggernaut").checked = false;
+                document.getElementById("varVehiculos").checked = false;
+                document.getElementById("varMedicos").checked = false;
+                document.getElementById("varRespawn").checked = false;
 
-            alert("¡Expediente actualizado con éxito en la base central!");
-            
-            // Si el administrador se editó a sí mismo, actualizamos el almacenamiento local
-            if (id === localStorage.getItem("miIdTemporal")) {
-                localStorage.setItem("usuarioLogueado", usuario);
+                obtenerMisionesActuales();
+            } catch (err) {
+                console.error(err);
+                alert("Fallo al registrar. Asegúrate de tener las columnas correspondientes en la tabla de Supabase.");
             }
-            
-            buscarOperador(); // Recargamos datos visuales
-        } catch (e) { alert("Error al sobrescribir los datos."); }
-    }
-</script>
+        }
+    </script>
 </body>
 </html>
