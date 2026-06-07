@@ -39,13 +39,26 @@
             box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
             z-index: 9999;
             transition: transform 0.2s, background 0.2s;
+            width: auto;
+            text-transform: none;
         }
         .boton-flotante:hover { transform: scale(1.05); background: #dbab4c; }
         .modal-oculta { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); }
         .modal-contenido { background-color: #0b0b0b; margin: 10% auto; padding: 20px; border: 2px solid #4a5d4e; width: 80%; max-width: 550px; border-radius: 10px; color: white; position: relative; text-align: left; }
         .cerrar-modal { position: absolute; top: 10px; right: 15px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
         .cerrar-modal:hover { color: white; }
-        .aviso-especial { background: #7a2222; border: 1px solid #ff4d4d; color: #ffcccc; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; margin-bottom: 15px; animation: parpadeo 2s infinite; }
+        
+        .aviso-especial { 
+            background: #7a2222; 
+            border: 1px solid #ff4d4d; 
+            color: #ffcccc; 
+            padding: 10px; 
+            border-radius: 5px; 
+            text-align: center; 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+            animation: parpadeo 2s infinite; 
+        }
         @keyframes parpadeo { 0% { opacity: 0.8; } 50% { opacity: 1; border-color: #ff8585; } 100% { opacity: 0.8; } }
         .lista-jugadores { background: #1a1a1a; padding: 10px; border-radius: 5px; margin-top: 10px; max-height: 200px; overflow-y: auto; }
     </style>
@@ -83,10 +96,9 @@
     </div>
 
 <script>
-    // Variables de control anónimas
     let usuarioLogueadoId = null;
 
-    // Detectar si el usuario de casualidad ya tiene una sesión abierta al entrar
+    // Comprobar de forma silenciosa si el visitante ya cuenta con una sesión activa
     async function chequearSesionSilenciosa() {
         const { data: { session } } = await window.supabaseClient.auth.getSession();
         if (session && session.user) {
@@ -107,6 +119,7 @@
         const contenedor = document.getElementById("contenedorInfoPartida");
         contenedor.innerHTML = "<p style='text-align:center;'>Estableciendo enlace con el campo de tiro...</p>";
 
+        // Obtener la partida que se encuentre activa
         const { data: partida, error: errorPartida } = await window.supabaseClient
             .from("partidas")
             .select("*")
@@ -123,6 +136,7 @@
             return;
         }
 
+        // Obtener la lista de los jugadores apuntados
         const { data: jugadores, error: errorJugadores } = await window.supabaseClient
             .from("jugadores")
             .select("id, usuario, rol_juego")
@@ -133,7 +147,7 @@
             return;
         }
 
-        // Condición de alerta especial para el operador clave 'admin'
+        // Condición para activar la alerta si se encuentra el operador 'admin'
         const nombreOperadorEspecial = "admin"; 
         const tieneOperadorEspecial = jugadores.some(j => j.usuario.toLowerCase() === nombreOperadorEspecial.toLowerCase());
 
@@ -154,9 +168,13 @@
             <p><strong>Operadores Listos para Combate:</strong> ${jugadores.length}</p>
         `;
 
-        // Si están en el index de forma anónima, se les recuerda que inicien sesión si quieren sumarse
+        // Recordatorio de inicio de sesión si se accede de modo público
         if (!usuarioLogueadoId) {
-            htmlContenido += `<p style='text-align:center; color:#bd913c; font-size:0.9em; margin-top:15px; background:#222; padding:8px; border-radius:4px;'>Debes entrar a tu perfil para alistarte o abandonar la misión.</p>`;
+            htmlContenido += `
+                <p style='text-align:center; color:#bd913c; font-size:0.9em; margin-top:15px; background:#222; padding:8px; border-radius:4px;'>
+                    Debes entrar a tu perfil para alistarte o abandonar la misión.
+                </p>
+            `;
         }
 
         if (jugadores.length === 0) {
