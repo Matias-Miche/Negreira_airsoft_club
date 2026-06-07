@@ -19,7 +19,6 @@
             align-items: center;
             min-height: 100vh;
             overflow-y: auto;
-            /* Cuadrícula táctica simulada con CSS */
             background-image: 
                 linear-gradient(rgba(8, 11, 9, 0.92), rgba(8, 11, 9, 0.96)),
                 linear-gradient(to right, #162419 1px, transparent 1px),
@@ -27,7 +26,7 @@
             background-size: 100% 100%, 40px 40px, 40px 40px;
         }
 
-        /* --- CONTENEDOR PRINCIPAL INTERACTIVO (CONSOLA MILITAR) --- */
+        /* --- CONTENEDOR PRINCIPAL INTERACTIVO (CONSOLA) --- */
         .terminal-consola {
             width: 100%;
             max-width: 950px;
@@ -42,7 +41,6 @@
             position: relative;
         }
 
-        /* Identificadores de esquina de la terminal */
         .terminal-consola::before {
             content: "HQ-NEGREIRA // ECO-OPS // SYS-ACTIVE";
             position: absolute;
@@ -89,7 +87,7 @@
             margin-bottom: 0;
         }
 
-        /* --- PANEL DE INFORMACIÓN SUPERIOR (ENTORNO Y ROLES) --- */
+        /* --- PANEL DE INFORMACIÓN SUPERIOR --- */
         .panel-superior {
             display: grid;
             grid-template-columns: 1.2fr 1fr;
@@ -127,7 +125,6 @@
             text-align: justify;
         }
 
-        /* Parches de Rol Simulados */
         .grid-roles {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -163,269 +160,6 @@
             .menu-interactivo { grid-template-columns: 1fr; }
         }
 
-        /* Estilo base de los botones de la consola */
         .btn-consola {
             background: #0f1712;
-            border: 1px solid #2d4533;
-            border-radius: 3px;
-            padding: 25px 15px;
-            color: #e2e8e3;
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            box-shadow: 0 4px 0 #0b110d;
-        }
-
-        .btn-consola:hover {
-            background: #18241c;
-            border-color: #4a6b52;
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #0b110d;
-        }
-
-        .btn-consola .icono {
-            font-size: 1.8rem;
-            margin-bottom: 8px;
-        }
-
-        .btn-consola .titulo {
-            font-size: 0.95rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn-consola .desc {
-            font-size: 0.7rem;
-            color: #728576;
-            margin-top: 4px;
-        }
-
-        /* Botón de Radar Animado (Especial) */
-        .btn-radar {
-            background: #070c08;
-            border-color: #1e3825;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-radar::after {
-            content: "";
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            top: -50%;
-            left: -50%;
-            background: conic-gradient(from 0deg, rgba(109, 160, 119, 0.15) 0deg, transparent 90deg, transparent 360deg);
-            animation: rotar-radar 4s linear infinite;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        @keyframes rotar-radar {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .btn-radar * {
-            position: relative;
-            z-index: 2;
-        }
-
-        .btn-radar .titulo {
-            color: #bfa054;
-        }
-
-        /* --- VENTANA MODAL (MANIFIESTO) --- */
-        .modal-oculta { 
-            display: none; 
-            position: fixed; 
-            z-index: 10000; 
-            left: 0; 
-            top: 0; 
-            width: 100%; 
-            height: 100%; 
-            background-color: rgba(4, 6, 5, 0.9); 
-            backdrop-filter: blur(4px); 
-        }
-        
-        .modal-contenido { 
-            background-color: #060907; 
-            margin: 12% auto; 
-            padding: 25px; 
-            border: 2px solid #38523f; 
-            width: 85%; 
-            max-width: 500px; 
-            border-radius: 4px; 
-            color: #e2e8e3; 
-            position: relative; 
-            box-shadow: 0 0 30px rgba(44, 74, 51, 0.4);
-        }
-
-        .cerrar-modal { 
-            position: absolute; 
-            top: 10px; 
-            right: 15px; 
-            color: #51755a; 
-            font-size: 28px; 
-            font-weight: bold; 
-            cursor: pointer; 
-        }
-        .cerrar-modal:hover { color: #bfa054; }
-
-        .lista-jugadores { 
-            background: #0a0f0b; 
-            padding: 15px; 
-            border: 1px solid #1c2e21; 
-            border-radius: 3px; 
-            margin-top: 15px; 
-            max-height: 200px; 
-            overflow-y: auto; 
-        }
-        .lista-jugadores ul { list-style: none; padding: 0; margin: 5px 0 0 0; }
-        .lista-jugadores li { padding: 8px 0; border-bottom: 1px dashed #162419; font-size: 0.9rem; }
-        .lista-jugadores li:last-child { border-bottom: none; }
-    </style>
-</head>
-<body>
-
-    <div class="terminal-consola">
-        <div class="coordenadas-top">GEO: 42.9096° N, 8.7364° W</div>
-        
-        <div class="header-tactico">
-            <h1>Airsoft Negreira</h1>
-            <p class="sub">Sistema de Navegación de Campo y Recursos</p>
-        </div>
-
-        <div class="panel-superior">
-            <div class="modulo-info">
-                <h2>🌲 Sector de Operaciones</h2>
-                <div class="texto-monitor">
-                    Entorno de bosque atlántico localizado en el municipio de Negreira. Terreno caracterizado por una densa vegetación arbórea, áreas de maleza húmeda y zonas abiertas con desniveles naturales. Condiciones ideales para tácticas de avance por escuadras y ocultamiento dinámico.
-                </div>
-            </div>
-            
-            <div class="modulo-info">
-                <h2>🛠️ Roles de Escuadra</h2>
-                <div class="grid-roles">
-                    <div class="rol-tag">Asalto</div>
-                    <div class="rol-tag">Sniper</div>
-                    <div class="rol-tag at">Médico</div>
-                    <div class="rol-tag at">AT (Asist. Técnico)</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="menu-interactivo">
-            <a href="login.html" class="btn-consola">
-                <span class="icono">🔑</span>
-                <span class="titulo">Acceso Operador</span>
-                <span class="desc">Validar credenciales</span>
-            </a>
-
-            <a href="tabla.html" class="btn-consola">
-                <span class="icono">📊</span>
-                <span class="titulo">Marcador Global</span>
-                <span class="desc">Registro de puntuaciones</span>
-            </a>
-
-            <div class="btn-consola btn-radar" onclick="abrirModalPartidas()">
-                <span class="icono">🛰️</span>
-                <span class="titulo">Escanear Despliegue</span>
-                <span class="desc">Ver estado de misiones activas</span>
-            </div>
-        </div>
-    </div>
-
-    <div id="modalPartidas" class="modal-oculta">
-        <div class="modal-contenido">
-            <span class="cerrar-modal" onclick="cerrarModalPartidas()">&times;</span>
-            <h3 style="color: #6da077; text-transform: uppercase; text-align: center; margin-top: 0; letter-spacing: 2px; font-size: 1.1rem;">📟 Datos del Cuadrante</h3>
-            <hr style="border: 0; border-top: 1px solid #1c2e21; margin-bottom: 15px;">
-            <div id="contenedorInfoPartida"></div>
-        </div>
-    </div>
-
-<script>
-    // Al cargar la página, verificamos la sesión de Supabase automáticamente
-    document.addEventListener("DOMContentLoaded", () => {
-        chequearSesionSilenciosa();
-    });
-
-    let usuarioLogueadoId = null;
-
-    async function chequearSesionSilenciosa() {
-        const { data: { session } } = await window.supabaseClient.auth.getSession();
-        if (session && session.user) {
-            usuarioLogueadoId = session.user.id;
-        }
-    }
-
-    function abrirModalPartidas() {
-        document.getElementById("modalPartidas").style.display = "block";
-        consultarPartidasYJugadores();
-    }
-
-    function cerrarModalPartidas() {
-        document.getElementById("modalPartidas").style.display = "none";
-    }
-
-    async function consultarPartidasYJugadores() {
-        const contenedor = document.getElementById("contenedorInfoPartida");
-        contenedor.innerHTML = "<p style='text-align:center; color:#6da077; font-size:0.85rem;'>Estableciendo conexión con el sector Negreira...</p>";
-
-        const { data: partida, error: errorPartida } = await window.supabaseClient
-            .from("partidas")
-            .select("*")
-            .eq("activa", true)
-            .maybeSingle();
-
-        if (errorPartida) {
-            contenedor.innerHTML = "<p style='color:#ff6b6b; font-size:0.85rem;'>ERROR: Caída en el enlace de datos.</p>";
-            return;
-        }
-
-        if (!partida) {
-            contenedor.innerHTML = "<p style='text-align:center; color:#728576; font-size:0.85rem;'>[ZONA EN CALMA] No se registran misiones activas en este cuadrante.</p>";
-            return;
-        }
-
-        const { data: jugadores, error: errorJugadores } = await window.supabaseClient
-            .from("jugadores")
-            .select("id, usuario, rol_juego")
-            .eq("en_partida", true);
-
-        if (errorJugadores) {
-            contenedor.innerHTML = "<p style='color:#ff6b6b; font-size:0.85rem;'>ERROR: Imposible compilar manifiesto de personal.</p>";
-            return;
-        }
-
-        let htmlContenido = `
-            <p style="font-size:0.9rem; margin: 8px 0;"><strong>Operación:</strong> <span style="color:#bfa054;">${partida.nombre || 'Reconocimiento Táctico'}</span></p>
-            <p style="font-size:0.9rem; margin: 8px 0;"><strong>Briefing (Fecha):</strong> ${partida.fecha || 'Sin fijar'}</p>
-            <p style="font-size:0.9rem; margin: 8px 0;"><strong>Efectivos en Zona:</strong> ${jugadores.length} operadores</p>
-        `;
-
-        if (jugadores.length === 0) {
-            htmlContenido += "<p style='color:#728576; font-size:0.8rem; margin-top:15px; text-align:center;'>Ningún miembro se ha desplegado en las coordenadas todavía.</p>";
-        } else {
-            htmlContenido += `
-                <div class="lista-jugadores">
-                    <strong style="color:#bfa054; font-size:0.8rem; text-transform:uppercase; display:block; margin-bottom:5px;">Personal Identificado:</strong>
-                    <ul>`;
-            jugadores.forEach(j => {
-                htmlContenido += `<li>🌲 <strong>${j.usuario.toUpperCase()}</strong> - <span style='color:#6da077;'>[${j.rol_juego.toUpperCase()}]</span></li>`;
-            });
-            htmlContenido += "</ul></div>";
-        }
-
-        contenedor.innerHTML = htmlContenido;
-    }
-</script>
-</body>
-</html>
+            border:
