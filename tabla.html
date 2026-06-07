@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcador - Airsoft Negreira</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+    <style>
+        body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: #0b0b0b; border: 2px solid #4a5d4e; border-radius: 10px; padding: 25px; }
+        h2 { text-align: center; color: #7fa984; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #111; }
+        th, td { padding: 12px; text-align: center; border: 1px solid #4a5d4e; }
+        th { background: #4a5d4e; color: white; text-transform: uppercase; }
+        tr:nth-child(even) { background: #181818; }
+        .btn-volver { display: block; width: 200px; margin: 20px auto 0 auto; padding: 10px; background: #222; color: #7fa984; text-align: center; text-decoration: none; font-weight: bold; border: 1px solid #4a5d4e; border-radius: 5px; }
+        .btn-volver:hover { background: #2e2e2e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Marcador General de Operadores</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rango</th>
+                    <th>Operador</th>
+                    <th>Especialidad</th>
+                    <th>Puntuación</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpoTabla">
+                <tr>
+                    <td colspan="4">Cargando base de datos táctica...</td>
+                </tr>
+            </tbody>
+        </table>
+        <a href="index.html" class="btn-volver">⬅️ Volver al Inicio</a>
+    </div>
+
+<script>
+    async function cargarMarcador() {
+        const tbody = document.getElementById("cuerpoTabla");
+        
+        // Pedimos los jugadores ordenados de mayor a menor puntuación
+        const { data, error } = await window.supabaseClient
+            .from("jugadores")
+            .select("usuario, rol_juego, puntos")
+            .order("puntos", { ascending: false });
+
+        if (error) {
+            tbody.innerHTML = `<tr><td colspan="4" style="color:red;">Error al conectar con las clasificaciones.</td></tr>`;
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4">No hay operadores registrados en el sistema.</td></tr>`;
+            return;
+        }
+
+        let html = "";
+        data.forEach((jugador, indice) => {
+            html += `
+                <tr>
+                    <td><strong>#${indice + 1}</strong></td>
+                    <td>${jugador.usuario.toUpperCase()}</td>
+                    <td style="color:#7fa984;">${jugador.rol_juego || 'Fusilero'}</td>
+                    <td style="color:#bd913c; font-weight:bold;">${jugador.puntos || 0} PTS</td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    }
+
+    document.addEventListener("DOMContentLoaded", cargarMarcador);
+</script>
+</body>
+</html>
