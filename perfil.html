@@ -7,8 +7,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <style>
-        body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; padding: 20px; }
-        .box { max-width: 700px; margin: auto; background: #0b0b0b; border: 2px solid #4a5d4e; border-radius: 10px; padding: 25px; }
+        body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; padding: 20px; margin: 0; }
+        .box { max-width: 700px; margin: 40px auto; background: #0b0b0b; border: 2px solid #4a5d4e; border-radius: 10px; padding: 25px; box-sizing: border-box; }
         h2 { text-align: center; color: #7fa984; text-transform: uppercase; margin-bottom: 20px; }
         .info { margin-top: 15px; padding: 12px; background: #222; border-radius: 6px; border-left: 4px solid #4a5d4e; }
         label { display: block; margin-top: 15px; color: #7fa984; font-weight: bold; font-size: 0.9em; }
@@ -18,9 +18,89 @@
         .btn-guardar { background: #7fa984; color: black; margin-top: 15px; }
         .admin-btn { background: #bd913c; color: black; display: block; width: 100%; margin-top: 15px; text-transform: uppercase; text-align: center; text-decoration: none; padding: 12px 0; border-radius: 5px; font-weight: bold; box-sizing: border-box; }
         #feedback { text-align: center; margin-top: 10px; font-weight: bold; }
+
+        /* --- ESTILOS DEL BOTÓN FLOTANTE Y MODAL --- */
+        .boton-flotante {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #bd913c;
+            color: black;
+            border: 2px solid #a37a2d;
+            padding: 14px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
+            z-index: 9999;
+            transition: transform 0.2s, background 0.2s;
+            width: auto;
+            text-transform: none;
+        }
+        .boton-flotante:hover {
+            transform: scale(1.05);
+            background: #dbab4c;
+        }
+        .modal-oculta {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+        .modal-contenido {
+            background-color: #0b0b0b;
+            margin: 10% auto;
+            padding: 20px;
+            border: 2px solid #4a5d4e;
+            width: 80%;
+            max-width: 550px;
+            border-radius: 10px;
+            color: white;
+            position: relative;
+        }
+        .cerrar-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .cerrar-modal:hover { color: white; }
+        .aviso-especial {
+            background: #7a2222;
+            border: 1px solid #ff4d4d;
+            color: #ffcccc;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+            animation: parpadeo 2s infinite;
+        }
+        @keyframes parpadeo {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; border-color: #ff8585; }
+            100% { opacity: 0.8; }
+        }
+        .lista-jugadores {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
+
     <div class="box">
         <h2>Mi Perfil de Operador</h2>
         <div class="info" id="usuario">Cargando operador...</div>
@@ -50,9 +130,23 @@
         <p style="text-align:center; margin-top:20px;"><a href="index.html" style="color:#8dc891; text-decoration:none; font-weight:bold;">⬅️ Volver al Marcador General</a></p>
     </div>
 
+    <button id="btnVerPartidas" class="boton-flotante" onclick="abrirModalPartidas()">
+        🎯 Ver Partidas y Alistados
+    </button>
+
+    <div id="modalPartidas" class="modal-oculta">
+        <div class="modal-contenido">
+            <span class="cerrar-modal" onclick="cerrarModalPartidas()">&times;</span>
+            <h3 style="color: #7fa984; text-transform: uppercase; text-align: center; margin-top: 0;">Partidas Actuales</h3>
+            <hr style="border-color: #4a5d4e; margin-bottom: 15px;">
+            <div id="contenedorInfoPartida"></div>
+        </div>
+    </div>
+
 <script>
     let usuarioLogueadoId = null;
 
+    // --- LOGICA DE PERFIL ---
     async function cargarPerfil() {
         const { data: { session }, error: sessionError } = await window.supabaseClient.auth.getSession();
         
@@ -101,7 +195,7 @@
         const feedback = document.getElementById("feedback");
         
         if (!usuarioLogueadoId) {
-            feedback.innerText = "❌ Error: Sesión de usuario expirada.";
+            feedback.innerText = "❌ Error: Sesión expirada.";
             feedback.style.color = "#ff8a8a";
             return;
         }
@@ -125,12 +219,87 @@
             feedback.innerText = "✔️ ¡Perfil actualizado correctamente!";
             feedback.style.color = "#8dc891";
             setTimeout(() => { feedback.innerText = ""; }, 3000);
+            cargarPerfil(); // Recarga la info visual
         }
     }
 
     async function cerrarSesion() {
         await window.supabaseClient.auth.signOut();
         window.location.href = "login.html";
+    }
+
+    // --- LÓGICA DEL BOTÓN FLOTANTE Y CONSULTA PÚBLICA ---
+    function abrirModalPartidas() {
+        document.getElementById("modalPartidas").style.display = "block";
+        consultarPartidasYJugadores();
+    }
+
+    function cerrarModalPartidas() {
+        document.getElementById("modalPartidas").style.display = "none";
+    }
+
+    async function consultarPartidasYJugadores() {
+        const contenedor = document.getElementById("contenedorInfoPartida");
+        contenedor.innerHTML = "<p style='text-align:center;'>Consultando datos de campo...</p>";
+
+        const { data: partida, error: errorPartida } = await window.supabaseClient
+            .from("partidas")
+            .select("*")
+            .eq("activa", true)
+            .maybeSingle();
+
+        if (errorPartida) {
+            contenedor.innerHTML = "<p style='color:red;'>Error al cargar partidas.</p>";
+            return;
+        }
+
+        if (!partida) {
+            contenedor.innerHTML = "<p style='text-align:center; color:#aaa;'>No hay ninguna partida programada en este momento.</p>";
+            return;
+        }
+
+        const { data: jugadores, error: errorJugadores } = await window.supabaseClient
+            .from("jugadores")
+            .select("usuario, rol, rol_juego")
+            .eq("en_partida", true);
+
+        if (errorJugadores) {
+            contenedor.innerHTML = "<p style='color:red;'>Error al cargar la lista de operadores.</p>";
+            return;
+        }
+
+        // CONDICIÓN ESPECIAL: Pon aquí el nombre del operador que activa la alerta
+        const nombreOperadorEspecial = "admin"; 
+        const tieneOperadorEspecial = jugadores.some(j => j.usuario.toLowerCase() === nombreOperadorEspecial.toLowerCase());
+
+        let htmlContenido = "";
+
+        if (tieneOperadorEspecial) {
+            htmlContenido += `
+                <div class="aviso-especial">
+                    ⚠️ ¡PARTIDA ESPECIAL DETECTADA! ⚠️<br>
+                    El operador de élite [${nombreOperadorEspecial.toUpperCase()}] está desplegado en esta misión.
+                </div>
+            `;
+        }
+
+        htmlContenido += `
+            <p><strong>Misión:</strong> ${partida.nombre || 'Operación Estándar'}</p>
+            <p><strong>Fecha/Hora:</strong> ${partida.fecha || 'Por confirmar'}</p>
+            <p><strong>Operadores Alistados:</strong> ${jugadores.length}</p>
+        `;
+
+        if (jugadores.length === 0) {
+            htmlContenido += "<p style='color:#888; font-size:0.9em;'>Aún no hay operadores apuntados a esta misión.</p>";
+        } else {
+            htmlContenido += `<div class="lista-jugadores"><strong>Lista de Despliegue:</strong><ul style='margin-top:5px; padding-left:20px;'>`;
+            jugadores.forEach(j => {
+                htmlContenido += `<li>${j.usuario.toUpperCase()} - <span style='color:#7fa984;'>${j.rol_juego}</span></li>`;
+            });
+            htmlContenido += "</ul></div>";
+        }
+
+        contenedor.innerHTML = htmlContenido;
     }
 
     document.addEventListener("DOMContentLoaded", cargarPerfil);
