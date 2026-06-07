@@ -9,53 +9,69 @@
     <style>
         body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; padding: 20px; }
         .box { max-width: 700px; margin: auto; background: #0b0b0b; border: 2px solid #4a5d4e; border-radius: 10px; padding: 25px; }
-        h2 { text-align: center; color: #7fa984; }
-        .info { margin-top: 15px; padding: 12px; background: #222; border-radius: 6px; }
-        button { margin-top: 15px; padding: 12px; border: none; background: #4a5d4e; color: white; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        h2 { text-align: center; color: #7fa984; text-transform: uppercase; margin-bottom: 20px; }
+        .info { margin-top: 15px; padding: 12px; background: #222; border-radius: 6px; border-left: 4px solid #4a5d4e; }
+        button { margin-top: 20px; padding: 12px; border: none; background: #4a5d4e; color: white; cursor: pointer; border-radius: 5px; font-weight: bold; width: 100%; text-transform: uppercase; }
         button:hover { opacity: 0.9; }
-        .admin-btn { background: #7fa984; color: black; display: block; width: 100%; margin-top: 15px; text-transform: uppercase; text-align: center; text-decoration: none; padding: 12px 0; border-radius: 5px; font-weight: bold; }
+        .admin-btn { background: #7fa984; color: black; display: block; width: 100%; margin-top: 15px; text-transform: uppercase; text-align: center; text-decoration: none; padding: 12px 0; border-radius: 5px; font-weight: bold; box-sizing: border-box; }
         .admin-btn:hover { background: #637d68; color: white; }
     </style>
 </head>
 <body>
     <div class="box">
         <h2>Mi Perfil de Operador</h2>
-        <div class="info" id="usuario">Cargando...</div>
+        <div class="info" id="usuario">Cargando operador...</div>
         <div class="info" id="rol">Permiso: Cargando...</div>
         <div class="info" id="rolJuego">Rol de juego: Cargando...</div>
         <div class="info" id="entrada">Entrada: Cargando...</div>
         <div class="info" id="puntos">Puntos acumulados: Cargando...</div>
+        
         <div id="panelAdmin"></div>
-        <button onclick="cerrarSesion()" style="width:100%;">Cerrar sesión</button>
-        <p style="text-align:center; margin-top:15px;"><a href="index.html" style="color:#8dc891; text-decoration:none;">⬅️ Volver al Marcador General</a></p>
+        
+        <button onclick="cerrarSesion()">Cerrar sesión</button>
+        <p style="text-align:center; margin-top:20px;"><a href="index.html" style="color:#8dc891; text-decoration:none; font-weight:bold;">⬅️ Volver al Marcador General</a></p>
     </div>
+
 <script>
     async function cargarPerfil() {
+        // 1. Verificar si hay una sesión activa de autenticación
         const { data: { user } } = await window.supabaseClient.auth.getUser();
         if (!user) {
             window.location.href = "login.html";
             return;
         }
 
-        // Corregido: Consulta unificada a la tabla real 'jugadores'
+        // 2. CORRECCIÓN CRÍTICA: Cambiado de '.from("profiles")' a '.from("jugadores")'
         const { data, error } = await window.supabaseClient
             .from("jugadores")
             .select("*")
             .eq("id", user.id)
-            .single();
+            .maybeSingle(); // Usamos maybeSingle para evitar excepciones duras si el registro no existe aún
 
         if (error) {
-            console.error(error);
-            document.getElementById("usuario").innerText = "Error al cargar el perfil.";
+            console.error("Error de Supabase:", error.message);
+            document.getElementById("usuario").innerText = "⚠️ Error al conectar con el servidor.";
             return;
         }
 
+        // Si el usuario está autenticado pero por algún motivo no tiene fila en la tabla 'jugadores'
+        if (!data) {
+            document.getElementById("usuario").innerHTML = "<strong>Usuario:</strong> Perfil no inicializado.";
+            document.getElementById("rol").innerText = "Por favor, contacta con un Administrador.";
+            document.getElementById("rolJuego").innerText = "ID de Auth: " + user.id;
+            document.getElementById("entrada").innerText = "N/A";
+            document.getElementById("puntos").innerText = "0 PTS";
+            return;
+        }
+
+        // 3. Renderizar los datos reales usando las columnas correctas de tu tabla 'jugadores'
         document.getElementById("usuario").innerHTML = "<strong>Usuario:</strong> " + (data.usuario ? data.usuario.toUpperCase() : "Sin nombre");
         document.getElementById("rol").innerHTML = "<strong>Rango del Sistema:</strong> " + (data.rol || "usuario");
-        document.getElementById("rolJuego").innerHTML = "<strong>Especialidad de Juego:</strong> " + (data.rol_juego || "No asignado");
+        document.getElementById("rolJuego").innerHTML = "<strong>Especialidad en Campo:</strong> " + (data.rol_juego || "Asalto");
         document.getElementById("entrada").innerHTML = "<strong>Modalidad de Entrada:</strong> " + (data.tipo_entrada || 0) + "€";
         document.getElementById("puntos").innerHTML = "<strong>Puntos Totales:</strong> " + (data.puntos || 0) + " PTS";
 
+        // 4. Mostrar botones especiales si el rango guardado es 'administración'
         if (data.rol === "administración" || data.rol === "administracion") {
             document.getElementById("panelAdmin").innerHTML = `
                 <a class="admin-btn" href="admin.html">Panel de Control General</a>
@@ -69,7 +85,8 @@
         window.location.href = "login.html";
     }
 
-    cargarPerfil();
+    // Ejecutar la carga inmediatamente al abrir la página
+    document.addEventListener("DOMContentLoaded", cargarPerfil);
 </script>
 </body>
 </html>
