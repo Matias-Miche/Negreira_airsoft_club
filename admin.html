@@ -3,117 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control Táctico - Administración</title>
+    <title>Panel de Control Táctico - Mando</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <style>
         body {
-            background: #080b09;
-            color: #d1dad2;
-            font-family: 'Courier New', Courier, monospace;
-            padding: 20px; margin: 0;
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-            background-image: 
-                linear-gradient(rgba(8, 11, 9, 0.92), rgba(8, 11, 9, 0.96)),
-                linear-gradient(to right, #162419 1px, transparent 1px),
-                linear-gradient(to bottom, #162419 1px, transparent 1px);
+            background: #080b09; color: #d1dad2; font-family: 'Courier New', Courier, monospace;
+            padding: 20px; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            background-image: linear-gradient(rgba(8, 11, 9, 0.92), rgba(8, 11, 9, 0.96)), linear-gradient(to right, #162419 1px, transparent 1px), linear-gradient(to bottom, #162419 1px, transparent 1px);
             background-size: 100% 100%, 40px 40px, 40px 40px;
         }
-
-        .panel-admin {
-            width: 100%; max-width: 600px; background: #040605;
-            border: 2px solid #223526; border-top: 6px solid #bfa054;
-            border-radius: 4px; padding: 30px; box-sizing: border-box;
-            box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.8);
-        }
-
+        .panel-admin { width: 100%; max-width: 600px; background: #040605; border: 2px solid #223526; border-top: 6px solid #bfa054; border-radius: 4px; padding: 30px; box-sizing: border-box; }
         h2 { color: #6da077; text-transform: uppercase; margin-top: 0; font-size: 1.2rem; border-bottom: 1px dashed #223526; padding-bottom: 10px; }
-        .campo-formulario { margin-bottom: 20px; }
+        .campo { margin-bottom: 20px; }
         label { color: #a4b3a7; display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: bold; text-transform: uppercase; }
         input, select { width: 100%; padding: 10px; background: #0f1712; color: #e2e8e3; border: 1px solid #2d4533; border-radius: 3px; box-sizing: border-box; font-family: inherit; }
-        button { width: 100%; padding: 12px; background: #1e3825; color: #bfa054; border: 1px solid #4a6b52; border-radius: 3px; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 0.9rem; }
+        button { width: 100%; padding: 12px; background: #1e3825; color: #bfa054; border: 1px solid #4a6b52; border-radius: 3px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
         button:hover { background: #274930; color: #ffd875; }
-        .sub-bloque { background: #090e0b; border: 1px dashed #2d4533; padding: 20px; border-radius: 3px; margin-top: 25px; }
-        .enlace-volver { display: block; text-align: center; margin-top: 15px; color: #728576; font-size: 0.8rem; text-decoration: none; }
+        .enlace-volver { display: block; text-align: center; margin-top: 20px; color: #728576; font-size: 0.8rem; text-decoration: none; }
     </style>
 </head>
 <body>
 
     <div class="panel-admin">
-        <h2>🛠️ Despliegue de Nueva Misión</h2>
+        <h2>🛠️ Publicación de Operaciones Oficiales</h2>
         
-        <div class="campo-formulario">
-            <label>🏷️ Nombre de la Operación:</label>
-            <input type="text" id="nombrePartida" placeholder="Ej: Operación Flecha Verde">
+        <div class="campo">
+            <label>🏷️ Codename de la Misión:</label>
+            <input type="text" id="nombrePartida" placeholder="Ej: Operación Tormenta">
         </div>
 
-        <div class="campo-formulario">
-            <label>📅 Fecha:</label>
+        <div class="campo">
+            <label>📅 Fecha de Despliegue:</label>
             <input type="date" id="fechaPartida">
         </div>
 
-        <div class="campo-formulario">
-            <label>🕹️ Modalidad:</label>
+        <div class="campo">
+            <label>🕹️ Reglas de Encuentro:</label>
             <select id="tipoPartida">
-                <option value="Refriega">Refriega</option>
-                <option value="Captura la Bandera">Captura la Bandera</option>
-                <option value="Dominación">Dominación</option>
-                <option value="MilSim">MilSim</option>
+                <option value="Refriega Convencional">Refriega Convencional</option>
+                <option value="Captura de Puntos">Captura de Puntos</option>
+                <option value="Simulación Militar (MilSim)">Simulación Militar (MilSim)</option>
             </select>
         </div>
 
-        <div class="campo-formulario">
-            <label>🚗 Vehículos:</label>
-            <select id="vehiculos">
-                <option value="Ninguno">Ninguno</option>
-                <option value="Vehículos de Transporte">Vehículos de Transporte</option>
-                <option value="Blindados Ligeros">Blindados Ligeros</option>
-            </select>
-        </div>
-
-        <div class="campo-formulario">
-            <label>⚙️ Equipamiento Especial:</label>
-            <select id="armamentoEspecial">
-                <option value="Ninguno">Ninguno</option>
-                <option value="Solo Secundarias">Solo Secundarias</option>
-                <option value="Lanzadores Permitidos">Lanzadores Permitidos</option>
-            </select>
-        </div>
-
-        <button onclick="crearNuevaPartida()">Publicar Operación</button>
-
-        <div class="sub-bloque">
-            <h3 style="color: #6da077; margin-top: 0; text-transform: uppercase; font-size: 0.9rem;">🔑 Ascender a Administrador</h3>
-            <p style="font-size: 0.75rem; color: #728576; margin-bottom: 15px;">* Requiere validación por nombre del Administrador actual.</p>
-            
-            <div class="campo-formulario" style="margin-bottom: 12px;">
-                <label>Nombre del Jugador a promover:</label>
-                <input type="text" id="nombreAdminInput" placeholder="Ej: Juan">
-            </div>
-            
-            <button onclick="intentarCrearAdmin()" style="background: #141f16; border-color: #2c4a33;">Otorgar Privilegios</button>
-        </div>
+        <button onclick="crearNuevaPartida()">Lanzar Orden de Operaciones</button>
         
-        <a href="index.html" class="enlace-volver">⬅️ Volver a la terminal principal</a>
+        <a href="index.html" class="enlace-volver">⬅️ Salir del Panel de Mando</a>
     </div>
 
 <script>
-    // Blindaje de seguridad por URL
+    // Blindaje de seguridad estricto por sesión activa
     document.addEventListener("DOMContentLoaded", async () => {
-        const quienValida = localStorage.getItem("usuarioLogueado");
-        if (!quienValida) {
-            window.location.href = "index.html";
-            return;
-        }
+        const operador = localStorage.getItem("usuarioLogueado");
+        if (!operador) { window.location.href = "index.html"; return; }
 
-        const { data: jefe } = await window.supabaseClient
-            .from("jugadores")
-            .select("es_admin")
-            .eq("usuario", quienValida.trim())
-            .maybeSingle();
+        try {
+            const { data: jefe } = await window.supabaseClient
+                .from("jugadores")
+                .select("es_admin")
+                .eq("usuario", operador.trim())
+                .maybeSingle();
 
-        if (!jefe || jefe.es_admin !== true) {
-            alert("ACCESO VIOLADO: No tienes permisos de comando.");
+            if (!jefe || jefe.es_admin !== true) {
+                alert("ACCESO RECHAZADO: Solo personal del Alto Mando autorizado.");
+                window.location.href = "index.html";
+            }
+        } catch(e) {
             window.location.href = "index.html";
         }
     });
@@ -122,69 +78,23 @@
         const nombre = document.getElementById("nombrePartida").value.trim();
         const fecha = document.getElementById("fechaPartida").value;
         const tipo = document.getElementById("tipoPartida").value;
-        const vehiculos = document.getElementById("vehiculos").value;
-        const armas = document.getElementById("armamentoEspecial").value;
 
-        if (!nombre || !fecha) {
-            alert("Completa el nombre y la fecha de la misión.");
-            return;
-        }
+        if (!nombre || !fecha) { alert("Asigna obligatoriamente un nombre y fecha."); return; }
 
-        const quienValida = localStorage.getItem("usuarioLogueado");
-        const { data: jefe } = await window.supabaseClient
-            .from("jugadores")
-            .select("es_admin")
-            .eq("usuario", quienValida.trim())
-            .maybeSingle();
+        try {
+            // Desactiva cualquier partida activa previa
+            await window.supabaseClient.from("partidas").update({ activa: false }).eq("activa", true);
 
-        if (!jefe || jefe.es_admin !== true) {
-            alert("AUTORIZACIÓN RECHAZADA.");
-            return;
-        }
+            // Inserta la nueva misión de comando
+            const { error } = await window.supabaseClient
+                .from("partidas")
+                .insert([{ nombre: nombre, fecha: fecha, activa: true, tipo_partida: tipo }]);
 
-        await window.supabaseClient.from("partidas").update({ activa: false }).eq("activa", true);
-
-        const { error } = await window.supabaseClient
-            .from("partidas")
-            .insert([{ nombre: nombre, fecha: fecha, activa: true, tipo_partida: tipo, vehiculos: vehiculos, armamento_especial: armas }]);
-
-        if (error) {
-            alert("Error de red al guardar la partida.");
-        } else {
-            alert("¡Misión enviada y publicada con éxito en el cuadrante!");
+            if (error) throw error;
+            alert("Nueva orden de misión desplegada en el radar.");
             document.getElementById("nombrePartida").value = "";
-        }
-    }
-
-    async function intentarCrearAdmin() {
-        const quienSube = localStorage.getItem("usuarioLogueado");
-        const { data: jefe } = await window.supabaseClient
-            .from("jugadores")
-            .select("es_admin")
-            .eq("usuario", quienSube.trim())
-            .maybeSingle();
-
-        if (!jefe || jefe.es_admin !== true) {
-            alert("PERMISO RECHAZADO.");
-            return;
-        }
-
-        const nombreNuevoAdmin = document.getElementById("nombreAdminInput").value.trim();
-        if (!nombreNuevoAdmin) {
-            alert("Especifica el nombre del jugador.");
-            return;
-        }
-
-        const { error } = await window.supabaseClient
-            .from("jugadores")
-            .update({ es_admin: true }) 
-            .eq("usuario", nombreNuevoAdmin);
-
-        if (error) {
-            alert("Error al actualizar rango.");
-        } else {
-            alert(`¡Ficha de comando actualizada! ${nombreNuevoAdmin.toUpperCase()} ahora es Administrador.`);
-            document.getElementById("nombreAdminInput").value = ""; 
+        } catch(e) {
+            alert("Fallo al publicar los datos de misión.");
         }
     }
 </script>
