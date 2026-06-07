@@ -7,273 +7,43 @@
     <link rel="icon" href="data:,">
     <style>
         body {
-            background: #080b09; color: #d1dad2; font-family: 'Courier New', Courier, monospace;
+            background: #050806; color: #d1dad2; font-family: 'Courier New', Courier, monospace;
             padding: 0; margin: 0; display: flex; justify-content: center; align-items: center;
             min-height: 100vh; overflow-y: auto;
             background-image: 
-                linear-gradient(rgba(8, 11, 9, 0.92), rgba(8, 11, 9, 0.96)),
-                linear-gradient(to right, #162419 1px, transparent 1px), linear-gradient(to bottom, #162419 1px, transparent 1px);
+                linear-gradient(rgba(5, 8, 6, 0.93), rgba(5, 8, 6, 0.97)),
+                linear-gradient(to right, #0f1f13 1px, transparent 1px), linear-gradient(to bottom, #0f1f13 1px, transparent 1px);
             background-size: 100% 100%, 40px 40px, 40px 40px;
         }
         .terminal-consola {
-            width: 100%; max-width: 950px; margin: 20px; background: #040605; border: 2px solid #223526;
-            border-top: 6px solid #4a6b52; border-radius: 4px; padding: 30px; box-sizing: border-box;
-            box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.8); position: relative;
+            width: 100%; max-width: 950px; margin: 20px; background: #020403; border: 2px solid #182b1e;
+            border-top: 6px solid #557c5e; border-radius: 4px; padding: 30px; box-sizing: border-box;
+            box-shadow: 0px 20px 50px rgba(0, 0, 0, 0.9); position: relative;
         }
         .alerta-juggernaut { border-top-color: #ff3333 !important; animation: pulso-rojo-borde 2s infinite; }
-        @keyframes pulso-rojo-borde { 0%, 100% { border-top-color: #ff3333; } 50% { border-top-color: #550000; } }
+        @keyframes pulso-rojo-borde { 0%, 100% { border-top-color: #ff3333; } 50% { border-top-color: #4a0000; } }
 
         .top-bar-actions { position: absolute; top: 8px; right: 12px; display: flex; align-items: center; gap: 15px; }
         .session-top { font-size: 0.75rem; color: #ff6b6b; font-weight: bold; text-transform: uppercase; }
         .btn-admin-oculto {
-            display: inline-block; background: #1a160d; border: 1px solid #bfa054; color: #bfa054; padding: 3px 8px;
+            display: inline-block; background: #13110a; border: 1px solid #bfa054; color: #bfa054; padding: 3px 8px;
             font-size: 0.65rem; text-transform: uppercase; font-weight: bold; cursor: pointer; border-radius: 2px; text-decoration: none;
         }
-        .header-tactico { text-align: center; margin-bottom: 25px; border-bottom: 1px dashed #223526; padding-bottom: 15px; }
-        .header-tactico h1 { color: #6da077; text-transform: uppercase; margin: 0; font-size: 2.2rem; letter-spacing: 4px; }
+        .header-tactico { text-align: center; margin-bottom: 25px; border-bottom: 1px dashed #1c2e21; padding-bottom: 15px; }
+        .header-tactico h1 { color: #6da077; text-transform: uppercase; margin: 0; font-size: 2.2rem; letter-spacing: 4px; filter: drop-shadow(0 0 5px rgba(109,160,117,0.3)); }
         
-        .panel-mision-activa { background: #0b110d; border: 1px solid #1c2e21; border-radius: 3px; padding: 12px; margin-bottom: 15px; text-align: center; font-size: 0.85rem; }
+        .panel-mision-activa { background: #070d09; border: 1px solid #16261b; border-radius: 3px; padding: 12px; margin-bottom: 15px; text-align: center; font-size: 0.85rem; }
 
-        .contenedor-radar-central { display: flex; justify-content: center; margin: 20px 0; position: relative; }
+        /* --- CONTENEDOR DEL RADAR MEJORADO --- */
+        .contenedor-radar-central { display: flex; justify-content: center; margin: 25px 0; position: relative; }
+        
         .pantalla-radar {
-            width: 240px; height: 240px; background: #040705; border: 3px solid #203825; border-radius: 50%;
-            position: relative; overflow: hidden;
-        }
-        .pantalla-radar::before {
-            content: ""; position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
-            background: conic-gradient(from 0deg, rgba(109, 160, 119, 0.3) 0deg, transparent 90deg, transparent 360deg);
-            animation: barrido 4s linear infinite; pointer-events: none;
-            z-index: 10;
-        }
-        @keyframes barrido { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        
-        /* Estilos de los Blips con transición suave de movimiento */
-        .blip-objetivo {
-            position: absolute; width: 8px; height: 8px; background: #ffd875; border-radius: 50%;
-            box-shadow: 0 0 10px #ffd875; transition: left 3.5s ease-in-out, top 3.5s ease-in-out;
-            animation: desvanecer-blip 4s infinite;
-        }
-        .blip-juggernaut {
-            position: absolute; width: 14px; height: 14px; background: #ff3333; border-radius: 3px;
-            box-shadow: 0 0 15px #ff0000; transition: left 3.5s ease-in-out, top 3.5s ease-in-out;
-            animation: desvanecer-blip 4s infinite;
-        }
-        .blip-vehiculo {
-            position: absolute; width: 14px; height: 10px; background: #33b5ff; border-radius: 2px;
-            box-shadow: 0 0 12px #0088ff; transition: left 3.5s ease-in-out, top 3.5s ease-in-out;
-            animation: desvanecer-blip 4s infinite;
+            width: 280px; height: 280px; background: #030604; border: 4px solid #28442e; border-radius: 50%;
+            position: relative; overflow: hidden; box-shadow: inset 0 0 25px rgba(0,255,0,0.15), 0 0 15px rgba(40,68,46,0.4);
         }
 
-        /* Efecto de radar real: el punto brilla y se atenúa simulando el rastro del barrido */
-        @keyframes desvanecer-blip {
-            0% { opacity: 1; filter: brightness(1.5); }
-            50% { opacity: 0.3; }
-            100% { opacity: 1; }
-        }
-        
-        .seccion-clasificacion { background: #060907; border: 1px solid #223526; border-radius: 3px; padding: 15px; margin-top: 25px; }
-        .seccion-clasificacion h3 { margin: 0 0 12px 0; font-size: 0.9rem; color: #bfa054; text-transform: uppercase; border-bottom: 1px dashed #223526; padding-bottom: 6px; }
-        .tabla-ranking { width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: left; }
-        .tabla-ranking th { color: #6da077; padding: 6px; border-bottom: 1px solid #1c2e21; text-transform: uppercase; }
-        .tabla-ranking td { padding: 8px 6px; border-bottom: 1px dashed #111a13; color: #a4b3a7; }
-        
-        .menu-interactivo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 25px; }
-        .btn-consola { background: #0f1712; border: 1px solid #2d4533; border-radius: 3px; padding: 15px 10px; color: #e2e8e3; text-decoration: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-        .btn-consola:hover { background: #18241c; border-color: #4a6b52; }
-    </style>
-</head>
-<body>
-
-    <div class="terminal-consola" id="consolaPrincipal">
-        <div class="top-bar-actions">
-            <a href="admin.html" id="btnComando" class="btn-admin-oculto">⚡ Comando</a>
-            <div id="indicadorSesion" class="session-top">🔴 ENLACE CENTRAL</div>
-        </div>
-        
-        <div class="header-tactico">
-            <h1>Airsoft Negreira</h1>
-            <p style="color: #bfa054; font-size: 0.85rem; margin: 5px 0 0 0; text-transform: uppercase; letter-spacing: 3px;">Consola Radar Global</p>
-        </div>
-
-        <div class="panel-mision-activa" id="infoMisionActiva">
-            📡 Sincronizando órdenes estratégicas de los administradores...
-        </div>
-
-        <div class="contenedor-radar-central">
-            <div class="pantalla-radar" id="radarPantalla"></div>
-        </div>
-
-        <div class="menu-interactivo">
-            <a href="login.html" id="linkLogin" class="btn-consola">
-                <span style="font-size:1.3rem;">🔑</span>
-                <strong style="font-size:0.8rem; text-transform:uppercase; margin-top:5px;">Acceso Terminal</strong>
-            </a>
-            <a href="perfil.html" id="linkPerfil" class="btn-consola" style="display:none; border-color: #bfa054;">
-                <span style="font-size:1.3rem;">🪪</span>
-                <strong style="font-size:0.8rem; text-transform:uppercase; margin-top:5px; color:#bfa054;">Mi Perfil / Misión</strong>
-            </a>
-            <div class="btn-consola" onclick="document.location.reload()">
-                <span style="font-size:1.3rem;">🔄</span>
-                <strong style="font-size:0.8rem; text-transform:uppercase; margin-top:5px; color:#6da077;">Actualizar</strong>
-            </div>
-        </div>
-
-        <div class="seccion-clasificacion">
-            <h3>📊 Sistema de Clasificación de Operadores</h3>
-            <table class="tabla-ranking">
-                <thead>
-                    <tr><th>Rango</th><th>Operador</th><th>Rol</th><th>Honor</th><th>Estado</th></tr>
-                </thead>
-                <tbody id="tablaCuerpoClasificacion">
-                    <tr><td colspan="5" style="text-align: center; color: #728576; padding: 15px;">Estableciendo enlace de red estricto...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <script>
-        const SUPABASE_URL = "https://wbcfszivrbuqfqnizarq.supabase.co"; 
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMjEsImV4cCI6MjA5NTQ3NTIyMX0.2iX7Twex3d96A9Iawg3zxvGAjFNLBqt81tSZgrzqA9s";
-        let supabaseLocal;
-        let listaElementosRadar = [];
-
-        function decodificarNombre(textoRaw) {
-            if (textoRaw && textoRaw.startsWith("{")) {
-                try { return JSON.parse(textoRaw); } catch(e){}
-            }
-            return { nombre: textoRaw || "Operación de Rutina", jugg: false, vehic: false, medicos: false, respawn: false, fecha: "" };
-        }
-
-        function inicializarSistema() {
-            try {
-                supabaseLocal = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                conectarYVerificarTodo();
-                
-                // Bucle de movimiento: recalcula posiciones aleatorias de patrulla cada 4 segundos (alineado al barrido)
-                setInterval(actualizarPosicionesMoviles, 4000);
-            } catch (e) { console.error(e); }
-        }
-
-        async function conectarYVerificarTodo() {
-            const usuarioActivo = localStorage.getItem("usuarioLogueado");
-            const indicador = document.getElementById("indicadorSesion");
-
-            try {
-                const { data: partidas } = await supabaseLocal.from("partidas").select("*").eq("activa", true).limit(1);
-                const panelMision = document.getElementById("infoMisionActiva");
-                const consola = document.getElementById("consolaPrincipal");
-                
-                let partidaConfig = { nombre: "Sin Operaciones Asignadas", jugg: false, vehic: false, medicos: false, respawn: false, fecha: "" };
-                
-                if (partidas && partidas.length > 0) {
-                    partidaConfig = decodificarNombre(partidas[0].nombre);
-                    
-                    let modificadoresTexto = [];
-                    if (partidaConfig.jugg) { modificadoresTexto.push("⚠️ ALERTA JUGGERNAUT"); consola.classList.add("alerta-juggernaut"); }
-                    if (partidaConfig.vehic) modificadoresTexto.push("🚜 UNIDADES MOTORIZADAS");
-                    if (partidaConfig.medicos) modificadoresTexto.push("🩹 REANIMACIÓN POR MÉDICOS");
-                    if (partidaConfig.respawn) modificadoresTexto.push("🔄 RESPAWN LIMITADO");
-
-                    let stringModificadores = modificadoresTexto.length > 0 ? `<br><span style="color:#ff6b6b; font-size:0.75rem;">MODIFICADORES: ${modificadoresTexto.join(" | ")}</span>` : "";
-                    let stringFecha = partidaConfig.fecha ? `<span style="color:#bfa054;">[INICIO: ${partidaConfig.fecha}]</span> ` : "";
-                    
-                    panelMision.innerHTML = `🛰️ OPERACIÓN ACTUAL: <strong>${partidaConfig.nombre.toUpperCase()}</strong> ${stringFecha} ${stringModificadores}`;
-                }
-
-                const { data: jugadores } = await supabaseLocal.from("jugadores").select("*").order('puntos', { ascending: false });
-                const listaSegura = jugadores || [];
-
-                if (usuarioActivo) {
-                    indicador.innerText = `🟢 ONLINE: ${usuarioActivo.toUpperCase()}`;
-                    indicador.style.color = "#6da077";
-                    document.getElementById("linkLogin").style.display = "none";
-                    document.getElementById("linkPerfil").style.display = "flex";
-                }
-
-                renderizarTabla(listaSegura);
-                generarEstructuraRadar(listaSegura, partidaConfig);
-
-            } catch (err) { console.error(err); }
-        }
-
-        function renderizarTabla(lista) {
-            const tabla = document.getElementById("tablaCuerpoClasificacion");
-            if (lista.length === 0) {
-                tabla.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #728576; padding: 15px;">No hay registros.</td></tr>`;
-                return;
-            }
-            let html = "";
-            lista.forEach((j, index) => {
-                const estado = j.en_partida ? "<span style='color:#ff6b6b;'>● EN COMBATE</span>" : "<span style='color:#728576;'>○ BASE</span>";
-                html += `<tr>
-                    <td><strong>#${index + 1}</strong></td>
-                    <td>${j.usuario.toUpperCase()}</td>
-                    <td>${j.rol_juego || 'Asalto'}</td>
-                    <td style="color:#bfa054; font-weight:bold;">${j.puntos || 0} PTS</td>
-                    <td>${estado}</td>
-                </tr>`;
-            });
-            tabla.innerHTML = html;
-        }
-
-        function generarEstructuraRadar(lista, config) {
-            const radar = document.getElementById("radarPantalla");
-            radar.innerHTML = "";
-            listaElementosRadar = [];
-            
-            // 1. Añadir operadores desplegados en combate
-            const desplegados = lista.filter(j => j.en_partida === true);
-            desplegados.forEach(() => {
-                const el = document.createElement("div");
-                el.className = "blip-objetivo";
-                radar.appendChild(el);
-                listaElementosRadar.push({ elemento: el, tipo: 'operador' });
-            });
-
-            // 2. Añadir Juggernaut si está activo
-            if (config.jugg) {
-                const elJugg = document.createElement("div");
-                elJugg.className = "blip-juggernaut";
-                radar.appendChild(elJugg);
-                listaElementosRadar.push({ elemento: elJugg, tipo: 'juggernaut' });
-            }
-
-            // 3. Añadir Vehículo si está habilitado
-            if (config.vehic) {
-                const elVeh = document.createElement("div");
-                elVeh.className = "blip-vehiculo";
-                radar.appendChild(elVeh);
-                listaElementosRadar.push({ elemento: elVeh, tipo: 'vehiculo' });
-            }
-
-            // Ejecutar el primer posicionamiento instantáneo
-            actualizarPosicionesMoviles();
-        }
-
-        function actualizarPosicionesMoviles() {
-            // Mueve cada punto simulando patrulla dentro del rango circular del radar (radio max 90px)
-            listaElementosRadar.forEach(objeto => {
-                let angulo = Math.random() * Math.PI * 2;
-                let radio = Math.random() * 75 + 15;
-                
-                // Forzar trayectorias ligeramente distintas según tipo
-                if (objeto.tipo === 'juggernaut') {
-                    radio = Math.random() * 40 + 10; // Más centrado en zona caliente
-                } else if (objeto.tipo === 'vehiculo') {
-                    radio = Math.random() * 30 + 60; // Bordea los flancos externos
-                }
-
-                const x = Math.floor(116 + Math.cos(angulo) * radio);
-                const y = Math.floor(116 + Math.sin(angulo) * radio);
-
-                objeto.elemento.style.left = `${x}px`;
-                objeto.elemento.style.top = `${y}px`;
-            });
-        }
-
-        inicializarSistema();
-    </script>
-</body>
-</html>
+        /* Rejilla de sonar real (Anillos de distancia) */
+        .radar-grid {
+            position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; border-radius: 50%;
+            background: 
+                radial-gradient(circle, transparent 30%, rgba(40,68,46,0.
