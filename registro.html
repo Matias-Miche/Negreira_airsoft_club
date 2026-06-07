@@ -7,98 +7,110 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .box { background: #0b0b0b; padding: 30px; border: 2px solid #4a5d4e; border-radius: 10px; width: 100%; max-width: 450px; }
-        h2 { text-align: center; margin-bottom: 20px; color: #7fa984; }
-        input { width: 100%; padding: 12px; margin-bottom: 15px; background: #2b2b2b; color: white; border: 1px solid #444; border-radius: 5px; }
-        button { width: 100%; padding: 12px; background: #4a5d4e; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        button:hover { opacity: 0.9; }
-        #estado { margin-top: 15px; text-align: center; font-weight: bold; }
-        .links { margin-top: 20px; text-align: center; }
-        .links a { color: #8dc891; text-decoration: none; }
+        body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; padding: 20px; margin: 0; }
+        .box { max-width: 450px; margin: 60px auto; background: #0b0b0b; border: 2px solid #4a5d4e; border-radius: 10px; padding: 30px; box-sizing: border-box; }
+        h2 { text-align: center; color: #7fa984; text-transform: uppercase; margin-bottom: 25px; margin-top: 0; }
+        label { display: block; margin-top: 15px; color: #7fa984; font-weight: bold; font-size: 0.9em; }
+        input { width: 100%; padding: 12px; margin-top: 5px; background: #2b2b2b; color: white; border: 1px solid #4a5d4e; border-radius: 5px; box-sizing: border-box; font-size: 1rem; }
+        input:focus { border-color: #bd913c; outline: none; }
+        button { margin-top: 25px; padding: 12px; border: none; background: #4a5d4e; color: white; cursor: pointer; border-radius: 5px; font-weight: bold; width: 100%; text-transform: uppercase; font-size: 1rem; transition: background 0.2s; }
+        button:hover { background: #5c7461; }
+        #mensajeFeedback { text-align: center; margin-top: 15px; font-weight: bold; min-height: 20px; }
+        .enlace-volver { display: block; text-align: center; margin-top: 20px; color: #8dc891; text-decoration: none; font-weight: bold; font-size: 0.95em; }
+        .enlace-volver:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
+
     <div class="box">
-        <h2>Crear Cuenta</h2>
-        <input id="usuario" type="text" placeholder="Usuario (Ej: operador12)">
-        <input id="password" type="password" placeholder="Contraseña">
-        <input id="password2" type="password" placeholder="Repetir contraseña">
-        <button id="btnRegistro" onclick="registrar()">Crear cuenta</button>
-        <p id="estado"></p>
-        <div class="links"><a href="login.html">Ya tengo cuenta</a></div>
+        <h2>Registro de Recluta</h2>
+        
+        <label for="usuarioInput">Nombre de Operador (Nickname):</label>
+        <input type="text" id="usuarioInput" placeholder="Ej: Ghost_94" required>
+
+        <label for="emailInput">Correo Electrónico:</label>
+        <input type="email" id="emailInput" placeholder="correo@ejemplo.com" required>
+
+        <label for="passwordInput">Contraseña de Acceso:</label>
+        <input type="password" id="passwordInput" placeholder="••••••••" required>
+
+        <button onclick="registrarNuevoUsuario()">⚔️ Crear Ficha de Combate</button>
+        
+        <div id="mensajeFeedback"></div>
+
+        <a href="login.html" class="enlace-volver">¿Ya tienes cuenta? Inicia sesión aquí</a>
+        <a href="index.html" class="enlace-volver" style="color: #aaa; font-size: 0.85em; margin-top: 10px;">⬅️ Volver al Inicio</a>
     </div>
+
 <script>
-    async function registrar() {
-        let usuario = document.getElementById("usuario").value.trim().toLowerCase().replace(/[^a-z0-9@._-]/g, "");
-        const password = document.getElementById("password").value;
-        const password2 = document.getElementById("password2").value;
-        const estado = document.getElementById("estado");
+    async function registrarNuevoUsuario() {
+        const email = document.getElementById("emailInput").value.trim();
+        const password = document.getElementById("passwordInput").value;
+        const usuarioForm = document.getElementById("usuarioInput").value.trim();
+        const feedback = document.getElementById("mensajeFeedback");
 
-        estado.innerText = "";
-        estado.style.color = "white";
-
-        if (!usuario || !password) {
-            estado.innerText = "Completa todos los campos";
-            estado.style.color = "#ff8a8a";
+        // Validaciones básicas previas obligatorias
+        if (!email || !password || !usuarioForm) {
+            feedback.innerText = "❌ Por favor, rellena todos los campos.";
+            feedback.style.color = "#ff8a8a";
             return;
         }
-        if (password !== password2) {
-            estado.innerText = "Las contraseñas no coinciden";
-            estado.style.color = "#ff8a8a";
-            return;
-        }
+
         if (password.length < 6) {
-            estado.innerText = "Mínimo 6 caracteres";
-            estado.style.color = "#ff8a8a";
+            feedback.innerText = "❌ La contraseña debe tener al menos 6 caracteres.";
+            feedback.style.color = "#ff8a8a";
             return;
         }
 
-        document.getElementById("btnRegistro").disabled = true;
-        const email = usuario.includes("@") ? usuario : usuario + "@airsoft.local";
+        feedback.innerText = "Procesando alta en el sistema...";
+        feedback.style.color = "#bd913c";
 
+        // PASO 1: Registrar la cuenta en el sistema de Autenticación de Supabase
         const { data, error } = await window.supabaseClient.auth.signUp({
             email: email,
             password: password
         });
 
         if (error) {
-            if (error.message.includes("rate limit") || error.status === 429) {
-                estado.innerText = "⚠️ Límite de Supabase alcanzado. Espera unos minutos o desactiva 'Confirm Email' en tu panel.";
-            } else {
-                estado.innerText = error.message;
-            }
-            estado.style.color = "#ff8a8a";
-            document.getElementById("btnRegistro").disabled = false;
+            console.error("Error Auth:", error.message);
+            feedback.innerText = "❌ Error en Registro: " + error.message;
+            feedback.style.color = "#ff8a8a";
             return;
         }
 
-        // Vinculación automática: Se crea el perfil público en la tabla 'jugadores' enlazado por el ID único
+        // PASO 2: Si el usuario se creó en Auth, inicializar su fila en la tabla pública 'jugadores'
         if (data && data.user) {
-            const { error: dbError } = await window.supabaseClient
+            const { error: errorTabla } = await window.supabaseClient
                 .from("jugadores")
-                .insert([{
-                    id: data.user.id,
-                    usuario: usuario,
-                    rol: "usuario",
-                    rol_juego: "Asalto",
-                    tipo_entrada: 0,
-                    puntos: 0,
-                    en_partida: false,
-                    arsenal_prestado: ""
-                }]);
+                .insert([
+                    {
+                        id: data.user.id, // Sincronizamos exactamente la ID generada por Auth
+                        usuario: usuarioForm,
+                        rol: "jugador", // Rango raso por defecto del sistema
+                        rol_juego: "Asalto", // Especialidad inicial por defecto
+                        puntos: 0, // Inicia con marcador a cero
+                        tipo_entrada: 5, // Tarifa estándar de socio / alquiler básico
+                        en_partida: false // Inicia sin estar apuntado a la misión
+                    }
+                ]);
 
-            if (dbError) {
-                console.error("Error al inicializar registro en tabla jugadores:", dbError.message);
+            if (errorTabla) {
+                console.error("Error al inicializar perfil público:", errorTabla.message);
+                feedback.innerHTML = `⚠️ Cuenta creada, pero hubo un error de base de datos:<br><span style="font-size:0.85em;">${errorTabla.message}</span>`;
+                feedback.style.color = "#ffbd4a";
+            } else {
+                feedback.innerText = "✔️ ¡Ficha creada correctamente! Redirigiendo...";
+                feedback.style.color = "#8dc891";
+                
+                // Pequeña espera para que el usuario vea el mensaje de éxito antes de saltar al login
+                setTimeout(() => {
+                    window.location.href = "login.html";
+                }, 2000);
             }
+        } else {
+            feedback.innerText = "❌ No se pudo validar la sesión del nuevo usuario.";
+            feedback.style.color = "#ff8a8a";
         }
-
-        estado.innerText = "Cuenta creada correctamente";
-        estado.style.color = "#8dc891";
-        setTimeout(() => {
-            window.location.href = "login.html";
-        }, 1500);
     }
 </script>
 </body>
