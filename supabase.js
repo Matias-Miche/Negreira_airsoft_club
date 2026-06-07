@@ -1,6 +1,6 @@
-// Coloca aquí tus credenciales reales de Supabase
-const supabaseUrl = 'https://tu-proyecto.supabase.co';
-const supabaseKey = 'tu-clave-anon-publica-de-supabase';
+// supabase.js
+const supabaseUrl = 'https://tu-proyecto.supabase.co'; // Reemplaza con tu URL real
+const supabaseAnonKey = 'tu-clave-anon-key-de-supabase'; // Reemplaza con tu clave API real
 
-// Esta línea crea el cliente global que usará tu index.html
-window.supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+// Esto asigna el cliente a la ventana global para que index.html pueda usarlo
+window.supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
