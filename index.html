@@ -7,79 +7,52 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <style>
-        body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; padding: 20px; margin: 0; }
-        .hero-container { max-width: 800px; margin: 50px auto; background: #0b0b0b; border: 2px solid #4a5d4e; border-radius: 10px; padding: 35px; box-sizing: border-box; text-align: center; }
-        h1 { color: #7fa984; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
-        .subtitulo { color: #bd913c; font-weight: bold; text-transform: uppercase; font-size: 1.1rem; margin-top: 0; }
-        p.descripcion { color: #ccc; line-height: 1.6; font-size: 1.05rem; margin: 20px 0 30px 0; }
-        
-        /* --- GRILLA DE ACCESOS --- */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .btn-home { display: block; padding: 15px; font-weight: bold; text-transform: uppercase; text-decoration: none; border-radius: 5px; text-align: center; transition: background 0.2s, transform 0.2s; box-sizing: border-box; }
-        .btn-home:hover { transform: scale(1.02); }
-        
-        .btn-login { background: #4a5d4e; color: white; border: 1px solid #637d69; }
-        .btn-login:hover { background: #5c7461; }
-        .btn-marcador { background: #222; color: #7fa984; border: 1px solid #4a5d4e; }
-        .btn-marcador:hover { background: #2e2e2e; }
-
-        /* --- ESTILOS DEL BOTÓN FLOTANTE Y MODAL --- */
-        .boton-flotante {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #bd913c;
-            color: black;
-            border: 2px solid #a37a2d;
-            padding: 14px 20px;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 0.95rem;
-            cursor: pointer;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
-            z-index: 9999;
-            transition: transform 0.2s, background 0.2s;
-            width: auto;
-            text-transform: none;
+        /* --- ESTILOS GENERALES TÁCTICOS --- */
+        body { 
+            background: #111412; 
+            color: #e0e5e1; 
+            font-family: 'Courier New', Courier, monospace, Arial, sans-serif; 
+            padding: 20px; 
+            margin: 0;
+            background-image: 
+                linear-gradient(rgba(17, 20, 18, 0.85), rgba(17, 20, 18, 0.95)),
+                radial-gradient(#1f2e22 1px, transparent 1px);
+            background-size: 100% 100%, 25px 25px;
         }
-        .boton-flotante:hover { transform: scale(1.05); background: #dbab4c; }
-        .modal-oculta { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); }
-        .modal-contenido { background-color: #0b0b0b; margin: 10% auto; padding: 20px; border: 2px solid #4a5d4e; width: 80%; max-width: 550px; border-radius: 10px; color: white; position: relative; text-align: left; }
-        .cerrar-modal { position: absolute; top: 10px; right: 15px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
-        .cerrar-modal:hover { color: white; }
-        
-        .aviso-especial { 
-            background: #7a2222; 
-            border: 1px solid #ff4d4d; 
-            color: #ffcccc; 
-            padding: 10px; 
-            border-radius: 5px; 
+
+        /* --- CONTENEDOR PRINCIPAL (BÚNKER) --- */
+        .hero-container { 
+            max-width: 850px; 
+            margin: 40px auto; 
+            background: #070908; 
+            border: 2px solid #3b4e40; 
+            border-top: 6px solid #63856b;
+            border-radius: 4px; 
+            padding: 40px; 
+            box-sizing: border-box; 
             text-align: center; 
-            font-weight: bold; 
-            margin-bottom: 15px; 
-            animation: parpadeo 2s infinite; 
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(99, 133, 107, 0.1);
+            position: relative;
         }
-        @keyframes parpadeo { 0% { opacity: 0.8; } 50% { opacity: 1; border-color: #ff8585; } 100% { opacity: 0.8; } }
-        .lista-jugadores { background: #1a1a1a; padding: 10px; border-radius: 5px; margin-top: 10px; max-height: 200px; overflow-y: auto; }
-    </style>
-</head>
-<body>
 
-    <div class="hero-container">
-        <h1>Airsoft Negreira</h1>
-        <div class="subtitulo">Centro de Operaciones y Marcador Táctico</div>
-        
-        <p class="descripcion">
-            Bienvenido a la plataforma oficial de gestión de combatientes de Airsoft Negreira. 
-            Aquí podrás alistarte en las misiones semanales, gestionar tu equipación obligatoria de campo, 
-            seleccionar tu especialidad táctica (Asalto, Médico, Soporte o Tirador) y consultar el estatus 
-            del ranking global de puntos acumulados por objetivos cumplidos.
-        </p>
+        /* Detalles de adorno militar (Esquinas de mira telescópica) */
+        .hero-container::before {
+            content: "HQ-NEGREIRA // OP-SYS";
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            font-size: 0.75rem;
+            color: #4c6653;
+            letter-spacing: 2px;
+        }
 
-        <div class="menu-grid">
-            <a href="login.html" class="btn-home btn-login">🔑 Acceder a mi Perfil</a>
-            <a href="tabla.html" class="btn-home btn-marcador">📊 Tabla de Jugadores</a>
-        </div>
-    </div>
+        h1 { 
+            color: #7fa984; 
+            text-transform: uppercase; 
+            margin-bottom: 5px; 
+            font-size: 2.5rem;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(127, 169, 132, 0.3);
+        }
 
-    <button id="btnVerPartidas" class="boton-fl
+        .subtitulo
