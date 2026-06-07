@@ -24,7 +24,7 @@
             background-size: 100% 100%, 40px 40px, 40px 40px;
         }
 
-        .contenedor-registro {
+        .contenedor-box {
             width: 100%;
             max-width: 450px;
             background: #040605;
@@ -47,7 +47,7 @@
             padding-bottom: 12px;
         }
 
-        .campo { margin-bottom: 20px; }
+        .campo { margin-bottom: 18px; }
 
         label {
             color: #a4b3a7;
@@ -69,6 +69,12 @@
             font-family: inherit;
         }
 
+        input:focus, select:focus {
+            outline: none;
+            border-color: #6da077;
+            background: #142018;
+        }
+
         button {
             width: 100%;
             padding: 12px;
@@ -81,20 +87,27 @@
             text-transform: uppercase;
             font-size: 0.9rem;
             letter-spacing: 1px;
+            margin-top: 5px;
         }
 
         button:hover { background: #274930; color: #ffd875; }
-        .enlace-volver { display: block; text-align: center; margin-top: 15px; color: #728576; font-size: 0.8rem; text-decoration: none; }
+        .enlace-cambio { display: block; text-align: center; margin-top: 15px; color: #728576; font-size: 0.8rem; text-decoration: none; }
+        .enlace-cambio:hover { color: #6da077; }
     </style>
 </head>
 <body>
 
-    <div class="contenedor-registro">
+    <div class="contenedor-box">
         <h2>📝 Alta de Operador</h2>
 
         <div class="campo">
             <label>🌲 Nombre de Jugador (Usuario):</label>
             <input type="text" id="regUsuario" placeholder="Tu indicativo militar">
+        </div>
+
+        <div class="campo">
+            <label>🔑 Contraseña de Acceso:</label>
+            <input type="password" id="regPassword" placeholder="Clave de seguridad">
         </div>
 
         <div class="campo">
@@ -107,32 +120,35 @@
             </select>
         </div>
 
-        <button onclick="registrarNuevoOperadorDirecto()">Dar de Alta en Red</button>
-        <a href="index.html" class="enlace-volver">⬅️ Volver a la terminal</a>
+        <button onclick="registrarNuevoOperadorDirecto()">Crear Cuenta</button>
+        
+        <a href="login.html" class="enlace-cambio">¿Ya tienes cuenta? Iniciar Sesión</a>
+        <a href="index.html" class="enlace-cambio" style="color: #51755a;">⬅️ Volver a la terminal</a>
     </div>
 
 <script>
     async function registrarNuevoOperadorDirecto() {
         const usuario = document.getElementById("regUsuario").value.trim();
+        const password = document.getElementById("regPassword").value;
         const rolJuego = document.getElementById("regRol").value;
 
-        if (!usuario) {
-            alert("ERROR: El nombre del jugador es obligatorio.");
+        if (!usuario || !password) {
+            alert("ERROR: Todos los campos de credenciales son obligatorios.");
             return;
         }
 
+        // Comprobar si ya existe el indicativo militar
+        const { data: existente } = await window.supabaseClient
+            .from("jugadores")
+            .select("usuario")
+            .eq("usuario", usuario)
+            .maybeSingle();
+
+        if (existente) {
+            alert("ERROR: Este indicativo ya se encuentra registrado en el sistema.");
+            return;
+        }
+
+        // Se guarda nombre, contraseña (puro texto) y rol en la tabla
         const { error } = await window.supabaseClient
             .from("jugadores")
-            .insert([{ usuario: usuario, rol_juego: rolJuego, en_partida: false, es_admin: false }]);
-
-        if (error) {
-            console.error(error);
-            alert("Error al registrar. Verifica las políticas RLS en Supabase.");
-        } else {
-            alert(`¡Operador ${usuario.toUpperCase()} registrado con éxito!`);
-            document.getElementById("regUsuario").value = "";
-        }
-    }
-</script>
-</body>
-</html>
