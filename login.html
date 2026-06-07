@@ -3,78 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Airsoft Negreira</title>
+    <title>Acceso de Operadores - Negreira</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <style>
-        body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; padding: 20px; margin: 0; }
-        .box { max-width: 450px; margin: 80px auto; background: #0b0b0b; border: 2px solid #4a5d4e; border-radius: 10px; padding: 30px; box-sizing: border-box; }
-        h2 { text-align: center; color: #7fa984; text-transform: uppercase; margin-bottom: 25px; margin-top: 0; }
-        label { display: block; margin-top: 15px; color: #7fa984; font-weight: bold; font-size: 0.9em; }
-        input { width: 100%; padding: 12px; margin-top: 5px; background: #2b2b2b; color: white; border: 1px solid #4a5d4e; border-radius: 5px; box-sizing: border-box; font-size: 1rem; }
-        input:focus { border-color: #bd913c; outline: none; }
-        button { margin-top: 25px; padding: 12px; border: none; background: #4a5d4e; color: white; cursor: pointer; border-radius: 5px; font-weight: bold; width: 100%; text-transform: uppercase; font-size: 1rem; transition: background 0.2s; }
-        button:hover { background: #5c7461; }
-        #mensajeFeedback { text-align: center; margin-top: 15px; font-weight: bold; min-height: 20px; }
-        .enlace-volver { display: block; text-align: center; margin-top: 20px; color: #8dc891; text-decoration: none; font-weight: bold; font-size: 0.95em; }
-        .enlace-volver:hover { text-decoration: underline; }
+        body {
+            background: #080b09;
+            color: #d1dad2;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: 
+                linear-gradient(rgba(8, 11, 9, 0.92), rgba(8, 11, 9, 0.96)),
+                linear-gradient(to right, #162419 1px, transparent 1px),
+                linear-gradient(to bottom, #162419 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+        }
+
+        .contenedor-login {
+            width: 100%;
+            max-width: 450px;
+            background: #040605;
+            border: 2px solid #223526;
+            border-top: 6px solid #bfa054;
+            border-radius: 4px;
+            padding: 30px;
+            box-sizing: border-box;
+            box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(191, 160, 84, 0.08);
+            position: relative;
+        }
+
+        .contenedor-login::before {
+            content: "SECURE-LOGIN // PORTAL";
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            font-size: 0.65rem;
+            color: #38523f;
+            letter-spacing: 1px;
+        }
+
+        h2 {
+            color: #6da077;
+            text-transform: uppercase;
+            margin-top: 10px;
+            letter-spacing: 2px;
+            font-size: 1.2rem;
+            text-align: center;
+            border-bottom: 1px dashed #223526;
+            padding-bottom: 12px;
+        }
+
+        .campo { margin-bottom: 20px; }
+
+        label {
+            color: #a4b3a7;
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px;
+            background: #0f1712;
+            color: #e2e8e3;
+            border: 1px solid #2d4533;
+            border-radius: 3px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #bfa054;
+            background: #142018;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #1e3825;
+            color: #bfa054;
+            border: 1px solid #4a6b52;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            box-shadow: 0 3px 0 #0b110d;
+        }
+
+        button:hover {
+            background: #274930;
+            color: #ffd875;
+        }
+
+        .enlace-cambio {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #728576;
+            font-size: 0.8rem;
+            text-decoration: none;
+        }
+        .enlace-cambio:hover { color: #6da077; }
     </style>
 </head>
 <body>
 
-    <div class="box">
-        <h2>Autenticación de Operador</h2>
+    <div class="contenedor-login">
+        <h2>🔑 Acceso Operador</h2>
+
+        <div class="campo">
+            <label>🌲 Indicativo Militar (Usuario):</label>
+            <input type="text" id="loginUsuario" placeholder="Introduce tu nombre registrado">
+        </div>
+
+        <div class="campo">
+            <label>🔒 Clave de Autenticación:</label>
+            <input type="password" id="loginPassword" placeholder="Introduce tu contraseña">
+        </div>
+
+        <button onclick="iniciarSesionDirecta()">Ingresar al Sistema</button>
         
-        <label for="usuarioInput">Nombre de Operador (Nickname):</label>
-        <input type="text" id="usuarioInput" placeholder="Tu nombre de jugador" required>
-
-        <label for="passwordInput">Contraseña:</label>
-        <input type="password" id="passwordInput" placeholder="••••••••" required>
-
-        <button onclick="iniciarSesion()">🔑 Validar Credenciales</button>
-        
-        <div id="mensajeFeedback"></div>
-
-        <a href="registro.html" class="enlace-volver">¿No tienes ficha? Regístrate aquí</a>
-        <a href="index.html" class="enlace-volver" style="color: #aaa; font-size: 0.85em; margin-top: 10px;">⬅️ Volver al Inicio</a>
+        <a href="registro.html" class="enlace-cambio">¿No tienes cuenta? Registrarse en la red</a>
+        <a href="index.html" class="enlace-cambio" style="color: #51755a;">⬅️ Volver a la terminal principal</a>
     </div>
 
 <script>
-    async function iniciarSesion() {
-        const usuarioForm = document.getElementById("usuarioInput").value.trim();
-        const password = document.getElementById("passwordInput").value;
-        const feedback = document.getElementById("mensajeFeedback");
+    async function iniciarSesionDirecta() {
+        const usuario = document.getElementById("loginUsuario").value.trim();
+        const password = document.getElementById("loginPassword").value;
 
-        if (!usuarioForm || !password) {
-            feedback.innerText = "❌ Completa los campos solicitados.";
-            feedback.style.color = "#ff8a8a";
+        if (!usuario || !password) {
+            alert("Por favor, introduce tus credenciales completas.");
             return;
         }
 
-        feedback.innerText = "Verificando identidad en el campo...";
-        feedback.style.color = "#bd913c";
-
-        // Reconstruimos el mismo correo virtual usado en el registro
-        const usuarioLimpio = usuarioForm.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
-        const emailVirtual = `${usuarioLimpio}@negreira.com`;
-
-        // Intentar loguear en Supabase usando el correo fantasma
-        const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-            email: emailVirtual,
-            password: password
-        });
+        // Busca el usuario y verifica la contraseña correspondiente en la tabla
+        const { data: jugador, error } = await window.supabaseClient
+            .from("jugadores")
+            .select("usuario, contrasena, es_admin")
+            .eq("usuario", usuario)
+            .maybeSingle();
 
         if (error) {
-            console.error("Error Login:", error.message);
-            feedback.innerText = "❌ Nombre de jugador o contraseña incorrectos.";
-            feedback.style.color = "#ff8a8a";
-        } else {
-            feedback.innerText = "✔️ Acceso concedido. Cargando perfil...";
-            feedback.style.color = "#8dc891";
+            console.error(error);
+            alert("Error de respuesta con el servidor táctico.");
+            return;
+        }
+
+        // Valida que el jugador exista y que la contraseña coincida exactamente
+        if (jugador && jugador.contrasena === password) {
+            localStorage.setItem("usuarioLogueado", jugador.usuario);
+            alert(`¡Conexión establecida! Código de acceso correcto.`);
             
-            setTimeout(() => {
-                window.location.href = "perfil.html";
-            }, 1000);
+            if (jugador.es_admin === true) {
+                window.location.href = "admin.html";
+            } else {
+                window.location.href = "index.html";
+            }
+        } else {
+            alert("ACCESO RECHAZADO: El indicativo militar o la contraseña no coinciden.");
         }
     }
 </script>
