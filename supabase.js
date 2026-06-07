@@ -1,11 +1,10 @@
-// supabase.js
-const supabaseUrl = 'https://tu-proyecto.supabase.co'; 
-const supabaseAnonKey = 'tu-clave-anon-key';
+// supabase.js - ENLACE SATELITAL DE CONTROL
+const supabaseUrl = 'https://wbcfszivrbuqfqnizarq.supabase.co'; 
+const supabaseAnonKey = 'TU_CLAVE_ANON_PUBLIC_REAL_AQUÍ'; // <-- Pega aquí tu clave anon de Supabase
 
-// Asegura que la librería global de Supabase se haya cargado antes de activarla
 if (typeof supabase !== 'undefined') {
     window.supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
-    console.log("Enlace de Supabase preparado correctamente.");
+    console.log("Enlace de Supabase sincronizado en el dominio correcto.");
 } else {
-    console.error("Error crítico: La librería CDN de Supabase no ha cargado en el HTML.");
+    console.error("Error: La librería de internet de Supabase no ha cargado en el HTML.");
 }
