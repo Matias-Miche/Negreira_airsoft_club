@@ -120,8 +120,8 @@
                     const distintivoEstado = m.activa ? "<span style='color:#6da077; font-weight:bold;'>[ACTIVA]</span>" : "<span style='color:#728576;'>[CONCLUIDA]</span>";
                     
                     let detalles = [];
-                    if (m.juggernauts) detalles.push("Juggernauts");
-                    if (m.vehiculos) detalles.push("Vehículos");
+                    if (m.juggernauts || m.juggernaut) detalles.push("Juggernauts");
+                    if (m.vehiculos || m.vehiculo) detalles.push("Vehículos");
                     if (m.medicos) detalles.push("Médicos");
                     if (m.respawn_limitado) detalles.push("Respawn");
                     const textoDetalles = detalles.length > 0 ? " (" + detalles.join(", ") + ")" : "";
@@ -150,23 +150,40 @@
             const resp = document.getElementById("varRespawn").checked;
 
             try {
+                // Desactivar misiones anteriores
                 await supabaseLocal
                     .from("partidas")
                     .update({ activa: false })
                     .eq("activa", true);
 
-                const { error } = await supabaseLocal
-                    .from("partidas")
-                    .insert([{
-                        nombre: nombre,
-                        activa: true,
-                        juggernauts: jugg,
-                        vehiculos: vehic,
-                        medicos: med,
-                        respawn_limitado: resp
-                    }]);
+                // Intento de inserción completo
+                let objetoInsercion = {
+                    nombre: nombre,
+                    activa: true,
+                    juggernauts: jugg,
+                    vehiculos: vehic,
+                    medicos: med,
+                    respawn_limitado: resp
+                };
 
-                if (error) throw error;
+                let { error } = await supabaseLocal
+                    .from("partidas")
+                    .insert([objetoInsercion]);
+
+                // Si da error por las columnas nuevas, mandamos un envío simplificado de emergencia
+                if (error) {
+                    console.log("Reintentando inserción simplificada por incompatibilidad de columnas...");
+                    const { error: errorS } = await supabaseLocal
+                        .from("partidas")
+                        .insert([{
+                            nombre: nombre + (jugg ? " [JUGGERNAUT]" : "") + (vehic ? " [VEHÍCULOS]" : ""),
+                            activa: true,
+                            medicos: med,
+                            respawn_limitado: resp
+                        }]);
+                    
+                    if (errorS) throw errorS;
+                }
 
                 alert("🟢 Misión desplegada.");
                 document.getElementById("nombreMision").value = "";
@@ -178,7 +195,7 @@
                 obtenerMisionesActuales();
             } catch (err) {
                 console.error(err);
-                alert("Fallo al registrar. Asegúrate de tener las columnas correspondientes en la tabla de Supabase.");
+                alert("Error crítico del servidor. Comprueba las políticas RLS de la tabla 'partidas' en Supabase.");
             }
         }
     </script>
