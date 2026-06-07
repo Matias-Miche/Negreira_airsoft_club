@@ -3,106 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro - Airsoft Negreira</title>
+    <title>Registro de Operadores - Negreira</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <style>
-        body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; padding: 20px; margin: 0; }
-        .box { max-width: 450px; margin: 60px auto; background: #0b0b0b; border: 2px solid #4a5d4e; border-radius: 10px; padding: 30px; box-sizing: border-box; }
-        h2 { text-align: center; color: #7fa984; text-transform: uppercase; margin-bottom: 25px; margin-top: 0; }
-        label { display: block; margin-top: 15px; color: #7fa984; font-weight: bold; font-size: 0.9em; }
-        input { width: 100%; padding: 12px; margin-top: 5px; background: #2b2b2b; color: white; border: 1px solid #4a5d4e; border-radius: 5px; box-sizing: border-box; font-size: 1rem; }
-        input:focus { border-color: #bd913c; outline: none; }
-        button { margin-top: 25px; padding: 12px; border: none; background: #4a5d4e; color: white; cursor: pointer; border-radius: 5px; font-weight: bold; width: 100%; text-transform: uppercase; font-size: 1rem; transition: background 0.2s; }
-        button:hover { background: #5c7461; }
-        #mensajeFeedback { text-align: center; margin-top: 15px; font-weight: bold; min-height: 20px; }
-        .enlace-volver { display: block; text-align: center; margin-top: 20px; color: #8dc891; text-decoration: none; font-weight: bold; font-size: 0.95em; }
-        .enlace-volver:hover { text-decoration: underline; }
+        body {
+            background: #080b09;
+            color: #d1dad2;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: 
+                linear-gradient(rgba(8, 11, 9, 0.92), rgba(8, 11, 9, 0.96)),
+                linear-gradient(to right, #162419 1px, transparent 1px),
+                linear-gradient(to bottom, #162419 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+        }
+
+        .contenedor-registro {
+            width: 100%;
+            max-width: 450px;
+            background: #040605;
+            border: 2px solid #223526;
+            border-top: 6px solid #4a6b52;
+            border-radius: 4px;
+            padding: 30px;
+            box-sizing: border-box;
+            box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.8);
+        }
+
+        h2 {
+            color: #6da077;
+            text-transform: uppercase;
+            margin-top: 0;
+            letter-spacing: 2px;
+            font-size: 1.2rem;
+            text-align: center;
+            border-bottom: 1px dashed #223526;
+            padding-bottom: 12px;
+        }
+
+        .campo {
+            margin-bottom: 15px;
+        }
+
+        label {
+            color: #a4b3a7;
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            background: #0f1712;
+            color: #e2e8e3;
+            border: 1px solid #2d4533;
+            border-radius: 3px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #6da077;
+            background: #142018;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #1e3825;
+            color: #bfa054;
+            border: 1px solid #4a6b52;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #274930;
+            color: #ffd875;
+        }
+
+        .enlace-volver {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #728576;
+            font-size: 0.8rem;
+            text-decoration: none;
+        }
+        .enlace-volver:hover { color: #6da077; }
     </style>
 </head>
 <body>
 
-    <div class="box">
-        <h2>Registro de Recluta</h2>
+    <div class="contenedor-registro">
+        <h2>📝 Alta de Operador</h2>
         
-        <label for="usuarioInput">Nombre de Operador (Nickname):</label>
-        <input type="text" id="usuarioInput" placeholder="Ej: Ghost_94" required>
+        <div class="campo">
+            <label>📧 Correo Electrónico:</label>
+            <input type="text" id="regEmail" placeholder="ejemplo@correo.com">
+        </div>
 
-        <label for="passwordInput">Contraseña de Acceso:</label>
-        <input type="password" id="passwordInput" placeholder="••••••••" required>
+        <div class="campo">
+            <label>🔑 Contraseña de Acceso:</label>
+            <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres">
+        </div>
 
-        <button onclick="registrarNuevoUsuario()">⚔️ Crear Ficha de Combate</button>
+        <div class="campo">
+            <label>🌲 Nombre de Jugador (Usuario):</label>
+            <input type="text" id="regUsuario" placeholder="Tu indicativo militar">
+        </div>
+
+        <div class="campo">
+            <label>🛠️ Especialidad (Rol de Juego):</label>
+            <select id="regRol">
+                <option value="Asalto">Asalto</option>
+                <option value="Sniper">Sniper</option>
+                <option value="Médico">Médico</option>
+                <option value="AT">AT</option>
+            </select>
+        </div>
+
+        <button onclick="registrarNuevoOperador()">Dar de Alta en Red</button>
         
-        <div id="mensajeFeedback"></div>
-
-        <a href="login.html" class="enlace-volver">¿Ya tienes cuenta? Inicia sesión aquí</a>
-        <a href="index.html" class="enlace-volver" style="color: #aaa; font-size: 0.85em; margin-top: 10px;">⬅️ Volver al Inicio</a>
+        <a href="index.html" class="enlace-volver">⬅️ Cancelar y volver a la terminal</a>
     </div>
 
 <script>
-    async function registrarNuevoUsuario() {
-        const usuarioForm = document.getElementById("usuarioInput").value.trim();
-        const password = document.getElementById("passwordInput").value;
-        const feedback = document.getElementById("mensajeFeedback");
+    async function registrarNuevoOperador() {
+        const email = document.getElementById("regEmail").value.trim();
+        const password = document.getElementById("regPassword").value;
+        const usuario = document.getElementById("regUsuario").value.trim();
+        const rolJuego = document.getElementById("regRol").value;
 
-        if (!usuarioForm || !password) {
-            feedback.innerText = "❌ Por favor, rellena todos los campos.";
-            feedback.style.color = "#ff8a8a";
+        if (!email || !password || !usuario) {
+            alert("ERROR: Todos los campos tácticos son obligatorios.");
             return;
         }
 
         if (password.length < 6) {
-            feedback.innerText = "❌ La contraseña debe tener al menos 6 caracteres.";
-            feedback.style.color = "#ff8a8a";
+            alert("SEGURIDAD: La contraseña debe tener al menos 6 caracteres.");
             return;
         }
 
-        feedback.innerText = "Procesando alta táctica...";
-        feedback.style.color = "#bd913c";
-
-        // TRUCO: Creamos un correo virtual basado en su nombre de usuario único
-        // Limpiamos espacios o caracteres extraños que rompan un correo normal
-        const usuarioLimpio = usuarioForm.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
-        const emailVirtual = `${usuarioLimpio}@negreira.com`;
-
-        // PASO 1: Registrar en Autenticación con el correo invisible
-        const { data, error } = await window.supabaseClient.auth.signUp({
-            email: emailVirtual,
+        // 1. Crear el usuario en el sistema de autenticación de Supabase
+        const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
+            email: email,
             password: password
         });
 
-        if (error) {
-            console.error("Error Auth:", error.message);
-            feedback.innerText = "❌ Este nombre de usuario ya está ocupado.";
-            feedback.style.color = "#ff8a8a";
+        if (authError) {
+            alert("Fallo en autenticación: " + authError.message);
             return;
         }
 
-        // PASO 2: Inicializar el perfil público en la tabla 'jugadores'
-        if (data && data.user) {
-            const { error: errorTabla } = await window.supabaseClient
+        // 2. Si se autenticó correctamente, insertamos sus datos en la tabla 'jugadores'
+        if (authData && authData.user) {
+            const { error: tablaError } = await window.supabaseClient
                 .from("jugadores")
                 .insert([
                     {
-                        id: data.user.id,
-                        usuario: usuarioForm,
-                        rol: "jugador",
-                        rol_juego: "Asalto",
-                        puntos: 0,
-                        tipo_entrada: 5,
-                        en_partida: false
+                        id: authData.user.id, // Sincroniza el ID de autenticación con la tabla
+                        usuario: usuario,
+                        rol_juego: rolJuego,
+                        en_partida: false,
+                        es_admin: false       // Entra por defecto como jugador regular
                     }
                 ]);
 
-            if (errorTabla) {
-                console.error("Error tabla:", errorTabla.message);
-                feedback.innerText = "⚠️ Error de perfil: " + errorTabla.message;
-                feedback.style.color = "#ffbd4a";
+            if (tablaError) {
+                console.error("Detalles del fallo en tabla:", tablaError);
+                alert("Usuario autenticado, pero falló el registro en la base de datos (Comprueba las políticas RLS).");
             } else {
-                feedback.innerText = "✔️ ¡Ficha creada! Redirigiendo al reingreso...";
-                feedback.style.color = "#8dc891";
-                setTimeout(() => { window.location.href = "login.html"; }, 2000);
+                alert("¡Operador registrado con éxito! Ya puedes iniciar sesión.");
+                // Limpiamos el formulario
+                document.getElementById("regEmail").value = "";
+                document.getElementById("regPassword").value = "";
+                document.getElementById("regUsuario").value = "";
             }
+        } else {
+            alert("Aviso: El registro requiere confirmación por correo electrónico antes de activar la ficha.");
         }
     }
 </script>
