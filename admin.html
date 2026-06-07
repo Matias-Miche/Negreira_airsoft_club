@@ -3,99 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control Táctico - Mando</title>
+    <title>Panel de Comando - Airsoft Negreira</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <style>
         body {
             background: #080b09; color: #d1dad2; font-family: 'Courier New', Courier, monospace;
-            padding: 20px; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-            background-image: linear-gradient(rgba(8, 11, 9, 0.92), rgba(8, 11, 9, 0.96)), linear-gradient(to right, #162419 1px, transparent 1px), linear-gradient(to bottom, #162419 1px, transparent 1px);
+            padding: 20px; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            background-image: 
+                linear-gradient(rgba(8, 11, 9, 0.92), rgba(8, 11, 9, 0.96)),
+                linear-gradient(to right, #162419 1px, transparent 1px), linear-gradient(to bottom, #162419 1px, transparent 1px);
             background-size: 100% 100%, 40px 40px, 40px 40px;
         }
-        .panel-admin { width: 100%; max-width: 600px; background: #040605; border: 2px solid #223526; border-top: 6px solid #bfa054; border-radius: 4px; padding: 30px; box-sizing: border-box; }
-        h2 { color: #6da077; text-transform: uppercase; margin-top: 0; font-size: 1.2rem; border-bottom: 1px dashed #223526; padding-bottom: 10px; }
-        .campo { margin-bottom: 20px; }
-        label { color: #a4b3a7; display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: bold; text-transform: uppercase; }
-        input, select { width: 100%; padding: 10px; background: #0f1712; color: #e2e8e3; border: 1px solid #2d4533; border-radius: 3px; box-sizing: border-box; font-family: inherit; }
-        button { width: 100%; padding: 12px; background: #1e3825; color: #bfa054; border: 1px solid #4a6b52; border-radius: 3px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
-        button:hover { background: #274930; color: #ffd875; }
-        .enlace-volver { display: block; text-align: center; margin-top: 20px; color: #728576; font-size: 0.8rem; text-decoration: none; }
+        .contenedor-admin { width: 100%; max-width: 650px; background: #040605; border: 2px solid #bfa054; border-top: 6px solid #bfa054; border-radius: 4px; padding: 30px; box-sizing: border-box; box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.8); }
+        h2 { color: #bfa054; text-transform: uppercase; margin-top: 0; letter-spacing: 2px; font-size: 1.4rem; text-align: center; border-bottom: 1px dashed #bfa054; padding-bottom: 12px; }
+        .campo { margin-bottom: 15px; }
+        label { color: #a4b3a7; display: block; margin-bottom: 6px; font-size: 0.8rem; text-transform: uppercase; font-weight: bold; }
+        input, select { width: 100%; padding: 11px; background: #0f1712; color: #e2e8e3; border: 1px solid #2d4533; border-radius: 3px; box-sizing: border-box; font-family: inherit; }
+        input:focus, select:focus { outline: none; border-color: #bfa054; background: #142018; }
+        .btn-buscar { background: #1e3825; color: #6da077; border: 1px solid #4a6b52; padding: 11px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; margin-bottom: 20px; }
+        .btn-buscar:hover { background: #274930; color: #e2e8e3; }
+        .seccion-edicion { display: none; border-top: 1px dashed #2d4533; padding-top: 20px; margin-top: 20px; }
+        .btn-guardar { width: 100%; padding: 12px; background: #2b220f; color: #bfa054; border: 1px solid #bfa054; border-radius: 3px; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 0.9rem; }
+        .btn-guardar:hover { background: #bfa054; color: #040605; }
+        .nav-links { display: flex; justify-content: space-between; margin-top: 20px; border-top: 1px dashed #2d4533; padding-top: 15px; font-size: 0.8rem; }
+        .link-btn { color: #6da077; text-decoration: none; text-transform: uppercase; font-weight: bold; }
+        .link-btn:hover { color: #bfa054; }
     </style>
 </head>
 <body>
 
-    <div class="panel-admin">
-        <h2>🛠️ Publicación de Operaciones Oficiales</h2>
+    <div class="contenedor-admin">
+        <h2>⚡ Panel de Comando de Alto Mando</h2>
         
         <div class="campo">
-            <label>🏷️ Codename de la Misión:</label>
-            <input type="text" id="nombrePartida" placeholder="Ej: Operación Tormenta">
+            <label>🔍 Buscar Operador (Indicativo Exacto):</label>
+            <input type="text" id="busquedaUsuario" placeholder="Ej: operador1, admin...">
         </div>
+        <button class="btn-buscar" onclick="buscarOperador()">Sincronizar Expediente</button>
 
-        <div class="campo">
-            <label>📅 Fecha de Despliegue:</label>
-            <input type="date" id="fechaPartida">
+        <div id="seccionEdicion" class="seccion-edicion">
+            <h3 style="color:#6da077; font-size:1rem; text-transform:uppercase; margin-top:0; margin-bottom:15px;">📝 Modificando Registro</h3>
+            
+            <input type="hidden" id="editId">
+
+            <div class="campo">
+                <label>🌲 Indicativo Militar (Usuario):</label>
+                <input type="text" id="editUsuario">
+            </div>
+
+            <div class="campo">
+                <label>🔒 Contraseña de Acceso:</label>
+                <input type="text" id="editContrasena">
+            </div>
+
+            <div class="campo">
+                <label>⚔️ Especialidad de Combate:</label>
+                <select id="editRol">
+                    <option value="Asalto">Asalto</option>
+                    <option value="Médico">Médico</option>
+                    <option value="Tirador Selecto">Tirador Selecto (DMR)</option>
+                    <option value="Sniper">Sniper</option>
+                    <option value="Apoyo">Apoyo</option>
+                    <option value="Mando">Mando</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label>📊 Puntos de Honor (Ranking):</label>
+                <input type="number" id="editPuntos">
+            </div>
+
+            <div class="campo">
+                <label>🛰️ Estado de Despliegue:</label>
+                <select id="editEstado">
+                    <option value="false">En Base (Falso)</option>
+                    <option value="true">En Combate / Radar (Verdadero)</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label>👑 Permisos de Consola Administrativa:</label>
+                <select id="editAdmin">
+                    <option value="false">Operador de Campo</option>
+                    <option value="true">Alto Mando (Administrador)</option>
+                </select>
+            </div>
+
+            <button class="btn-guardar" onclick="guardarCambiosOperador()">Sobrescribir Datos de Red</button>
         </div>
-
-        <div class="campo">
-            <label>🕹️ Reglas de Encuentro:</label>
-            <select id="tipoPartida">
-                <option value="Refriega Convencional">Refriega Convencional</option>
-                <option value="Captura de Puntos">Captura de Puntos</option>
-                <option value="Simulación Militar (MilSim)">Simulación Militar (MilSim)</option>
-            </select>
-        </div>
-
-        <button onclick="crearNuevaPartida()">Lanzar Orden de Operaciones</button>
         
-        <a href="index.html" class="enlace-volver">⬅️ Salir del Panel de Mando</a>
+        <div class="nav-links">
+            <a href="index.html" class="link-btn">🛰️ Volver al Radar</a>
+            <a href="perfil.html" class="link-btn">🪪 Mi Perfil</a>
+        </div>
     </div>
 
 <script>
-    // Blindaje de seguridad estricto por sesión activa
-    document.addEventListener("DOMContentLoaded", async () => {
-        const operador = localStorage.getItem("usuarioLogueado");
-        if (!operador) { window.location.href = "index.html"; return; }
+    let miUsuario = localStorage.getItem("usuarioLogueado");
 
+    window.onload = function() {
+        if (!miUsuario) {
+            window.location.href = "login.html";
+            return;
+        }
+        verificarRangoAdmin();
+    };
+
+    async function verificarRangoAdmin() {
         try {
-            const { data: jefe } = await window.supabaseClient
+            const { data: jugador } = await window.supabaseClient
                 .from("jugadores")
                 .select("es_admin")
-                .eq("usuario", operador.trim())
+                .eq("usuario", miUsuario.toLowerCase().trim())
                 .maybeSingle();
 
-            if (!jefe || jefe.es_admin !== true) {
-                alert("ACCESO RECHAZADO: Solo personal del Alto Mando autorizado.");
+            if (!jugador || !jugador.es_admin) {
+                alert("Acceso denegado: Se requieren credenciales de Alto Mando.");
                 window.location.href = "index.html";
             }
-        } catch(e) {
-            window.location.href = "index.html";
-        }
-    });
+        } catch (e) { window.location.href = "index.html"; }
+    }
 
-    async function crearNuevaPartida() {
-        const nombre = document.getElementById("nombrePartida").value.trim();
-        const fecha = document.getElementById("fechaPartida").value;
-        const tipo = document.getElementById("tipoPartida").value;
-
-        if (!nombre || !fecha) { alert("Asigna obligatoriamente un nombre y fecha."); return; }
+    async function buscarOperador() {
+        const busqueda = document.getElementById("busquedaUsuario").value.trim().toLowerCase();
+        if (!busqueda) return;
 
         try {
-            // Desactiva cualquier partida activa previa
-            await window.supabaseClient.from("partidas").update({ activa: false }).eq("activa", true);
+            const { data: objetivo, error } = await window.supabaseClient
+                .from("jugadores")
+                .select("id, usuario, contrasena, rol_juego, puntos, en_partida, es_admin")
+                .eq("usuario", busqueda)
+                .maybeSingle();
 
-            // Inserta la nueva misión de comando
+            if (error || !objetivo) {
+                alert("No se ha localizado ningún operador bajo ese indicativo.");
+                document.getElementById("seccionEdicion").style.display = "none";
+                return;
+            }
+
+            // Cargamos los datos en el formulario oculto
+            document.getElementById("editId").value = objetivo.id;
+            document.getElementById("editUsuario").value = objetivo.usuario;
+            document.getElementById("editContrasena").value = objetivo.contrasena;
+            document.getElementById("editRol").value = objetivo.rol_juego || "Asalto";
+            document.getElementById("editPuntos").value = objetivo.puntos || 0;
+            document.getElementById("editEstado").value = objetivo.en_partida ? "true" : "false";
+            document.getElementById("editAdmin").value = objetivo.es_admin ? "true" : "false";
+
+            document.getElementById("seccionEdicion").style.display = "block";
+        } catch (e) { alert("Error al conectar con la base de datos."); }
+    }
+
+    async function guardarCambiosOperador() {
+        const id = document.getElementById("editId").value;
+        const usuario = document.getElementById("editUsuario").value.trim().toLowerCase();
+        const contrasena = document.getElementById("editContrasena").value;
+        const rol_juego = document.getElementById("editRol").value;
+        const puntos = parseInt(document.getElementById("editPuntos").value) || 0;
+        const en_partida = document.getElementById("editEstado").value === "true";
+        const es_admin = document.getElementById("editAdmin").value === "true";
+
+        try {
             const { error } = await window.supabaseClient
-                .from("partidas")
-                .insert([{ nombre: nombre, fecha: fecha, activa: true, tipo_partida: tipo }]);
+                .from("jugadores")
+                .update({ usuario, contrasena, rol_juego, puntos, en_partida, es_admin })
+                .eq("id", id);
 
             if (error) throw error;
-            alert("Nueva orden de misión desplegada en el radar.");
-            document.getElementById("nombrePartida").value = "";
-        } catch(e) {
-            alert("Fallo al publicar los datos de misión.");
-        }
+
+            alert("¡Expediente actualizado con éxito en la base central!");
+            
+            // Si el administrador se editó a sí mismo, actualizamos el almacenamiento local
+            if (id === localStorage.getItem("miIdTemporal")) {
+                localStorage.setItem("usuarioLogueado", usuario);
+            }
+            
+            buscarOperador(); // Recargamos datos visuales
+        } catch (e) { alert("Error al sobrescribir los datos."); }
     }
 </script>
 </body>
