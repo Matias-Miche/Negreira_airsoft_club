@@ -47,9 +47,7 @@
             padding-bottom: 12px;
         }
 
-        .campo {
-            margin-bottom: 15px;
-        }
+        .campo { margin-bottom: 20px; }
 
         label {
             color: #a4b3a7;
@@ -71,12 +69,6 @@
             font-family: inherit;
         }
 
-        input:focus, select:focus {
-            outline: none;
-            border-color: #6da077;
-            background: #142018;
-        }
-
         button {
             width: 100%;
             padding: 12px;
@@ -89,39 +81,16 @@
             text-transform: uppercase;
             font-size: 0.9rem;
             letter-spacing: 1px;
-            margin-top: 10px;
         }
 
-        button:hover {
-            background: #274930;
-            color: #ffd875;
-        }
-
-        .enlace-volver {
-            display: block;
-            text-align: center;
-            margin-top: 15px;
-            color: #728576;
-            font-size: 0.8rem;
-            text-decoration: none;
-        }
-        .enlace-volver:hover { color: #6da077; }
+        button:hover { background: #274930; color: #ffd875; }
+        .enlace-volver { display: block; text-align: center; margin-top: 15px; color: #728576; font-size: 0.8rem; text-decoration: none; }
     </style>
 </head>
 <body>
 
     <div class="contenedor-registro">
         <h2>📝 Alta de Operador</h2>
-        
-        <div class="campo">
-            <label>📧 Correo Electrónico:</label>
-            <input type="text" id="regEmail" placeholder="ejemplo@correo.com">
-        </div>
-
-        <div class="campo">
-            <label>🔑 Contraseña de Acceso:</label>
-            <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres">
-        </div>
 
         <div class="campo">
             <label>🌲 Nombre de Jugador (Usuario):</label>
@@ -138,65 +107,30 @@
             </select>
         </div>
 
-        <button onclick="registrarNuevoOperador()">Dar de Alta en Red</button>
-        
-        <a href="index.html" class="enlace-volver">⬅️ Cancelar y volver a la terminal</a>
+        <button onclick="registrarNuevoOperadorDirecto()">Dar de Alta en Red</button>
+        <a href="index.html" class="enlace-volver">⬅️ Volver a la terminal</a>
     </div>
 
 <script>
-    async function registrarNuevoOperador() {
-        const email = document.getElementById("regEmail").value.trim();
-        const password = document.getElementById("regPassword").value;
+    async function registrarNuevoOperadorDirecto() {
         const usuario = document.getElementById("regUsuario").value.trim();
         const rolJuego = document.getElementById("regRol").value;
 
-        if (!email || !password || !usuario) {
-            alert("ERROR: Todos los campos tácticos son obligatorios.");
+        if (!usuario) {
+            alert("ERROR: El nombre del jugador es obligatorio.");
             return;
         }
 
-        if (password.length < 6) {
-            alert("SEGURIDAD: La contraseña debe tener al menos 6 caracteres.");
-            return;
-        }
+        const { error } = await window.supabaseClient
+            .from("jugadores")
+            .insert([{ usuario: usuario, rol_juego: rolJuego, en_partida: false, es_admin: false }]);
 
-        // 1. Crear el usuario en el sistema de autenticación de Supabase
-        const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
-            email: email,
-            password: password
-        });
-
-        if (authError) {
-            alert("Fallo en autenticación: " + authError.message);
-            return;
-        }
-
-        // 2. Si se autenticó correctamente, insertamos sus datos en la tabla 'jugadores'
-        if (authData && authData.user) {
-            const { error: tablaError } = await window.supabaseClient
-                .from("jugadores")
-                .insert([
-                    {
-                        id: authData.user.id, // Sincroniza el ID de autenticación con la tabla
-                        usuario: usuario,
-                        rol_juego: rolJuego,
-                        en_partida: false,
-                        es_admin: false       // Entra por defecto como jugador regular
-                    }
-                ]);
-
-            if (tablaError) {
-                console.error("Detalles del fallo en tabla:", tablaError);
-                alert("Usuario autenticado, pero falló el registro en la base de datos (Comprueba las políticas RLS).");
-            } else {
-                alert("¡Operador registrado con éxito! Ya puedes iniciar sesión.");
-                // Limpiamos el formulario
-                document.getElementById("regEmail").value = "";
-                document.getElementById("regPassword").value = "";
-                document.getElementById("regUsuario").value = "";
-            }
+        if (error) {
+            console.error(error);
+            alert("Error al registrar. Verifica las políticas RLS en Supabase.");
         } else {
-            alert("Aviso: El registro requiere confirmación por correo electrónico antes de activar la ficha.");
+            alert(`¡Operador ${usuario.toUpperCase()} registrado con éxito!`);
+            document.getElementById("regUsuario").value = "";
         }
     }
 </script>
