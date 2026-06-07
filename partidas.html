@@ -3,39 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Partidas</title>
+    <title>Partidas - Airsoft Negreira</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <style>
         body { background: #1a1a1a; color: white; font-family: Arial; padding: 20px; }
-        .box { background: #0b0b0b; padding: 20px; border-radius: 10px; border: 2px solid #4a5d4e; }
-        input { padding: 10px; margin-right: 10px; background: #2b2b2b; color: white; border: 1px solid #4a5d4e; }
-        button { padding: 10px; background: #4a5d4e; color: white; border: none; cursor: pointer; }
-        #lista { margin-top: 20px; }
+        .box { background: #0b0b0b; padding: 20px; border-radius: 10px; border: 2px solid #4a5d4e; max-width: 600px; margin: auto; }
+        input { width: 100%; padding: 10px; margin-bottom: 15px; background: #2b2b2b; color: white; border: 1px solid #4a5d4e; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #4a5d4e; color: white; border: none; cursor: pointer; font-weight: bold; margin-bottom: 15px; }
+        #lista { margin-top: 20px; padding-top: 15px; border-top: 1px solid #2b2b2b; }
     </style>
 </head>
 <body>
     <div class="box">
-        <h2>Partidas activas</h2>
-        <input id="nombre" placeholder="Nombre partida">
+        <h2>Publicar Nueva Misión</h2>
+        <p style="margin-bottom:15px; color:#ccc;"><a href="perfil.html" style="color:#7fa984; text-decoration:none;">⬅️ Volver a mi Perfil</a></p>
+        <input id="nombre" placeholder="Nombre de la operación">
         <input id="fecha" type="date">
-        <button onclick="crear()">Crear partida</button>
+        <button onclick="crear()">Generar y Activar Operación</button>
         <div id="lista"></div>
     </div>
 <script>
+    async function verificarAcceso() {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) { window.location.href = "login.html"; return; }
+        
+        const { data } = await window.supabaseClient.from("jugadores").select("rol").eq("id", user.id).single();
+        if(!data || (data.rol !== "administración" && data.rol !== "administracion")) {
+            alert("Acceso denegado.");
+            window.location.href = "perfil.html";
+        } else {
+            cargar();
+        }
+    }
+
     async function crear() {
+        const nombre = document.getElementById("nombre").value.trim();
+        const fecha = document.getElementById("fecha").value;
+
+        if (!nombre || !fecha) {
+            alert("Completa todos los campos");
+            return;
+        }
+
         await window.supabaseClient
             .from("partidas")
             .update({ activa: false })
             .eq("activa", true);
 
-        const nombre = document.getElementById("nombre").value;
-        const fecha = document.getElementById("fecha").value;
-
         await window.supabaseClient
             .from("partidas")
             .insert([{ nombre, fecha, activa: true }]);
 
+        document.getElementById("nombre").value = "";
+        document.getElementById("fecha").value = "";
         cargar();
     }
 
@@ -47,13 +68,13 @@
 
         const lista = document.getElementById("lista");
         if (data && data.length > 0) {
-            lista.innerHTML = data.map(p => `<p>⚔️ <strong>${p.nombre}</strong> - ${p.fecha}</p>`).join("");
+            lista.innerHTML = "<h3>Operación Activa:</h3>" + data.map(p => `<p style='background:#111; padding:10px; margin-top:5px;'>⚔️ <strong>${p.nombre}</strong> - ${p.fecha}</p>`).join("");
         } else {
             lista.innerHTML = "<p>No hay partidas activas en este momento.</p>";
         }
     }
 
-    cargar();
+    document.addEventListener("DOMContentLoaded", verificarAcceso);
 </script>
 </body>
 </html>
