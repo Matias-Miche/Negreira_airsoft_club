@@ -65,7 +65,7 @@
         }
 
         .btn-admin-oculto {
-            display: none; /* Se activa por JS solo para administradores */
+            display: none;
             background: #1a160d;
             border: 1px solid #bfa054;
             color: #bfa054;
@@ -153,4 +153,46 @@
             text-transform: uppercase;
             font-weight: bold;
             color: #8fa694;
+        }
+
+        .seccion-clasificacion {
+            background: #060907;
+            border: 1px solid #223526;
+            border-radius: 3px;
+            padding: 15px;
+            margin-top: 25px;
+        }
+        .seccion-clasificacion h3 {
+            margin: 0 0 12px 0;
+            font-size: 0.9rem;
+            color: #bfa054;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px dashed #223526;
+            padding-bottom: 6px;
+        }
+        .tabla-ranking {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            text-align: left;
+        }
+        .tabla-ranking th {
+            color: #6da077;
+            padding: 6px;
+            border-bottom: 1px solid #1c2e21;
+            text-transform: uppercase;
+        }
+        .tabla-ranking td {
+            padding: 8px 6px;
+            border-bottom: 1px dashed #111a13;
+            color: #a4b3a7;
+        }
+        .tabla-ranking tr:last-child td { border-bottom: none; }
+
+        .menu-interactivo {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
         }
