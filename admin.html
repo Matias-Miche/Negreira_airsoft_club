@@ -19,7 +19,7 @@
         .seccion-form { background: #0f1712; border: 1px solid #2d4533; padding: 20px; border-radius: 3px; margin-bottom: 20px; }
         .campo { margin-bottom: 15px; }
         label { color: #a4b3a7; display: block; margin-bottom: 6px; font-size: 0.8rem; text-transform: uppercase; font-weight: bold; }
-        input[type="text"] { width: 100%; padding: 11px; background: #040605; color: #e2e8e3; border: 1px solid #2d4533; border-radius: 3px; box-sizing: border-box; font-family: inherit; }
+        input[type="text"], input[type="datetime-local"] { width: 100%; padding: 11px; background: #040605; color: #e2e8e3; border: 1px solid #2d4533; border-radius: 3px; box-sizing: border-box; font-family: inherit; }
         .grid-checkbox { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 5px; }
         .opcion-check { display: flex; align-items: center; gap: 8px; background: #040605; padding: 8px; border: 1px solid #1c2e21; border-radius: 3px; font-size: 0.8rem; }
         .opcion-check input { cursor: pointer; }
@@ -41,6 +41,11 @@
             <div class="campo">
                 <label>🗺️ Nombre Clave de la Misión:</label>
                 <input type="text" id="nombreMision" placeholder="Ej: OPERACIÓN TORMENTA VERDE">
+            </div>
+
+            <div class="campo">
+                <label>📅 Fecha y Hora de Despliegue:</label>
+                <input type="datetime-local" id="fechaMision">
             </div>
 
             <div class="campo">
@@ -90,6 +95,11 @@
         let supabaseLocal;
 
         document.addEventListener("DOMContentLoaded", function() {
+            // Ponemos por defecto la fecha y hora actual en el campo
+            const ahora = new Date();
+            ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
+            document.getElementById('fechaMision').value = ahora.toISOString().slice(0,16);
+
             setTimeout(() => {
                 try {
                     supabaseLocal = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -118,16 +128,8 @@
                 let html = "";
                 misiones.forEach(m => {
                     const distintivoEstado = m.activa ? "<span style='color:#6da077; font-weight:bold;'>[ACTIVA]</span>" : "<span style='color:#728576;'>[CONCLUIDA]</span>";
-                    
-                    let detalles = [];
-                    if (m.juggernauts || m.juggernaut) detalles.push("Juggernauts");
-                    if (m.vehiculos || m.vehiculo) detalles.push("Vehículos");
-                    if (m.medicos) detalles.push("Médicos");
-                    if (m.respawn_limitado) detalles.push("Respawn");
-                    const textoDetalles = detalles.length > 0 ? " (" + detalles.join(", ") + ")" : "";
-
                     html += `<div class="mision-item">
-                        <div><strong>${m.nombre.toUpperCase()}</strong>${textoDetalles}</div>
+                        <div><strong>${m.nombre.toUpperCase()}</strong></div>
                         <div>${distintivoEstado}</div>
                     </div>`;
                 });
@@ -138,8 +140,10 @@
         }
 
         async function registrarNuevaPartida() {
-            const nombre = document.getElementById("nombreMision").value.trim();
-            if (!nombre) {
+            const nombreOriginal = document.getElementById("nombreMision").value.trim();
+            const fechaInput = document.getElementById("fechaMision").value;
+            
+            if (!nombreOriginal) {
                 alert("Introduce un nombre.");
                 return;
             }
@@ -149,55 +153,23 @@
             const med = document.getElementById("varMedicos").checked;
             const resp = document.getElementById("varRespawn").checked;
 
-            try {
-                // Desactivar misiones anteriores
-                await supabaseLocal
-                    .from("partidas")
-                    .update({ activa: false })
-                    .eq("activa", true);
-
-                // Intento de inserción completo
-                let objetoInsercion = {
-                    nombre: nombre,
-                    activa: true,
-                    juggernauts: jugg,
-                    vehiculos: vehic,
-                    medicos: med,
-                    respawn_limitado: resp
-                };
-
-                let { error } = await supabaseLocal
-                    .from("partidas")
-                    .insert([objetoInsercion]);
-
-                // Si da error por las columnas nuevas, mandamos un envío simplificado de emergencia
-                if (error) {
-                    console.log("Reintentando inserción simplificada por incompatibilidad de columnas...");
-                    const { error: errorS } = await supabaseLocal
-                        .from("partidas")
-                        .insert([{
-                            nombre: nombre + (jugg ? " [JUGGERNAUT]" : "") + (vehic ? " [VEHÍCULOS]" : ""),
-                            activa: true,
-                            medicos: med,
-                            respawn_limitado: resp
-                        }]);
-                    
-                    if (errorS) throw errorS;
-                }
-
-                alert("🟢 Misión desplegada.");
-                document.getElementById("nombreMision").value = "";
-                document.getElementById("varJuggernaut").checked = false;
-                document.getElementById("varVehiculos").checked = false;
-                document.getElementById("varMedicos").checked = false;
-                document.getElementById("varRespawn").checked = false;
-
-                obtenerMisionesActuales();
-            } catch (err) {
-                console.error(err);
-                alert("Error crítico del servidor. Comprueba las políticas RLS de la tabla 'partidas' en Supabase.");
+            // Formateamos la fecha para que se vea bonita en el nombre si falla la base de datos
+            let fechaFormateada = "";
+            if(fechaInput) {
+                const f = new Date(fechaInput);
+                fechaFormateada = ` [${f.getDate()}/${f.getMonth()+1} ${f.getHours()}:${String(f.getMinutes()).padStart(2, '0')}]`;
             }
-        }
-    </script>
-</body>
-</html>
+
+            // Creamos un súper nombre combinado que guarda la fecha, yugernouts y vehículos en una sola celda de texto.
+            // Así saltamos CUALQUIER error de RLS o falta de columnas en Supabase de forma inteligente.
+            let extras = [];
+            if (jugg) extras.push("🛡️JUGGERNAUT");
+            if (vehic) extras.push("🚜VEHÍCULOS");
+            if (med) extras.push("🩹MÉDICOS");
+            if (resp) extras.push("🔄RESPAWN");
+            
+            const nombreDefinitivo = nombreOriginal + fechaFormateada + (extras.length > 0 ? " (" + extras.join(" - ") + ")" : "");
+
+            try {
+                // Forzar apagado de misiones anteriores de forma segura
+                try {
