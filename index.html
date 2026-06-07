@@ -13,40 +13,31 @@
             min-height: 100vh; overflow-y: auto;
             background-image: 
                 linear-gradient(rgba(8, 11, 9, 0.92), rgba(8, 11, 9, 0.96)),
-                linear-gradient(to right, #162419 1px, transparent 1px),
-                linear-gradient(to bottom, #162419 1px, transparent 1px);
+                linear-gradient(to right, #162419 1px, transparent 1px), linear-gradient(to bottom, #162419 1px, transparent 1px);
             background-size: 100% 100%, 40px 40px, 40px 40px;
         }
         .terminal-consola {
             width: 100%; max-width: 950px; margin: 20px; background: #040605; border: 2px solid #223526;
             border-top: 6px solid #4a6b52; border-radius: 4px; padding: 30px; box-sizing: border-box;
-            box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(74, 107, 82, 0.15); position: relative;
+            box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.8); position: relative;
         }
         .top-bar-actions { position: absolute; top: 8px; right: 12px; display: flex; align-items: center; gap: 15px; }
-        .session-top { font-size: 0.75rem; color: #ff6b6b; font-weight: bold; }
+        .session-top { font-size: 0.75rem; color: #ff6b6b; font-weight: bold; text-transform: uppercase; }
         .btn-admin-oculto {
             display: none; background: #1a160d; border: 1px solid #bfa054; color: #bfa054; padding: 3px 8px;
             font-size: 0.65rem; text-transform: uppercase; font-weight: bold; cursor: pointer; border-radius: 2px; text-decoration: none;
         }
-        .btn-admin-oculto:hover { background: #bfa054; color: #040605; }
         .header-tactico { text-align: center; margin-bottom: 25px; border-bottom: 1px dashed #223526; padding-bottom: 15px; }
         .header-tactico h1 { color: #6da077; text-transform: uppercase; margin: 0; font-size: 2.2rem; letter-spacing: 4px; }
         .contenedor-radar-central { display: flex; justify-content: center; margin: 20px 0; position: relative; }
         .pantalla-radar {
             width: 240px; height: 240px; background: #040705; border: 3px solid #203825; border-radius: 50%;
-            position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(109, 160, 119, 0.2);
+            position: relative; overflow: hidden;
         }
         .pantalla-radar::before {
             content: ""; position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
             background: conic-gradient(from 0deg, rgba(109, 160, 119, 0.25) 0deg, transparent 90deg, transparent 360deg);
             animation: barrido 3.5s linear infinite; pointer-events: none;
-        }
-        .pantalla-radar::after {
-            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: 
-                radial-gradient(circle, transparent 35%, rgba(22, 36, 25, 0.4) 36%, transparent 38%, transparent 68%, rgba(22, 36, 25, 0.4) 69%, transparent 71%),
-                linear-gradient(to right, rgba(32, 56, 37, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(32, 56, 37, 0.3) 1px, transparent 1px);
-            background-size: 100% 100%, 50% 100%, 100% 50%; pointer-events: none;
         }
         @keyframes barrido { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .blip-objetivo {
@@ -62,8 +53,6 @@
         .menu-interactivo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 25px; }
         .btn-consola { background: #0f1712; border: 1px solid #2d4533; border-radius: 3px; padding: 15px 10px; color: #e2e8e3; text-decoration: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
         .btn-consola:hover { background: #18241c; border-color: #4a6b52; }
-        .modal-oculta { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(4,6,5,0.9); }
-        .modal-contenido { background: #060907; margin: 12% auto; padding: 25px; border: 2px solid #38523f; width: 85%; max-width: 500px; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -71,12 +60,12 @@
     <div class="terminal-consola">
         <div class="top-bar-actions">
             <a href="admin.html" id="btnComando" class="btn-admin-oculto">⚡ Panel Comando</a>
-            <div id="indicadorSesion" class="session-top">🔴 CONECTANDO...</div>
+            <div id="indicadorSesion" class="session-top">🔴 DESCONECTADO</div>
         </div>
         
         <div class="header-tactico">
             <h1>Airsoft Negreira</h1>
-            <p style="color: #bfa054; font-size: 0.85rem; margin: 5px 0 0 0; text-transform: uppercase; letter-spacing: 3px;">Consola de Misión Activa</p>
+            <p style="color: #bfa054; font-size: 0.85rem; margin: 5px 0 0 0; text-transform: uppercase; letter-spacing: 3px;">Consola Radar Global</p>
         </div>
 
         <div class="contenedor-radar-central">
@@ -84,47 +73,36 @@
         </div>
 
         <div class="menu-interactivo">
-            <a href="login.html" class="btn-consola">
+            <a href="login.html" id="linkLogin" class="btn-consola">
                 <span style="font-size:1.3rem;">🔑</span>
-                <strong style="font-size:0.8rem; text-transform:uppercase; margin-top:5px;">Terminal Acceso</strong>
+                <strong style="font-size:0.8rem; text-transform:uppercase; margin-top:5px;">Acceso Terminal</strong>
             </a>
-            <div class="btn-consola" onclick="desplegarseEnPartida()" style="border-color: #6da077;">
-                <span style="font-size:1.3rem;">🔫</span>
-                <strong style="font-size:0.8rem; text-transform:uppercase; margin-top:5px; color:#6da077;">Confirmar Despliegue</strong>
-            </div>
-            <div class="btn-consola" onclick="abrirModalPartidas()">
-                <span style="font-size:1.3rem;">🛰️</span>
-                <strong style="font-size:0.8rem; text-transform:uppercase; margin-top:5px; color:#bfa054;">Datos Radar</strong>
+            <a href="perfil.html" id="linkPerfil" class="btn-consola" style="display:none; border-color: #bfa054;">
+                <span style="font-size:1.3rem;">🪪</span>
+                <strong style="font-size:0.8rem; text-transform:uppercase; margin-top:5px; color:#bfa054;">Mi Perfil / Misión</strong>
+            </a>
+            <div class="btn-consola" onclick="document.location.reload()">
+                <span style="font-size:1.3rem;">🔄</span>
+                <strong style="font-size:0.8rem; text-transform:uppercase; margin-top:5px; color:#6da077;">Actualizar Datos</strong>
             </div>
         </div>
 
         <div class="seccion-clasificacion">
-            <h3>📊 Clasificación General de Operadores</h3>
+            <h3>📊 Tabla del Sistema de Ranking Competitivo</h3>
             <table class="tabla-ranking">
                 <thead>
-                    <tr><th>Indicativo Militar</th><th>Especialidad</th><th>Rango Operativo</th><th>Estado</th></tr>
+                    <tr><th>Rango</th><th>Operador</th><th>Rol de Combate</th><th>Puntos de Honor</th><th>Estado</th></tr>
                 </thead>
                 <tbody id="tablaCuerpoClasificacion">
-                    <tr><td colspan="4" style="text-align: center; color: #728576; padding: 15px;">Estableciendo enlace de red estricto...</td></tr>
+                    <tr><td colspan="5" style="text-align: center; color: #728576; padding: 15px;">Estableciendo enlace de red estricto...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <div id="modalPartidas" class="modal-oculta">
-        <div class="modal-contenido">
-            <span style="float:right; cursor:pointer; color:#51755a; font-size:20px;" onclick="cerrarModalPartidas()">&times;</span>
-            <h3 style="color:#6da077; text-transform:uppercase; margin-top:0;">📟 Objetivos de la Operación</h3>
-            <div id="contenedorInfoPartida"></div>
-        </div>
-    </div>
-
 <script>
     window.onload = function() {
-        if (!window.supabaseClient) {
-            document.getElementById("indicadorSesion").innerText = "🔴 ERROR: ESTRUCTURA SUPABASE ERRÓNEA";
-            return;
-        }
+        if (!window.supabaseClient) return;
         conectarYVerificarTodo();
     };
 
@@ -133,47 +111,46 @@
         const indicador = document.getElementById("indicadorSesion");
 
         try {
+            // Solicitamos los puntos para armar el ranking de la flota
             const { data: jugadores, error } = await window.supabaseClient
                 .from("jugadores")
-                .select("usuario, rol_juego, es_admin, en_partida");
+                .select("usuario, rol_juego, es_admin, en_partida, puntos")
+                .order('puntos', { ascending: false }); // El ranking ordena de mayor a menor
 
             if (error) throw error;
 
             if (usuarioActivo) {
-                indicador.innerText = `🟢 OP: ${usuarioActivo.toUpperCase()}`;
+                indicador.innerText = `🟢 EN LÍNEA: ${usuarioActivo}`;
                 indicador.style.color = "#6da077";
+                document.getElementById("linkLogin").style.display = "none";
+                document.getElementById("linkPerfil").style.display = "flex";
 
-                const actual = jugadores.find(u => u.usuario === usuarioActivo);
-                if (actual && actual.es_admin === true) {
+                const actual = jugadores.find(u => u.usuario.toLowerCase() === usuarioActivo.toLowerCase());
+                if (actual && actual.es_admin) {
                     document.getElementById("btnComando").style.display = "inline-block";
                 }
-            } else {
-                indicador.innerText = "🟢 EN LÍNEA";
-                indicador.style.color = "#6da077";
             }
 
             renderizarTabla(jugadores);
             generarPuntosRadar(jugadores);
 
         } catch (err) {
-            indicador.innerText = "🔴 ERROR DE ENLACE";
-            indicador.style.color = "#ff6b6b";
-            document.getElementById("tablaCuerpoClasificacion").innerHTML = 
-                `<tr><td colspan="4" style="text-align:center; color:#ff6b6b; font-weight:bold;">[RED CAÍDA] Revisa las credenciales de red.</td></tr>`;
+            console.error(err);
         }
     }
 
     function renderizarTabla(lista) {
         const tabla = document.getElementById("tablaCuerpoClasificacion");
-        if(!lista || lista.length === 0) {
-            tabla.innerHTML = `<tr><td colspan="4" style="text-align:center;">No hay operadores registrados.</td></tr>`;
-            return;
-        }
         let html = "";
-        lista.forEach(j => {
-            const rango = j.es_admin ? "<span style='color:#bfa054;'>[CMD] ALTO MANDO</span>" : "OPERADOR";
-            const estado = j.en_partida ? "<span style='color:#6da077;'>● DESPLEGADO</span>" : "<span style='color:#728576;'>○ BASE</span>";
-            html += `<tr><td><strong>${(j.usuario || 'N/N').toUpperCase()}</strong></td><td>${j.rol_juego || 'Asalto'}</td><td>${rango}</td><td>${estado}</td></tr>`;
+        lista.forEach((j, index) => {
+            const estado = j.en_partida ? "<span style='color:#ff6b6b;'>● EN COMBATE</span>" : "<span style='color:#728576;'>○ BASE</span>";
+            html += `<tr>
+                <td><strong>#${index + 1}</strong></td>
+                <td>${j.usuario.toUpperCase()}</td>
+                <td>${j.rol_juego}</td>
+                <td style="color:#bfa054; font-weight:bold;">${j.puntos || 0} PTS</td>
+                <td>${estado}</td>
+            </tr>`;
         });
         tabla.innerHTML = html;
     }
@@ -188,38 +165,10 @@
             blip.className = "blip-objetivo";
             const angulo = Math.random() * Math.PI * 2;
             const radio = Math.random() * 80 + 15;
-            const x = Math.floor(116 + Math.cos(angulo) * radio);
-            const y = Math.floor(116 + Math.sin(angulo) * radio);
-            blip.style.left = `${x}px`;
-            blip.style.top = `${y}px`;
+            blip.style.left = `${Math.floor(116 + Math.cos(angulo) * radio)}px`;
+            blip.style.top = `${Math.floor(116 + Math.sin(angulo) * radio)}px`;
             radar.appendChild(blip);
         });
-    }
-
-    async function desplegarseEnPartida() {
-        const usuario = localStorage.getItem("usuarioLogueado");
-        if (!usuario) { alert("Inicia sesión primero."); return; }
-
-        try {
-            await window.supabaseClient.from("jugadores").update({ en_partida: true }).eq("usuario", usuario);
-            alert("Despliegue confirmado.");
-            conectarYVerificarTodo();
-        } catch(e) { alert("Error al actualizar estado."); }
-    }
-
-    function abrirModalPartidas() {
-        document.getElementById("modalPartidas").style.display = "block";
-        consultarPartidasYJugadores();
-    }
-    function cerrarModalPartidas() { document.getElementById("modalPartidas").style.display = "none"; }
-
-    async function consultarPartidasYJugadores() {
-        const contenedor = document.getElementById("contenedorInfoPartida");
-        contenedor.innerHTML = "<p>Buscando misiones...</p>";
-        try {
-            const { data: partida } = await window.supabaseClient.from("partidas").select("nombre, tipo_partida").eq("activa", true).maybeSingle();
-            contenedor.innerHTML = partida ? `<p><strong>Misión:</strong> <span style='color:#bfa054;'>${partida.nombre}</span></p><p><strong>Modo:</strong> ${partida.tipo_partida}</p>` : "<p style='color:#728576;'>Zona despejada. No hay misiones activas.</p>";
-        } catch (e) { contenedor.innerHTML = "<p>Fallo de respuesta.</p>"; }
     }
 </script>
 </body>
