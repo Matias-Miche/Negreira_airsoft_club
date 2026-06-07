@@ -50,8 +50,49 @@
 
 <script>
     async function iniciarSesionDirecta() {
-        const usuario = document.getElementById("loginUsuario").value.trim().toLowerCase();
-        const password = document.getElementById("loginPassword").value;
+        // Obtenemos los valores limpiando espacios iniciales y finales
+        const usuarioInput = document.getElementById("loginUsuario").value.trim();
+        const passwordInput = document.getElementById("loginPassword").value;
 
-        if (!usuario || !password) { alert("Introduce tus credenciales."); return; }
-        if (!window.supabaseClient) { alert("Error de comunicación con
+        if (!usuarioInput || !passwordInput) { 
+            alert("Por favor, introduce tus credenciales."); 
+            return; 
+        }
+        if (!window.supabaseClient) { 
+            alert("Error: El cliente de Supabase no está listo."); 
+            return; 
+        }
+
+        try {
+            // Buscamos usando la función ilike para que ignore si lo pusiste en mayúsculas o minúsculas
+            const { data: jugador, error } = await window.supabaseClient
+                .from("jugadores")
+                .select("usuario, contrasena, es_admin")
+                .ilike("usuario", usuarioInput)
+                .maybeSingle();
+
+            if (error) { 
+                alert("Error de consulta en la base de datos: " + error.message); 
+                return; 
+            }
+
+            if (jugador) {
+                // Comparamos la contraseña de forma exacta
+                if (jugador.contrasena === passwordInput) {
+                    // Guardamos en el navegador exactamente el nombre como está en la base de datos
+                    localStorage.setItem("usuarioLogueado", jugador.usuario);
+                    alert("¡Conexión establecida correctamente!");
+                    window.location.href = "index.html";
+                } else {
+                    alert("Acceso denegado: Contraseña incorrecta.");
+                }
+            } else {
+                alert("Acceso denegado: El operador no existe en la red.");
+            }
+        } catch (err) { 
+            alert("Error crítico de red al intentar conectar."); 
+        }
+    }
+</script>
+</body>
+</html>
