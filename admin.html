@@ -98,6 +98,26 @@
     </div>
 
 <script>
+    // Blindaje de seguridad por URL
+    document.addEventListener("DOMContentLoaded", async () => {
+        const quienValida = localStorage.getItem("usuarioLogueado");
+        if (!quienValida) {
+            window.location.href = "index.html";
+            return;
+        }
+
+        const { data: jefe } = await window.supabaseClient
+            .from("jugadores")
+            .select("es_admin")
+            .eq("usuario", quienValida.trim())
+            .maybeSingle();
+
+        if (!jefe || jefe.es_admin !== true) {
+            alert("ACCESO VIOLADO: No tienes permisos de comando.");
+            window.location.href = "index.html";
+        }
+    });
+
     async function crearNuevaPartida() {
         const nombre = document.getElementById("nombrePartida").value.trim();
         const fecha = document.getElementById("fechaPartida").value;
@@ -110,13 +130,7 @@
             return;
         }
 
-        // Obtener la identidad del creador de la sesión local
         const quienValida = localStorage.getItem("usuarioLogueado");
-        if (!quienValida) {
-            alert("ERROR: Debes loguearte primero para autorizar misiones.");
-            return;
-        }
-
         const { data: jefe } = await window.supabaseClient
             .from("jugadores")
             .select("es_admin")
@@ -124,14 +138,12 @@
             .maybeSingle();
 
         if (!jefe || jefe.es_admin !== true) {
-            alert("AUTORIZACIÓN RECHAZADA: No posees credenciales de Administrador en el sistema.");
+            alert("AUTORIZACIÓN RECHAZADA.");
             return;
         }
 
-        // Desactivar partida vieja
         await window.supabaseClient.from("partidas").update({ activa: false }).eq("activa", true);
 
-        // Guardar la nueva
         const { error } = await window.supabaseClient
             .from("partidas")
             .insert([{ nombre: nombre, fecha: fecha, activa: true, tipo_partida: tipo, vehiculos: vehiculos, armamento_especial: armas }]);
@@ -146,11 +158,6 @@
 
     async function intentarCrearAdmin() {
         const quienSube = localStorage.getItem("usuarioLogueado");
-        if (!quienSube) {
-            alert("ERROR: No has validado tus credenciales de sesión.");
-            return;
-        }
-
         const { data: jefe } = await window.supabaseClient
             .from("jugadores")
             .select("es_admin")
@@ -158,7 +165,7 @@
             .maybeSingle();
 
         if (!jefe || jefe.es_admin !== true) {
-            alert("PERMISO RECHAZADO: Solo un administrador existente puede promover rangos.");
+            alert("PERMISO RECHAZADO.");
             return;
         }
 
