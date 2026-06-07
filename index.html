@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marcador - Airsoft Negreira</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
     <style>
         body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
         .contenedor-login, .contenedor-marcador { background: #0b0b0b; padding: 25px; border-radius: 10px; border: 3px solid #4a5d4e; width: 100%; max-width: 650px; margin-bottom: 25px; box-sizing: border-box; }
@@ -30,10 +31,10 @@
 <body>
 
 <div id="alerta-boss" class="alerta-juggernaut">
-    🚨 EVENTO ESPECIAL 🚨 <br><br> ¡Un administrador ha entrado como JUGGERNAUT!
+    🚨 EVENTO ESPECIAL 🚨 <br><br> ¡Un administrador ha entrado al campo como JUGGERNAUT!
 </div>
 
-<div class="contenedor-login">
+<div class="contenedor-login" id="bloque-autenticacion">
     <h2>Ingreso de Operadores</h2>
     <form id="formLogin">
         <input type="text" id="usuario" placeholder="Tu usuario" required>
@@ -41,29 +42,29 @@
         <button type="submit" class="btn-accion">Entrar al Panel</button>
     </form>
     <a href="registro.html" style="color:#7fa984; display:block; text-align:center; margin-top:15px; text-decoration:none;">
-        ¿No tienes perfil? Regístrate
+        ¿No tienes perfil? Regístrate aquí
     </a>
     <div id="estado-login" class="estado"></div>
 </div>
 
 <div class="contenedor-marcador" id="zona-partida" style="display:none;">
     <h3 id="titulo-partida">Cargando partida...</h3>
-    <p id="fecha-partida" style="text-align:center;color:#ccc;"></p>
-    <label>Selecciona modalidad:</label>
+    <p id="fecha-partida" style="text-align:center;color:#ccc; margin-bottom:15px;"></p>
+    <label>Selecciona modalidad de asistencia:</label>
     <select id="tipo-pago">
         <option value="5">5€ - Traigo réplica propia</option>
-        <option value="25">25€ - Alquiler completo</option>
+        <option value="25">25€ - Alquiler completo del Club</option>
     </select>
     <button class="btn-accion" onclick="unirseAPartida()">Confirmar Asistencia</button>
 </div>
 
 <div class="contenedor-marcador">
-    <h3>Marcador General</h3>
+    <h3>Marcador General de Operadores</h3>
     <table>
         <thead>
             <tr>
                 <th>Operador</th>
-                <th>Rol</th>
+                <th>Rol Táctico</th>
                 <th>Puntos</th>
             </tr>
         </thead>
@@ -72,65 +73,79 @@
 </div>
 
 <script>
-    const SUPABASE_URL = "https://wbcfszivrbuqfqnizarq.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMjEsImV4cCI6MjA5NTQ3NTIyMX0.2iX7Twex3d96A9Iawg3zxvGAjFNLBqt81tSZgrzqA9s";
-    const clienteSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // Corregido: Uso de cliente global unificado de supabase.js
+    document.addEventListener("DOMContentLoaded", comprobarSesion);
 
-    let usuarioLogueado = localStorage.getItem("usuarioRegistrado");
-    if (usuarioLogueado) {
-        document.getElementById("zona-partida").style.display = "block";
+    async function comprobarSesion() {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (user) {
+            const { data } = await window.supabaseClient
+                .from("jugadores")
+                .select("usuario")
+                .eq("id", user.id)
+                .maybeSingle();
+
+            if (data) {
+                document.getElementById("zona-partida").style.display = "block";
+                document.getElementById("formLogin").style.display = "none";
+                document.getElementById("estado-login").innerHTML = `Identificado como: <strong>${data.usuario.toUpperCase()}</strong> | <a href="perfil.html" style="color:#7fa984; text-decoration:none; font-weight:bold;">Ir a mi Perfil</a>`;
+            }
+        }
+        cargarSistema();
+        setInterval(cargarSistema, 10000);
     }
 
     document.getElementById("formLogin").addEventListener("submit", async function(e) {
         e.preventDefault();
-        const usuario = document.getElementById("usuario").value.trim().toLowerCase().replace(/[^a-z0-9@._-]/g, "");
-        const contra = document.getElementById("contra").value;
+        const user = document.getElementById("usuario").value.trim().toLowerCase().replace(/[^a-z0-9@._-]/g, "");
+        const pass = document.getElementById("contra").value;
         const estado = document.getElementById("estado-login");
 
         estado.innerText = "Verificando acceso...";
 
-        const { data, error } = await clienteSupabase
-            .from("jugadores")
-            .select("*")
-            .eq("usuario", usuario)
-            .eq("contrasena", contra)
-            .maybeSingle();
-
-        if (error) {
-            estado.innerText = "Error de conexión";
+        if (!user || !pass) {
+            estado.innerText = "Completa todos los campos";
             return;
         }
 
-        if (data) {
-            localStorage.setItem("usuarioRegistrado", usuario);
-            document.getElementById("zona-partida").style.display = "block";
-            estado.innerText = "Acceso autorizado";
-            usuarioLogueado = usuario;
-        } else {
-            estado.innerText = "Datos incorrectos";
+        const email = user.includes("@") ? user : user + "@airsoft.local";
+
+        const { error } = await window.supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: pass
+        });
+
+        if (error) {
+            // Corregido: Se eliminó la referencia a 'msg' que rompía el hilo de ejecución
+            estado.innerText = "Usuario o contraseña incorrectos";
+            return;
         }
+
+        window.location.href = "perfil.html";
     });
 
     async function unirseAPartida() {
-        if (!usuarioLogueado) {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) {
             alert("Debes iniciar sesión");
             return;
         }
         const precio = document.getElementById("tipo-pago").value;
-        const { error } = await clienteSupabase
+        const { error } = await window.supabaseClient
             .from("jugadores")
-            .update({ tipo_entrada: precio, en_partida: true })
-            .eq("usuario", usuarioLogueado);
+            .update({ tipo_entrada: Number(precio), en_partida: true })
+            .eq("id", user.id);
 
         if (error) {
-            alert("Error al alistarse");
+            alert("Error al alistarse en la misión.");
             return;
         }
         alert("¡Te has alistado correctamente!");
+        cargarSistema();
     }
 
     async function cargarSistema() {
-        const { data: partida } = await clienteSupabase
+        const { data: partida } = await window.supabaseClient
             .from("partidas")
             .select("*")
             .eq("activa", true)
@@ -139,9 +154,12 @@
         if (partida) {
             document.getElementById("titulo-partida").innerText = "⚔️ MISIÓN: " + partida.nombre;
             document.getElementById("fecha-partida").innerText = "Fecha: " + partida.fecha;
+        } else {
+            document.getElementById("titulo-partida").innerText = "No hay misiones activas";
+            document.getElementById("fecha-partida").innerText = "";
         }
 
-        const { data: jugadores } = await clienteSupabase
+        const { data: jugadores } = await window.supabaseClient
             .from("jugadores")
             .select("*")
             .order("puntos", { ascending: false });
@@ -152,21 +170,21 @@
 
         if (jugadores) {
             jugadores.forEach(j => {
-                if (j.usuario.toLowerCase().includes("admin")) {
+                if (j.rol === "administración" || j.rol === "administracion") {
                     if (j.en_partida) juggernautActivo = true;
                     return;
                 }
 
                 let estilo = "rol-at";
-                if (j.rol === "Medico" || j.rol === "Médico") estilo = "rol-medico";
-                if (j.rol === "Asalto") estilo = "rol-asalto";
-                if (j.rol === "Ametrallador") estilo = "rol-ametrallador";
-                if (j.rol === "Tirador designado" || j.rol === "Tirador") estilo = "rol-tirador";
+                if (j.rol_juego === "Medico" || j.rol_juego === "Médico") estilo = "rol-medico";
+                if (j.rol_juego === "Asalto") estilo = "rol-asalto";
+                if (j.rol_juego === "Ametrallador") estilo = "rol-ametrallador";
+                if (j.rol_juego === "Tirador designado" || j.rol_juego === "Tirador") estilo = "rol-tirador";
 
                 tbody.innerHTML += `
                     <tr>
                         <td><strong>${j.usuario}</strong></td>
-                        <td><span class="etiqueta-rol ${estilo}">${j.rol || 'Asalto'}</span></td>
+                        <td><span class="etiqueta-rol ${estilo}">${j.rol_juego || 'Asalto'}</span></td>
                         <td><strong>${j.puntos || 0} PTS</strong></td>
                     </tr>
                 `;
@@ -174,9 +192,6 @@
         }
         document.getElementById("alerta-boss").style.display = juggernautActivo ? "block" : "none";
     }
-
-    cargarSistema();
-    setInterval(cargarSistema, 10000);
 </script>
 </body>
 </html>
