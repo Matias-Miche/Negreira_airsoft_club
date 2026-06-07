@@ -1,268 +1,105 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Registro - Airsoft Negreira</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js"></script>
-
-<style>
-*{
-box-sizing:border-box;
-margin:0;
-padding:0;
-}
-
-body{
-background:#1a1a1a;
-color:white;
-font-family:Arial,sans-serif;
-display:flex;
-justify-content:center;
-align-items:center;
-min-height:100vh;
-padding:20px;
-}
-
-.box{
-background:#0b0b0b;
-padding:30px;
-border:2px solid #4a5d4e;
-border-radius:10px;
-width:100%;
-max-width:450px;
-}
-
-h2{
-text-align:center;
-margin-bottom:20px;
-color:#7fa984;
-}
-
-input{
-width:100%;
-padding:12px;
-margin-bottom:15px;
-background:#2b2b2b;
-color:white;
-border:1px solid #444;
-border-radius:5px;
-}
-
-button{
-width:100%;
-padding:12px;
-background:#4a5d4e;
-color:white;
-border:none;
-border-radius:5px;
-cursor:pointer;
-font-weight:bold;
-}
-
-button:hover{
-opacity:.9;
-}
-
-#estado{
-margin-top:15px;
-text-align:center;
-font-weight:bold;
-}
-
-.links{
-margin-top:20px;
-text-align:center;
-}
-
-.links a{
-color:#8dc891;
-text-decoration:none;
-}
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Airsoft Negreira</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .box { background: #0b0b0b; padding: 30px; border: 2px solid #4a5d4e; border-radius: 10px; width: 100%; max-width: 450px; }
+        h2 { text-align: center; margin-bottom: 20px; color: #7fa984; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; background: #2b2b2b; color: white; border: 1px solid #444; border-radius: 5px; }
+        button { width: 100%; padding: 12px; background: #4a5d4e; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { opacity: 0.9; }
+        #estado { margin-top: 15px; text-align: center; font-weight: bold; }
+        .links { margin-top: 20px; text-align: center; }
+        .links a { color: #8dc891; text-decoration: none; }
+    </style>
 </head>
-
 <body>
-
-<div class="box">
-
-<h2>Crear Cuenta</h2>
-
-<input id="usuario" placeholder="Usuario">
-
-<input
-id="password"
-type="password"
-placeholder="Contraseña">
-
-<input
-id="password2"
-type="password"
-placeholder="Repetir contraseña">
-
-<button
-id="btnRegistro"
-onclick="registrar()">
-
-Crear cuenta
-
-</button>
-
-<p id="estado"></p>
-
-<div class="links">
-<a href="login.html">
-Ya tengo cuenta
-</a>
-</div>
-
-</div>
-
+    <div class="box">
+        <h2>Crear Cuenta</h2>
+        <input id="usuario" type="text" placeholder="Usuario (Ej: operador12)">
+        <input id="password" type="password" placeholder="Contraseña">
+        <input id="password2" type="password" placeholder="Repetir contraseña">
+        <button id="btnRegistro" onclick="registrar()">Crear cuenta</button>
+        <p id="estado"></p>
+        <div class="links"><a href="login.html">Ya tengo cuenta</a></div>
+    </div>
 <script>
+    async function registrar() {
+        let usuario = document.getElementById("usuario").value.trim().toLowerCase().replace(/[^a-z0-9@._-]/g, "");
+        const password = document.getElementById("password").value;
+        const password2 = document.getElementById("password2").value;
+        const estado = document.getElementById("estado");
 
-async function registrar(){
+        estado.innerText = "";
+        estado.style.color = "white";
 
-const estado =
-document.getElementById("estado");
+        if (!usuario || !password) {
+            estado.innerText = "Completa todos los campos";
+            estado.style.color = "#ff8a8a";
+            return;
+        }
+        if (password !== password2) {
+            estado.innerText = "Las contraseñas no coinciden";
+            estado.style.color = "#ff8a8a";
+            return;
+        }
+        if (password.length < 6) {
+            estado.innerText = "Mínimo 6 caracteres";
+            estado.style.color = "#ff8a8a";
+            return;
+        }
 
-const btn =
-document.getElementById("btnRegistro");
+        document.getElementById("btnRegistro").disabled = true;
+        const email = usuario.includes("@") ? usuario : usuario + "@airsoft.local";
 
-let username =
-document.getElementById("usuario")
-.value
-.trim()
-.toLowerCase();
+        const { data, error } = await window.supabaseClient.auth.signUp({
+            email: email,
+            password: password
+        });
 
-const password =
-document.getElementById("password").value;
+        if (error) {
+            if (error.message.includes("rate limit") || error.status === 429) {
+                estado.innerText = "⚠️ Límite de Supabase alcanzado. Espera unos minutos o desactiva 'Confirm Email' en tu panel.";
+            } else {
+                estado.innerText = error.message;
+            }
+            estado.style.color = "#ff8a8a";
+            document.getElementById("btnRegistro").disabled = false;
+            return;
+        }
 
-const password2 =
-document.getElementById("password2").value;
+        // Vinculación automática: Se crea el perfil público en la tabla 'jugadores' enlazado por el ID único
+        if (data && data.user) {
+            const { error: dbError } = await window.supabaseClient
+                .from("jugadores")
+                .insert([{
+                    id: data.user.id,
+                    usuario: usuario,
+                    rol: "usuario",
+                    rol_juego: "Asalto",
+                    tipo_entrada: 0,
+                    puntos: 0,
+                    en_partida: false,
+                    arsenal_prestado: ""
+                }]);
 
-estado.innerText="";
+            if (dbError) {
+                console.error("Error al inicializar registro en tabla jugadores:", dbError.message);
+            }
+        }
 
-if(!username){
-estado.innerText="Introduce usuario";
-return;
-}
-
-if(password.length < 6){
-estado.innerText="Mínimo 6 caracteres";
-return;
-}
-
-if(password !== password2){
-estado.innerText="Las contraseñas no coinciden";
-return;
-}
-
-btn.disabled=true;
-
-try{
-
-const email =
-username + "@airsoft.com";
-
-const {
-data: existe
-}
-=
-await window.supabaseClient
-.from("profiles")
-.select("username")
-.eq("username", username)
-.maybeSingle();
-
-if(existe){
-
-estado.innerText =
-"Ese usuario ya existe";
-
-btn.disabled=false;
-
-return;
-}
-
-const {
-data,
-error
-}
-=
-await window.supabaseClient
-.auth
-.signUp({
-email,
-password
-});
-
-if(error){
-
-estado.innerText =
-error.message;
-
-btn.disabled=false;
-
-return;
-}
-
-const userId =
-data.user.id;
-
-const { error: perfilError }
-=
-await window.supabaseClient
-.from("profiles")
-.insert([
-{
-id:userId,
-username:username,
-rol:"jugador",
-puntos:0,
-rol_juego:"Asalto",
-tipo_entrada:5,
-en_partida:false
-}
-]);
-
-if(perfilError){
-
-estado.innerText =
-perfilError.message;
-
-btn.disabled=false;
-
-return;
-}
-
-estado.style.color="#8dc891";
-
-estado.innerText =
-"Cuenta creada correctamente";
-
-setTimeout(()=>{
-
-window.location.href =
-"login.html";
-
-},1500);
-
-}catch(err){
-
-console.error(err);
-
-estado.innerText =
-"Error inesperado";
-
-btn.disabled=false;
-}
-
-}
-
+        estado.innerText = "Cuenta creada correctamente";
+        estado.style.color = "#8dc891";
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 1500);
+    }
 </script>
-
 </body>
 </html>
