@@ -3,356 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil - Airsoft Negreira</title>
+    <title>Perfil de Operador - Negreira</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <style>
-        body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; padding: 20px; margin: 0; }
-        .box { max-width: 700px; margin: 40px auto; background: #0b0b0b; border: 2px solid #4a5d4e; border-radius: 10px; padding: 25px; box-sizing: border-box; }
-        h2 { text-align: center; color: #7fa984; text-transform: uppercase; margin-bottom: 20px; }
-        .info { margin-top: 15px; padding: 12px; background: #222; border-radius: 6px; border-left: 4px solid #4a5d4e; }
-        label { display: block; margin-top: 15px; color: #7fa984; font-weight: bold; font-size: 0.9em; }
-        select { width: 100%; padding: 10px; margin-top: 5px; background: #2b2b2b; color: white; border: 1px solid #4a5d4e; border-radius: 5px; }
-        button { margin-top: 20px; padding: 12px; border: none; background: #4a5d4e; color: white; cursor: pointer; border-radius: 5px; font-weight: bold; width: 100%; text-transform: uppercase; }
-        button:hover { opacity: 0.9; }
-        .btn-guardar { background: #7fa984; color: black; margin-top: 15px; }
-        .admin-btn { background: #bd913c; color: black; display: block; width: 100%; margin-top: 15px; text-transform: uppercase; text-align: center; text-decoration: none; padding: 12px 0; border-radius: 5px; font-weight: bold; box-sizing: border-box; }
-        #feedback { text-align: center; margin-top: 10px; font-weight: bold; }
-
-        /* --- ESTILOS DEL BOTÓN FLOTANTE Y MODAL --- */
-        .boton-flotante {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #bd913c;
-            color: black;
-            border: 2px solid #a37a2d;
-            padding: 14px 20px;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 0.95rem;
-            cursor: pointer;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
-            z-index: 9999;
-            transition: transform 0.2s, background 0.2s;
-            width: auto;
-            text-transform: none;
+        body {
+            background: #080b09; color: #d1dad2; font-family: 'Courier New', Courier, monospace;
+            padding: 20px; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            background-image: 
+                linear-gradient(rgba(8, 11, 9, 0.92), rgba(8, 11, 9, 0.96)),
+                linear-gradient(to right, #162419 1px, transparent 1px), linear-gradient(to bottom, #162419 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
         }
-        .boton-flotante:hover {
-            transform: scale(1.05);
-            background: #dbab4c;
-        }
-        .modal-oculta {
-            display: none;
-            position: fixed;
-            z-index: 10000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.8);
-        }
-        .modal-contenido {
-            background-color: #0b0b0b;
-            margin: 10% auto;
-            padding: 20px;
-            border: 2px solid #4a5d4e;
-            width: 80%;
-            max-width: 550px;
-            border-radius: 10px;
-            color: white;
-            position: relative;
-        }
-        .cerrar-modal {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .cerrar-modal:hover { color: white; }
-        .aviso-especial {
-            background: #7a2222;
-            border: 1px solid #ff4d4d;
-            color: #ffcccc;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 15px;
-            animation: parpadeo 2s infinite;
-        }
-        @keyframes parpadeo {
-            0% { opacity: 0.8; }
-            50% { opacity: 1; border-color: #ff8585; }
-            100% { opacity: 0.8; }
-        }
-        .lista-jugadores {
-            background: #1a1a1a;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .btn-accion-partida {
-            width: 100%;
-            padding: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            border-radius: 5px;
-            margin-top: 15px;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-unirse { background: #4caf50; color: white; }
-        .btn-salir { background: #f44336; color: white; }
+        .contenedor-perfil { width: 100%; max-width: 550px; background: #040605; border: 2px solid #223526; border-top: 6px solid #bfa054; border-radius: 4px; padding: 30px; box-sizing: border-box; box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.8); }
+        h2 { color: #bfa054; text-transform: uppercase; margin-top: 0; letter-spacing: 2px; font-size: 1.4rem; text-align: center; border-bottom: 1px dashed #223526; padding-bottom: 12px; }
+        .info-bloque { background: #0f1712; border: 1px solid #2d4533; padding: 15px; border-radius: 3px; margin-bottom: 20px; }
+        .info-linea { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; }
+        .info-linea span { color: #6da077; font-weight: bold; }
+        .campo { margin-bottom: 15px; }
+        label { color: #a4b3a7; display: block; margin-bottom: 6px; font-size: 0.8rem; text-transform: uppercase; font-weight: bold; }
+        select { width: 100%; padding: 11px; background: #0f1712; color: #e2e8e3; border: 1px solid #2d4533; border-radius: 3px; box-sizing: border-box; font-family: inherit; }
+        button { width: 100%; padding: 12px; background: #1e3825; color: #bfa054; border: 1px solid #4a6b52; border-radius: 3px; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 0.9rem; margin-top: 10px; }
+        button:hover { background: #274930; color: #ffd875; }
+        .nav-links { display: flex; justify-content: space-between; margin-top: 20px; border-top: 1px dashed #223526; padding-top: 15px; font-size: 0.8rem; }
+        .link-btn { color: #6da077; text-decoration: none; text-transform: uppercase; font-weight: bold; }
+        .link-btn:hover { color: #bfa054; }
     </style>
 </head>
 <body>
 
-    <div class="box">
-        <h2>Mi Perfil de Operador</h2>
-        <div class="info" id="usuario">Cargando operador...</div>
-        <div class="info" id="rol">Permiso: Cargando...</div>
-        <div class="info" id="puntos">Puntos acumulados: Cargando...</div>
+    <div class="contenedor-perfil">
+        <h2>🪪 Expediente de Operador</h2>
         
-        <label for="selectRolJuego">Especialidad en Campo (Rol):</label>
-        <select id="selectRolJuego">
-            <option value="Asalto">Asalto</option>
-            <option value="Médico">Médico</option>
-            <option value="Ametrallador">Ametrallador</option>
-            <option value="Tirador designado">Tirador Designado</option>
-        </select>
+        <div class="info-bloque">
+            <div class="info-linea">Indicativo Militar: <span id="perfUsuario">-</span></div>
+            <div class="info-linea">Rango Operativo: <span id="perfRango">-</span></div>
+            <div class="info-linea">Estado en Red: <span id="perfEstado">-</span></div>
+        </div>
 
-        <label for="selectEntrada">Modalidad de Entrada Obligatoria:</label>
-        <select id="selectEntrada">
-            <option value="5">Socio / Alquiler Básico (5€)</option>
-            <option value="25">Entrada Completa + Equipación (25€)</option>
-        </select>
+        <div class="campo">
+            <label>⚔️ Cambiar Especialidad de Combate:</label>
+            <select id="selectRol" onchange="actualizarEspecialidad()">
+                <option value="Asalto">Asalto</option>
+                <option value="Médico">Médico</option>
+                <option value="Tirador Selecto">Tirador Selecto (DMR)</option>
+                <option value="Sniper">Sniper</option>
+                <option value="Apoyo">Apoyo</option>
+            </select>
+        </div>
 
-        <button class="btn-guardar" onclick="actualizarDatosPerfil()">💾 Guardar Cambios Perfil</button>
-        <div id="feedback"></div>
+        <div class="campo">
+            <label>🛰️ Desplegarse en Misión Activa:</label>
+            <select id="selectPartida">
+                <option value="">-- No hay misiones disponibles --</option>
+            </select>
+        </div>
 
-        <div id="panelAdmin"></div>
+        <button onclick="confirmarDespliegueMision()">Confirmar Orden de Despliegue</button>
         
-        <button onclick="cerrarSesion()">Cerrar sesión</button>
-        <p style="text-align:center; margin-top:20px;"><a href="index.html" style="color:#8dc891; text-decoration:none; font-weight:bold;">⬅️ Volver al Marcador General</a></p>
-    </div>
-
-    <button id="btnVerPartidas" class="boton-flotante" onclick="abrirModalPartidas()">
-        🎯 Ver Partidas y Alistados
-    </button>
-
-    <div id="modalPartidas" class="modal-oculta">
-        <div class="modal-contenido">
-            <span class="cerrar-modal" onclick="cerrarModalPartidas()">&times;</span>
-            <h3 style="color: #7fa984; text-transform: uppercase; text-align: center; margin-top: 0;">Partidas Actuales</h3>
-            <hr style="border-color: #4a5d4e; margin-bottom: 15px;">
-            <div id="contenedorInfoPartida"></div>
+        <div class="nav-links">
+            <a href="index.html" class="link-btn">🛰️ Ver Radar</a>
+            <a href="#" onclick="cerrarSesion()" class="link-btn" style="color:#ff6b6b;">🔒 Desconectar</a>
         </div>
     </div>
 
 <script>
-    let usuarioLogueadoId = null;
-    let estoyApuntado = false; // Rastrea el estado del usuario actual en la partida
+    let usuarioLogueado = localStorage.getItem("usuarioLogueado");
 
-    // --- LÓGICA DE PERFIL ---
-    async function cargarPerfil() {
-        const { data: { session }, error: sessionError } = await window.supabaseClient.auth.getSession();
-        
-        if (sessionError || !session || !session.user) {
+    window.onload = function() {
+        if (!usuarioLogueado) {
+            alert("Acceso denegado. Inicia sesión.");
             window.location.href = "login.html";
             return;
         }
+        cargarDatosPerfil();
+        cargarPartidasDisponibles();
+    };
 
-        usuarioLogueadoId = session.user.id;
+    async function cargarDatosPerfil() {
+        try {
+            const { data: jugador, error } = await window.supabaseClient
+                .from("jugadores")
+                .select("usuario, rol_juego, es_admin, en_partida")
+                .ilike("usuario", usuarioLogueado)
+                .maybeSingle();
 
-        const { data, error } = await window.supabaseClient
-            .from("jugadores")
-            .select("*")
-            .eq("id", usuarioLogueadoId)
-            .maybeSingle();
+            if (error || !jugador) return;
 
-        if (error) {
-            console.error("Error Supabase:", error.message);
-            document.getElementById("usuario").innerText = "⚠️ Error al conectar con el servidor.";
-            return;
-        }
-
-        if (!data) {
-            document.getElementById("usuario").innerHTML = "<strong>Operador:</strong> Perfil no inicializado.";
-            return;
-        }
-
-        document.getElementById("usuario").innerHTML = "<strong>Operador:</strong> " + data.usuario.toUpperCase();
-        document.getElementById("rol").innerHTML = "<strong>Rango del Sistema:</strong> " + data.rol;
-        document.getElementById("puntos").innerHTML = "<strong>Puntos Totales:</strong> " + (data.puntos || 0) + " PTS";
-
-        if (data.rol_juego) document.getElementById("selectRolJuego").value = data.rol_juego;
-        document.getElementById("selectEntrada").value = data.tipo_entrada == 25 ? "25" : "5";
-
-        estoyApuntado = data.en_partida || false;
-
-        if (data.rol === "administración" || data.rol === "administracion") {
-            const panel = document.getElementById("panelAdmin");
-            if (panel) {
-                panel.innerHTML = `<a class="admin-btn" href="admin.html">⚙️ Entrar al Panel de Control General</a>`;
-            }
-        }
-    }
-
-    async function actualizarDatosPerfil() {
-        const nuevoRolJuego = document.getElementById("selectRolJuego").value;
-        const nuevaEntrada = parseInt(document.getElementById("selectEntrada").value);
-        const feedback = document.getElementById("feedback");
-        
-        if (!usuarioLogueadoId) {
-            feedback.innerText = "❌ Error: Sesión expirada.";
-            feedback.style.color = "#ff8a8a";
-            return;
-        }
-
-        feedback.innerText = "Guardando cambios...";
-        feedback.style.color = "white";
-
-        const { error } = await window.supabaseClient
-            .from("jugadores")
-            .update({
-                rol_juego: nuevoRolJuego,
-                tipo_entrada: nuevaEntrada
-            })
-            .eq("id", usuarioLogueadoId);
-
-        if (error) {
-            console.error("Error al actualizar:", error);
-            feedback.innerText = "❌ Error: " + error.message;
-            feedback.style.color = "#ff8a8a";
-        } else {
-            feedback.innerText = "✔️ ¡Perfil actualizado correctamente!";
-            feedback.style.color = "#8dc891";
-            setTimeout(() => { feedback.innerText = ""; }, 3000);
-            cargarPerfil();
-        }
-    }
-
-    async function cerrarSesion() {
-        await window.supabaseClient.auth.signOut();
-        window.location.href = "login.html";
-    }
-
-    // --- LÓGICA DEL BOTÓN FLOTANTE Y GESTIÓN DE LA PARTIDA ---
-    function abrirModalPartidas() {
-        document.getElementById("modalPartidas").style.display = "block";
-        consultarPartidasYJugadores();
-    }
-
-    function cerrarModalPartidas() {
-        document.getElementById("modalPartidas").style.display = "none";
-    }
-
-    async function consultarPartidasYJugadores() {
-        const contenedor = document.getElementById("contenedorInfoPartida");
-        contenedor.innerHTML = "<p style='text-align:center;'>Consultando datos de campo...</p>";
-
-        const { data: partida, error: errorPartida } = await window.supabaseClient
-            .from("partidas")
-            .select("*")
-            .eq("activa", true)
-            .maybeSingle();
-
-        if (errorPartida) {
-            contenedor.innerHTML = "<p style='color:red;'>Error al cargar partidas.</p>";
-            return;
-        }
-
-        if (!partida) {
-            contenedor.innerHTML = "<p style='text-align:center; color:#aaa;'>No hay ninguna partida programada en este momento.</p>";
-            return;
-        }
-
-        const { data: jugadores, error: errorJugadores } = await window.supabaseClient
-            .from("jugadores")
-            .select("id, usuario, rol, rol_juego")
-            .eq("en_partida", true);
-
-        if (errorJugadores) {
-            contenedor.innerHTML = "<p style='color:red;'>Error al cargar la lista de operadores.</p>";
-            return;
-        }
-
-        // Verificar si el usuario actual ya figura en la lista de alistados
-        if (usuarioLogueadoId) {
-            estoyApuntado = jugadores.some(j => j.id === usuarioLogueadoId);
-        }
-
-        // CONDICIÓN ESPECIAL: Alerta si el operador 'admin' está en la lista
-        const nombreOperadorEspecial = "admin"; 
-        const tieneOperadorEspecial = jugadores.some(j => j.usuario.toLowerCase() === nombreOperadorEspecial.toLowerCase());
-
-        let htmlContenido = "";
-
-        if (tieneOperadorEspecial) {
-            htmlContenido += `
-                <div class="aviso-especial">
-                    ⚠️ ¡PARTIDA ESPECIAL DETECTADA! ⚠️<br>
-                    El operador de élite [${nombreOperadorEspecial.toUpperCase()}] está desplegado en esta misión.
-                </div>
-            `;
-        }
-
-        htmlContenido += `
-            <p><strong>Misión:</strong> ${partida.nombre || 'Operación Estándar'}</p>
-            <p><strong>Fecha/Hora:</strong> ${partida.fecha || 'Por confirmar'}</p>
-            <p><strong>Operadores Alistados:</strong> ${jugadores.length}</p>
-        `;
-
-        // BOTÓN DINÁMICO: Solo se muestra si el usuario inició sesión correctamente
-        if (usuarioLogueadoId) {
-            if (estoyApuntado) {
-                htmlContenido += `<button class="btn-accion-partida btn-clean btn-salir" onclick="cambiarEstadoMision(false)">❌ Abandonar Misión</button>`;
-            } else {
-                htmlContenido += `<button class="btn-accion-partida btn-clean btn-unirse" onclick="cambiarEstadoMision(true)">⚔️ Alistarse en la Misión</button>`;
-            }
-        } else {
-            htmlContenido += `<p style='text-align:center; color:#bd913c; font-size:0.9em; margin-top:15px;'>Inicia sesión para poder unirte a la partida.</p>`;
-        }
-
-        if (jugadores.length === 0) {
-            htmlContenido += "<p style='color:#888; font-size:0.9em; margin-top:15px;'>Aún no hay operadores apuntados a esta misión.</p>";
-        } else {
-            htmlContenido += `<div class="lista-jugadores"><strong>Lista de Despliegue:</strong><ul style='margin-top:5px; padding-left:20px;'>`;
-            jugadores.forEach(j => {
-                htmlContenido += `<li>${j.usuario.toUpperCase()} - <span style='color:#7fa984;'>${j.rol_juego}</span></li>`;
-            });
-            htmlContenido += "</ul></div>";
-        }
-
-        contenedor.innerHTML = htmlContenido;
-    }
-
-    // Cambia el estado 'en_partida' del usuario directamente desde la ventana modal
-    async function cambiarEstadoMision(unirse) {
-        if (!usuarioLogueadoId) return;
-
-        const { error } = await window.supabaseClient
-            .from("jugadores")
-            .update({ en_partida: unirse })
-            .eq("id", usuarioLogueadoId);
-
-        if (error) {
-            alert("Error al actualizar estado en la misión: " + error.message);
-        } else {
-            estoyApuntado = unirse;
-            // Actualiza la modal y el panel principal para reflejar los cambios al instante
-            await consultarPartidasYJugadores();
-            await cargarPerfil(); 
-        }
-    }
-
-    document.addEventListener("DOMContentLoaded", cargarPerfil);
-</script>
-</body>
-</html>
+            document.getElementById("perfUsuario").innerText = jugador.usuario.toUpperCase();
+            document.getElementById("perfRango").innerText = jugador.es_admin ? "ALTO MANDO (CMD)" : "OPERADOR DE CAMPO";
+            document.getElementById("perfEstado").innerText
