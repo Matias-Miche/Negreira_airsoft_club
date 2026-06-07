@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil de Operador - Negreira</title>
+    <link rel="icon" href="data:,">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <style>
@@ -69,4 +70,133 @@
     </div>
 
 <script>
-    let usuarioLogueado = localStorage.
+    let usuarioLogueado = localStorage.getItem("usuarioLogueado") ? localStorage.getItem("usuarioLogueado").trim() : null;
+
+    window.onload = function() {
+        if (!usuarioLogueado) {
+            alert("Acceso denegado. Por favor, inicia sesión primero.");
+            window.location.href = "login.html";
+            return;
+        }
+        cargarDatosPerfil();
+        cargarPartidasDisponibles();
+    };
+
+    function calcularRangoMilitar(puntos) {
+        if (puntos < 100) return "RECLUTA (LVL 1)";
+        if (puntos < 200) return "SOLDADO DE 1ª (LVL 2)";
+        if (puntos < 300) return "CABO TÁCTICO (LVL 3)";
+        if (puntos < 400) return "CABO PRIMERO (LVL 4)";
+        if (puntos < 500) return "SARGENTO DE INFANTERÍA (LVL 5)";
+        if (puntos < 600) return "SARGENTO PRIMERO (LVL 6)";
+        if (puntos < 700) return "BRIGADA OPERATIVO (LVL 7)";
+        if (puntos < 800) return "SUBTENIENTE DE CAMPO (LVL 8)";
+        if (puntos < 900) return "ALFÉREZ (LVL 9)";
+        if (puntos < 1000) return "TENIENTE DE ASALTO (LVL 10)";
+        if (puntos < 1100) return "CAPITÁN DE ESCUADRÓN (LVL 11)";
+        if (puntos < 1200) return "MAYOR TÁCTICO (LVL 12)";
+        if (puntos < 1300) return "TENIENTE CORONEL (LVL 13)";
+        if (puntos < 1400) return "CORONEL DE ASALTO (LVL 14)";
+        if (puntos < 1500) return "GENERAL DE BRIGADA (LVL 15)";
+        return "⚡ COMANDANTE DE LA FLOTA (MAX)";
+    }
+
+    async function cargarDatosPerfil() {
+        try {
+            if (!window.supabaseClient) {
+                fallbackCampos("ERROR DE ENLACE");
+                return;
+            }
+
+            const { data: jugador, error } = await window.supabaseClient
+                .from("jugadores")
+                .select("usuario, rol_juego, puntos, en_partida")
+                .ilike("usuario", usuarioLogueado)
+                .maybeSingle();
+
+            if (error) {
+                console.error(error.message);
+                fallbackCampos("FALLO DE RED");
+                return;
+            }
+
+            if (jugador) {
+                const pts = jugador.puntos || 0;
+                document.getElementById("perfUsuario").innerText = jugador.usuario.toUpperCase();
+                document.getElementById("perfPuntos").innerText = pts + " PTS";
+                document.getElementById("perfRango").innerText = calcularRangoMilitar(pts);
+                document.getElementById("perfEstado").innerText = jugador.en_partida ? "🔴 EN COMBATE" : "🟢 EN BASE";
+                
+                if (jugador.rol_juego) {
+                    document.getElementById("selectRol").value = jugador.rol_juego;
+                }
+            } else {
+                fallbackCampos("NO LOCALIZADO");
+            }
+        } catch (e) { 
+            fallbackCampos("ERROR CRÍTICO");
+        }
+    }
+
+    function fallbackCampos(mensaje) {
+        document.getElementById("perfUsuario").innerText = mensaje;
+        document.getElementById("perfRango").innerText = mensaje;
+        document.getElementById("perfPuntos").innerText = mensaje;
+        document.getElementById("perfEstado").innerText = mensaje;
+    }
+
+    async function cargarPartidasDisponibles() {
+        try {
+            const { data: misiones } = await window.supabaseClient
+                .from("partidas")
+                .select("id, nombre")
+                .eq("activa", true);
+
+            const select = document.getElementById("selectPartida");
+            if (misiones && misiones.length > 0) {
+                select.innerHTML = misiones.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('');
+            } else {
+                select.innerHTML = `<option value="">-- No hay misiones activas --</option>`;
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    async function actualizarEspecialidad() {
+        const nuevoRol = document.getElementById("selectRol").value;
+        try {
+            await window.supabaseClient
+                .from("jugadores")
+                .update({ rol_juego: nuevoRol })
+                .ilike("usuario", usuarioLogueado);
+        } catch (e) { console.error(e); }
+    }
+
+    async function confirmarDespliegueMision() {
+        const partidaId = document.getElementById("selectPartida").value;
+        if (!partidaId) { 
+            alert("No hay misiones seleccionadas o activas en la red."); 
+            return; 
+        }
+        
+        try {
+            const { error } = await window.supabaseClient
+                .from("jugadores")
+                .update({ en_partida: true })
+                .ilike("usuario", usuarioLogueado);
+                
+            if (error) throw error;
+
+            alert("¡Despliegue autorizado! Tu posición ha sido transmitida al radar principal.");
+            cargarDatosPerfil();
+        } catch (e) { 
+            alert("Error al enviar la orden de despliegue."); 
+        }
+    }
+
+    function cerrarSesion() {
+        localStorage.removeItem("usuarioLogueado");
+        window.location.href = "login.html";
+    }
+</script>
+</body>
+</html>
