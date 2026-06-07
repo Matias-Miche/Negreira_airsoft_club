@@ -6,7 +6,6 @@
     <title>Perfil de Operador - Negreira</title>
     <link rel="icon" href="data:,">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase.js"></script>
     <style>
         body {
             background: #080b09; color: #d1dad2; font-family: 'Courier New', Courier, monospace;
@@ -70,6 +69,10 @@
     </div>
 
 <script>
+    const SUPABASE_URL = "https://wbcfszivrbuqfqnizarq.supabase.co"; 
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMjEsImV4cCI6MjA5NTQ3NTIyMX0.2iX7Twex3d96A9Iawg3zxvGAjFNLBqt81tSZgrzqA9s";
+
+    let supabaseLocal;
     let usuarioLogueado = localStorage.getItem("usuarioLogueado") ? localStorage.getItem("usuarioLogueado").trim() : null;
 
     window.onload = function() {
@@ -78,8 +81,13 @@
             window.location.href = "login.html";
             return;
         }
-        cargarDatosPerfil();
-        cargarPartidasDisponibles();
+        try {
+            supabaseLocal = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            cargarDatosPerfil();
+            cargarPartidasDisponibles();
+        } catch (e) {
+            fallbackCampos("ERROR CONFIG");
+        }
     };
 
     function calcularRangoMilitar(puntos) {
@@ -103,19 +111,13 @@
 
     async function cargarDatosPerfil() {
         try {
-            if (!window.supabaseClient) {
-                fallbackCampos("ERROR DE ENLACE");
-                return;
-            }
-
-            const { data: jugador, error } = await window.supabaseClient
+            const { data: jugador, error } = await supabaseLocal
                 .from("jugadores")
                 .select("usuario, rol_juego, puntos, en_partida")
                 .ilike("usuario", usuarioLogueado)
                 .maybeSingle();
 
             if (error) {
-                console.error(error.message);
                 fallbackCampos("FALLO DE RED");
                 return;
             }
@@ -147,7 +149,7 @@
 
     async function cargarPartidasDisponibles() {
         try {
-            const { data: misiones } = await window.supabaseClient
+            const { data: misiones } = await supabaseLocal
                 .from("partidas")
                 .select("id, nombre")
                 .eq("activa", true);
@@ -164,7 +166,7 @@
     async function actualizarEspecialidad() {
         const nuevoRol = document.getElementById("selectRol").value;
         try {
-            await window.supabaseClient
+            await supabaseLocal
                 .from("jugadores")
                 .update({ rol_juego: nuevoRol })
                 .ilike("usuario", usuarioLogueado);
@@ -179,7 +181,7 @@
         }
         
         try {
-            const { error } = await window.supabaseClient
+            const { error } = await supabaseLocal
                 .from("jugadores")
                 .update({ en_partida: true })
                 .ilike("usuario", usuarioLogueado);
