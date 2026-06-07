@@ -27,4 +27,37 @@
         button:hover { background: #274930; color: #ffd875; }
         .nav-links { display: flex; justify-content: space-between; margin-top: 20px; border-top: 1px dashed #223526; padding-top: 15px; font-size: 0.8rem; }
         .link-btn { color: #6da077; text-decoration: none; text-transform: uppercase; font-weight: bold; }
-        .
+        .link-btn:hover { color: #bfa054; }
+    </style>
+</head>
+<body>
+
+    <div class="contenedor-perfil">
+        <h2>🪪 Expediente de Operador</h2>
+        
+        <div class="info-bloque">
+            <div class="info-linea">Indicativo Militar: <span id="perfUsuario">CARGANDO...</span></div>
+            <div class="info-linea">Rango Militar: <span id="perfRango">CARGANDO...</span></div>
+            <div class="info-linea">Puntos de Honor: <span id="perfPuntos" style="color: #bfa054;">CARGANDO...</span></div>
+            <div class="info-linea">Estado en Red: <span id="perfEstado">CARGANDO...</span></div>
+        </div>
+
+        <div class="campo">
+            <label>⚔️ Cambiar Especialidad de Combate:</label>
+            <select id="selectRol" onchange="actualizarEspecialidad()">
+                <option value="Asalto">Asalto</option>
+                <option value="Médico">Médico</option>
+                <option value="Tirador Selecto">Tirador Selecto (DMR)</option>
+                <option value="Sniper">Sniper</option>
+                <option value="Apoyo">Apoyo</option>
+            </select>
+        </div>
+
+        <div class="campo">
+            <label>🛰️ Desplegarse en Misión Activa:</label>
+            <select id="selectPartida">
+                <option value="">-- No hay misiones disponibles --</option>
+            </select>
+        </div>
+
+        <button onclick="confirmarDespliegueMision()">Confirmar Orden de Despliegue</
