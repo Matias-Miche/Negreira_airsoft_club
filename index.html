@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terminal de Navegación - Negreira</title>
     <link rel="icon" href="data:,">
-    
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
-
     <style>
         body {
             background: #080b09; color: #d1dad2; font-family: 'Courier New', Courier, monospace;
@@ -31,3 +28,177 @@
         }
         .header-tactico { text-align: center; margin-bottom: 25px; border-bottom: 1px dashed #223526; padding-bottom: 15px; }
         .header-tactico h1 { color: #6da077; text-transform: uppercase; margin: 0; font-size: 2.2rem; letter-spacing: 4px; }
+        .contenedor-radar-central { display: flex; justify-content: center; margin: 20px 0; position: relative; }
+        .pantalla-radar {
+            width: 240px; height: 240px; background: #040705; border: 3px solid #203825; border-radius: 50%;
+            position: relative; overflow: hidden;
+        }
+        .pantalla-radar::before {
+            content: ""; position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
+            background: conic-gradient(from 0deg, rgba(109, 160, 119, 0.25) 0deg, transparent 90deg, transparent 360deg);
+            animation: barrido 3.5s linear infinite; pointer-events: none;
+        }
+        @keyframes barrido { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .blip-objetivo {
+            position: absolute; width: 8px; height: 8px; background: #ffd875; border-radius: 50%;
+            box-shadow: 0 0 10px #ffd875; animation: pulso-blip 1.5s infinite ease-in-out;
+        }
+        @keyframes pulso-blip { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+        .seccion-clasificacion { background: #060907; border: 1px solid #223526; border-radius: 3px; padding: 15px; margin-top: 25px; }
+        .seccion-clasificacion h3 { margin: 0 0 12px 0; font-size: 0.9rem; color: #bfa054; text-transform: uppercase; border-bottom: 1px dashed #223526; padding-bottom: 6px; }
+        .tabla-ranking { width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: left; }
+        .tabla-ranking th { color: #6da077; padding: 6px; border-bottom: 1px solid #1c2e21; text-transform: uppercase; }
+        .tabla-ranking td { padding: 8px 6px; border-bottom: 1px dashed #111a13; color: #a4b3a7; }
+        .menu-interactivo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 25px; }
+        .btn-consola { background: #0f1712; border: 1px solid #2d4533; border-radius: 3px; padding: 15px 10px; color: #e2e8e3; text-decoration: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .btn-consola:hover { background: #18241c; border-color: #4a6b52; }
+    </style>
+</head>
+<body>
+
+    <div class="terminal-consola">
+        <div class="top-bar-actions">
+            <a href="admin.html" id="btnComando" class="btn-admin-oculto">⚡ Panel Comando</a>
+            <div id="indicadorSesion" class="session-top">🔴 DESCONECTADO</div>
+        </div>
+        
+        <div class="header-tactico">
+            <h1>Airsoft Negreira</h1>
+            <p style="color: #bfa054; font-size: 0.85rem; margin: 5px 0 0 0; text-transform: uppercase; letter-spacing: 3px;">Consola Radar Global</p>
+        </div>
+
+        <div class="contenedor-radar-central">
+            <div class="pantalla-radar" id="radarPantalla"></div>
+        </div>
+
+        <div class="menu-interactivo">
+            <a href="login.html" id="linkLogin" class="btn-consola">
+                <span style="font-size:1.3rem;">🔑</span>
+                <strong style="font-size:0.8rem; text-transform:uppercase; margin-top:5px;">Acceso Terminal</strong>
+            </a>
+            <a href="perfil.html" id="linkPerfil" class="btn-consola" style="display:none; border-color: #bfa054;">
+                <span style="font-size:1.3rem;">🪪</span>
+                <strong style="font-size:0.8rem; text-transform:uppercase; margin-top:5px; color:#bfa054;">Mi Perfil / Misión</strong>
+            </a>
+            <div class="btn-consola" onclick="document.location.reload()">
+                <span style="font-size:1.3rem;">🔄</span>
+                <strong style="font-size:0.8rem; text-transform:uppercase; margin-top:5px; color:#6da077;">Actualizar Datos</strong>
+            </div>
+        </div>
+
+        <div class="seccion-clasificacion">
+            <h3>📊 Tabla del Sistema de Ranking Competitivo</h3>
+            <table class="tabla-ranking">
+                <thead>
+                    <tr><th>Rango</th><th>Operador</th><th>Rol de Combate</th><th>Puntos de Honor</th><th>Estado</th></tr>
+                </thead>
+                <tbody id="tablaCuerpoClasificacion">
+                    <tr><td colspan="5" style="text-align: center; color: #728576; padding: 15px;">Estableciendo enlace de red estricto...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const SUPABASE_URL = "https://wbcfszivrbuqfqnizarq.supabase.co"; 
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMjEsImV4cCI6MjA5NTQ3NTIyMX0.2iX7Twex3d96A9Iawg3zxvGAjFNLBqt81tSZgrzqA9s";
+
+        let supabaseLocal;
+
+        // Forzamos la ejecución manual inmediata de la lógica de red
+        function inicializarSistema() {
+            try {
+                if (typeof supabase === 'undefined') {
+                    document.getElementById("tablaCuerpoClasificacion").innerHTML = 
+                        `<tr><td colspan="5" style="text-align: center; color: #ff6b6b; padding:15px;">⚠️ ERROR: La librería CDN de Supabase falló al descargar.</td></tr>`;
+                    return;
+                }
+                supabaseLocal = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                conectarYVerificarTodo();
+            } catch (e) {
+                console.error(e);
+                document.getElementById("tablaCuerpoClasificacion").innerHTML = 
+                    `<tr><td colspan="5" style="text-align: center; color: #ff6b6b; padding:15px;">⚠️ ERROR DE SINTAXIS EN ENLACE</td></tr>`;
+            }
+        }
+
+        async function conectarYVerificarTodo() {
+            const usuarioActivo = localStorage.getItem("usuarioLogueado");
+            const indicador = document.getElementById("indicadorSesion");
+
+            try {
+                const { data: jugadores, error } = await supabaseLocal
+                    .from("jugadores")
+                    .select("usuario, rol_juego, es_admin, en_partida, puntos")
+                    .order('puntos', { ascending: false });
+
+                if (error) throw error;
+
+                const listaSegura = jugadores || [];
+
+                if (usuarioActivo) {
+                    indicador.innerText = `🟢 EN LÍNEA: ${usuarioActivo}`;
+                    indicador.style.color = "#6da077";
+                    document.getElementById("linkLogin").style.display = "none";
+                    document.getElementById("linkPerfil").style.display = "flex";
+
+                    const actual = listaSegura.find(u => u.usuario.toLowerCase() === usuarioActivo.toLowerCase());
+                    if (actual && actual.es_admin) {
+                        document.getElementById("btnComando").style.display = "inline-block";
+                    }
+                }
+
+                renderizarTabla(listaSegura);
+                generarPuntosRadar(listaSegura);
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById("tablaCuerpoClasificacion").innerHTML = 
+                    `<tr><td colspan="5" style="text-align: center; color: #ff6b6b; padding:15px;">FALLO DE RESPUESTA DEL SERVIDOR DE DATOS</td></tr>`;
+            }
+        }
+
+        function renderizarTabla(lista) {
+            const tabla = document.getElementById("tablaCuerpoClasificacion");
+            if (lista.length === 0) {
+                tabla.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #728576; padding: 15px;">No se encontraron operadores registrados.</td></tr>`;
+                return;
+            }
+
+            let html = "";
+            lista.forEach((j, index) => {
+                const estado = j.en_partida ? "<span style='color:#ff6b6b;'>● EN COMBATE</span>" : "<span style='color:#728576;'>○ BASE</span>";
+                html += `<tr>
+                    <td><strong>#${index + 1}</strong></td>
+                    <td>${j.usuario.toUpperCase()}</td>
+                    <td>${j.rol_juego || 'Asalto'}</td>
+                    <td style="color:#bfa054; font-weight:bold;">${j.puntos || 0} PTS</td>
+                    <td>${estado}</td>
+                </tr>`;
+            });
+            tabla.innerHTML = html;
+        }
+
+        function generarPuntosRadar(lista) {
+            const radar = document.getElementById("radarPantalla");
+            radar.innerHTML = "";
+            const desplegados = lista.filter(j => j.en_partida === true);
+            
+            desplegados.forEach(() => {
+                const blip = document.createElement("div");
+                blip.className = "blip-objetivo";
+                const angulo = Math.random() * Math.PI * 2;
+                const radio = Math.random() * 80 + 15;
+                blip.style.left = `${Math.floor(116 + Math.cos(angulo) * radio)}px`;
+                blip.style.top = `${Math.floor(116 + Math.sin(angulo) * radio)}px`;
+                radar.appendChild(blip);
+            });
+        }
+
+        // Ejecutamos la carga del sistema de inmediato
+        inicializarSistema();
+    </script>
+</body>
+</html>
