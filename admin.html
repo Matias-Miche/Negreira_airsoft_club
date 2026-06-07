@@ -35,7 +35,7 @@
 <body>
 
     <div class="contenedor-admin">
-        <h2>⚡ Panel de Comando: Crear Partida</h2>
+        <h2>⚡ Panel de Comando: Despliegue Avanzado</h2>
         
         <div class="seccion-form">
             <div class="campo">
@@ -44,9 +44,142 @@
             </div>
 
             <div class="campo">
-                <label>📅 Fecha y Hora de Despliegue:</label>
+                <label>📅 Fecha y Hora de Inicio:</label>
                 <input type="datetime-local" id="fechaMision">
             </div>
 
             <div class="campo">
-                <label>
+                <label>⚠️ Modificadores de Entorno Únicos:</label>
+                <div class="grid-checkbox">
+                    <div class="opcion-check">
+                        <input type="checkbox" id="varJuggernaut">
+                        <label for="varJuggernaut" style="margin:0; cursor:pointer;">🛡️ Juggernauts Activos</label>
+                    </div>
+                    <div class="opcion-check">
+                        <input type="checkbox" id="varVehiculos">
+                        <label for="varVehiculos" style="margin:0; cursor:pointer;">🚜 Blindados / Vehículos</label>
+                    </div>
+                    <div class="opcion-check">
+                        <input type="checkbox" id="varMedicos">
+                        <label for="varMedicos" style="margin:0; cursor:pointer;">🩹 Rol Médico Habilitado</label>
+                    </div>
+                    <div class="opcion-check">
+                        <input type="checkbox" id="varRespawn">
+                        <label for="varRespawn" style="margin:0; cursor:pointer;">🔄 Respawn Limitado</label>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="registrarNuevaPartida()">Lanzar Operación</button>
+        </div>
+
+        <div class="seccion-form" style="border-color: #1a291f;">
+            <label style="color: #6da077;">🛰️ Registro Logístico de Misiones:</label>
+            <div class="lista-misiones" id="contenedorListaMisiones">
+                <div style="text-align: center; color: #728576; font-size: 0.8rem; padding: 10px;">Cargando historial...</div>
+            </div>
+        </div>
+
+        <div class="nav-links">
+            <a href="index.html" class="link-btn">🛰️ Volver al Radar</a>
+            <a href="perfil.html" class="link-btn" style="color:#bfa054;">🪪 Mi Perfil</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const SUPABASE_URL = "https://wbcfszivrbuqfqnizarq.supabase.co"; 
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMjEsImV4cCI6MjA5NTQ3NTIyMX0.2iX7Twex3d96A9Iawg3zxvGAjFNLBqt81tSZgrzqA9s";
+        let supabaseLocal;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const ahora = new Date();
+            ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
+            document.getElementById('fechaMision').value = ahora.toISOString().slice(0,16);
+
+            try {
+                supabaseLocal = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                obtenerMisionesActuales();
+            } catch (e) { console.error(e); }
+        });
+
+        function decodificarNombre(textoRaw) {
+            if (textoRaw.startsWith("{")) {
+                try { return JSON.parse(textoRaw); } catch(e){}
+            }
+            return { nombre: textoRaw, jugg: false, vehic: false, medicos: false, respawn: false, fecha: "" };
+        }
+
+        async function obtenerMisionesActuales() {
+            try {
+                const { data: misiones, error } = await supabaseLocal.from("partidas").select("*").order('id', { ascending: false });
+                if (error) throw error;
+
+                const contenedor = document.getElementById("contenedorListaMisiones");
+                if (!misiones || misiones.length === 0) {
+                    contenedor.innerHTML = "<div style='text-align: center; color: #728576; font-size:0.8rem;'>No hay misiones activas.</div>";
+                    return;
+                }
+
+                let html = "";
+                misiones.forEach(m => {
+                    const datos = decodificarNombre(m.nombre);
+                    const distintivoEstado = m.activa ? "<span style='color:#6da077; font-weight:bold;'>[ACTIVA]</span>" : "<span style='color:#728576;'>[CONCLUIDA]</span>";
+                    
+                    let detalles = [];
+                    if (datos.jugg) detalles.push("🛡️Jugg");
+                    if (datos.vehic) detalles.push("🚜Vehíc");
+                    
+                    html += `<div class="mision-item">
+                        <div><strong>${datos.nombre.toUpperCase()}</strong> ${detalles.join(" ")}</div>
+                        <div>${distintivoEstado}</div>
+                    </div>`;
+                });
+                contenedor.innerHTML = html;
+            } catch (err) { console.error(err); }
+        }
+
+        async function registrarNuevaPartida() {
+            const nombreOriginal = document.getElementById("nombreMision").value.trim();
+            const fechaInput = document.getElementById("fechaMision").value;
+            
+            if (!nombreOriginal) {
+                alert("Introduce un nombre.");
+                return;
+            }
+
+            const jugg = document.getElementById("varJuggernaut").checked;
+            const vehic = document.getElementById("varVehiculos").checked;
+            const med = document.getElementById("varMedicos").checked;
+            const resp = document.getElementById("varRespawn").checked;
+
+            // Creamos un paquete JSON súper compacto cifrado en una sola línea de texto para evitar el RLS
+            const paqueteConfig = {
+                nombre: nombreOriginal,
+                jugg: jugg,
+                vehic: vehic,
+                medicos: med,
+                respawn: resp,
+                fecha: fechaInput ? new Date(fechaInput).toLocaleString('es-ES', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'}) : ""
+            };
+
+            const stringFinal = JSON.stringify(paqueteConfig);
+
+            try {
+                try { await supabaseLocal.from("partidas").update({ activa: false }).match({ activa: true }); } catch(e){}
+
+                const { error } = await supabaseLocal.from("partidas").insert([{ nombre: stringFinal, activa: true }]);
+                if (error) throw error;
+
+                alert("🟢 ¡Operación táctica lanzada a la red global!");
+                document.getElementById("nombreMision").value = "";
+                obtenerMisionesActuales();
+            } catch (err) {
+                console.error(err);
+                alert("Error crítico al subir la configuración.");
+            }
+        }
+    </script>
+</body>
+</html>
