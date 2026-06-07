@@ -97,6 +97,18 @@
             max-height: 200px;
             overflow-y: auto;
         }
+        .btn-accion-partida {
+            width: 100%;
+            padding: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 5px;
+            margin-top: 15px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-unirse { background: #4caf50; color: white; }
+        .btn-salir { background: #f44336; color: white; }
     </style>
 </head>
 <body>
@@ -145,8 +157,9 @@
 
 <script>
     let usuarioLogueadoId = null;
+    let estoyApuntado = false; // Rastrea el estado del usuario actual en la partida
 
-    // --- LOGICA DE PERFIL ---
+    // --- LÓGICA DE PERFIL ---
     async function cargarPerfil() {
         const { data: { session }, error: sessionError } = await window.supabaseClient.auth.getSession();
         
@@ -180,6 +193,8 @@
 
         if (data.rol_juego) document.getElementById("selectRolJuego").value = data.rol_juego;
         document.getElementById("selectEntrada").value = data.tipo_entrada == 25 ? "25" : "5";
+
+        estoyApuntado = data.en_partida || false;
 
         if (data.rol === "administración" || data.rol === "administracion") {
             const panel = document.getElementById("panelAdmin");
@@ -219,7 +234,7 @@
             feedback.innerText = "✔️ ¡Perfil actualizado correctamente!";
             feedback.style.color = "#8dc891";
             setTimeout(() => { feedback.innerText = ""; }, 3000);
-            cargarPerfil(); // Recarga la info visual
+            cargarPerfil();
         }
     }
 
@@ -228,7 +243,7 @@
         window.location.href = "login.html";
     }
 
-    // --- LÓGICA DEL BOTÓN FLOTANTE Y CONSULTA PÚBLICA ---
+    // --- LÓGICA DEL BOTÓN FLOTANTE Y GESTIÓN DE LA PARTIDA ---
     function abrirModalPartidas() {
         document.getElementById("modalPartidas").style.display = "block";
         consultarPartidasYJugadores();
@@ -260,7 +275,7 @@
 
         const { data: jugadores, error: errorJugadores } = await window.supabaseClient
             .from("jugadores")
-            .select("usuario, rol, rol_juego")
+            .select("id, usuario, rol, rol_juego")
             .eq("en_partida", true);
 
         if (errorJugadores) {
@@ -268,7 +283,12 @@
             return;
         }
 
-        // CONDICIÓN ESPECIAL: Pon aquí el nombre del operador que activa la alerta
+        // Verificar si el usuario actual ya figura en la lista de alistados
+        if (usuarioLogueadoId) {
+            estoyApuntado = jugadores.some(j => j.id === usuarioLogueadoId);
+        }
+
+        // CONDICIÓN ESPECIAL: Alerta si el operador 'admin' está en la lista
         const nombreOperadorEspecial = "admin"; 
         const tieneOperadorEspecial = jugadores.some(j => j.usuario.toLowerCase() === nombreOperadorEspecial.toLowerCase());
 
@@ -289,8 +309,19 @@
             <p><strong>Operadores Alistados:</strong> ${jugadores.length}</p>
         `;
 
+        // BOTÓN DINÁMICO: Solo se muestra si el usuario inició sesión correctamente
+        if (usuarioLogueadoId) {
+            if (estoyApuntado) {
+                htmlContenido += `<button class="btn-accion-partida btn-clean btn-salir" onclick="cambiarEstadoMision(false)">❌ Abandonar Misión</button>`;
+            } else {
+                htmlContenido += `<button class="btn-accion-partida btn-clean btn-unirse" onclick="cambiarEstadoMision(true)">⚔️ Alistarse en la Misión</button>`;
+            }
+        } else {
+            htmlContenido += `<p style='text-align:center; color:#bd913c; font-size:0.9em; margin-top:15px;'>Inicia sesión para poder unirte a la partida.</p>`;
+        }
+
         if (jugadores.length === 0) {
-            htmlContenido += "<p style='color:#888; font-size:0.9em;'>Aún no hay operadores apuntados a esta misión.</p>";
+            htmlContenido += "<p style='color:#888; font-size:0.9em; margin-top:15px;'>Aún no hay operadores apuntados a esta misión.</p>";
         } else {
             htmlContenido += `<div class="lista-jugadores"><strong>Lista de Despliegue:</strong><ul style='margin-top:5px; padding-left:20px;'>`;
             jugadores.forEach(j => {
@@ -300,6 +331,25 @@
         }
 
         contenedor.innerHTML = htmlContenido;
+    }
+
+    // Cambia el estado 'en_partida' del usuario directamente desde la ventana modal
+    async function cambiarEstadoMision(unirse) {
+        if (!usuarioLogueadoId) return;
+
+        const { error } = await window.supabaseClient
+            .from("jugadores")
+            .update({ en_partida: unirse })
+            .eq("id", usuarioLogueadoId);
+
+        if (error) {
+            alert("Error al actualizar estado en la misión: " + error.message);
+        } else {
+            estoyApuntado = unirse;
+            // Actualiza la modal y el panel principal para reflejar los cambios al instante
+            await consultarPartidasYJugadores();
+            await cargarPerfil(); 
+        }
     }
 
     document.addEventListener("DOMContentLoaded", cargarPerfil);
