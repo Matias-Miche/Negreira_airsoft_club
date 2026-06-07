@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Control - Airsoft Negreira</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
     <style>
         body { background-color: #1a1a1a; color: white; font-family: Arial, sans-serif; padding: 20px; }
         .contenedor { max-width: 1100px; margin: auto; background: #0b0b0b; padding: 25px; border: 3px solid #7fa984; border-radius: 10px; }
@@ -42,7 +43,7 @@
             <thead>
                 <tr>
                     <th>Operador</th>
-                    <th>Rol</th>
+                    <th>Rol de Juego</th>
                     <th>Entrada</th>
                     <th>Arsenal Prestado</th>
                     <th>Puntos</th>
@@ -50,19 +51,36 @@
                 </tr>
             </thead>
             <tbody id="tabla-jugadores">
-                <tr><td colspan="6">Cargando operadores...</td></tr>
+                <tr><td colspan="6">Verificando credenciales perimetrales...</td></tr>
             </tbody>
         </table>
     </div>
 </div>
 
 <script>
-    const SUPABASE_URL = "https://wbcfszivrbuqfqnizarq.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMjEsImV4cCI6MjA5NTQ3NTIyMX0.2iX7Twex3d96A9Iawg3zxvGAjFNLBqt81tSZgrzqA9s";
-    const clienteSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // Control de acceso estricto en cliente
+    document.addEventListener("DOMContentLoaded", comprobarAccesoAdmin);
+
+    async function comprobarAccesoAdmin() {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) { window.location.href = "login.html"; return; }
+
+        const { data, error } = await window.supabaseClient
+            .from("jugadores")
+            .select("rol")
+            .eq("id", user.id)
+            .single();
+
+        if (error || !data || (data.rol !== "administración" && data.rol !== "administracion")) {
+            alert("Acceso denegado. No posees credenciales de administración.");
+            window.location.href = "perfil.html";
+        } else {
+            cargarOperadores();
+        }
+    }
 
     async function cargarOperadores() {
-        const { data: jugadores, error } = await clienteSupabase
+        const { data: jugadores, error } = await window.supabaseClient
             .from("jugadores")
             .select("*")
             .order("usuario", { ascending: true });
@@ -82,17 +100,17 @@
                         <td><strong>${j.usuario.toUpperCase()}</strong></td>
                         <td>
                             <select id="rol-${j.usuario}" style="margin:0; padding:6px;">
-                                <option value="Asalto" ${j.rol === 'Asalto' ? 'selected' : ''}>Asalto</option>
-                                <option value="Medico" ${j.rol === 'Medico' || j.rol === 'Médico' ? 'selected' : ''}>Médico</option>
-                                <option value="Ametrallador" ${j.rol === 'Ametrallador' ? 'selected' : ''}>Ametrallador</option>
-                                <option value="Tirador designado" ${j.rol === 'Tirador designado' || j.rol === 'Tirador' ? 'selected' : ''}>Tirador</option>
+                                <option value="Asalto" ${j.rol_juego === 'Asalto' ? 'selected' : ''}>Asalto</option>
+                                <option value="Medico" ${j.rol_juego === 'Medico' || j.rol_juego === 'Médico' ? 'selected' : ''}>Médico</option>
+                                <option value="Ametrallador" ${j.rol_juego === 'Ametrallador' ? 'selected' : ''}>Ametrallador</option>
+                                <option value="Tirador designado" ${j.rol_juego === 'Tirador designado' || j.rol_juego === 'Tirador' ? 'selected' : ''}>Tirador</option>
                             </select>
                         </td>
                         <td>
                             <input type="number" id="entrada-${j.usuario}" value="${j.tipo_entrada || 0}" style="width:60px; margin:0; padding:6px;">
                         </td>
                         <td>
-                            <input type="text" id="arsenal-${j.usuario}" value="${j.arsenal_prestado || j.arsenal || ''}" placeholder="Ninguno" style="width:130px; margin:0; padding:6px;">
+                            <input type="text" id="arsenal-${j.usuario}" value="${j.arsenal_prestado || ''}" placeholder="Ninguno" style="width:130px; margin:0; padding:6px;">
                         </td>
                         <td>
                             <input type="number" id="puntos-${j.usuario}" value="${j.puntos || 0}" style="width:70px; margin:0; padding:6px;">
@@ -109,18 +127,18 @@
     }
 
     async function actualizarOperador(usuario) {
-        const nuevoRol = document.getElementById(`rol-${usuario}`).value;
+        const nuevoRolJuego = document.getElementById(`rol-${usuario}`).value;
         const nuevaEntrada = document.getElementById(`entrada-${usuario}`).value;
         const nuevoArsenal = document.getElementById(`arsenal-${usuario}`).value;
         const nuevosPuntos = document.getElementById(`puntos-${usuario}`).value;
 
-        const { error } = await clienteSupabase
+        // CORRECCIÓN: Se actualiza 'rol_juego' para EVITAR machacar la columna 'rol' y no perder los privilegios de administración
+        const { error } = await window.supabaseClient
             .from("jugadores")
             .update({
-                rol: nuevoRol,
+                rol_juego: nuevoRolJuego,
                 tipo_entrada: Number(nuevaEntrada),
                 arsenal_prestado: nuevoArsenal,
-                arsenal: nuevoArsenal,
                 puntos: Number(nuevosPuntos)
             })
             .eq("usuario", usuario);
@@ -145,13 +163,12 @@
 
         estado.innerText = "Publicando...";
 
-        // CORRECCIÓN: Añadido 'await' para asegurar que finaliza la desactivación de partidas viejas antes de insertar la nueva
-        await clienteSupabase
+        await window.supabaseClient
             .from("partidas")
             .update({ activa: false })
             .eq("activa", true);
 
-        const { error } = await clienteSupabase
+        const { error } = await window.supabaseClient
             .from("partidas")
             .insert([{ nombre, fecha, activa: true }]);
 
@@ -163,8 +180,6 @@
             document.getElementById("fecha-partida").value = "";
         }
     }
-
-    document.addEventListener("DOMContentLoaded", cargarOperadores);
 </script>
 </body>
 </html>
