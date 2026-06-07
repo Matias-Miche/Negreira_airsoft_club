@@ -8,25 +8,154 @@
     <script src="supabase.js"></script>
     <style>
         body {
-            background: #080b09; color: #d1dad2; font-family: 'Courier New', Courier, monospace;
-            padding: 0; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;
-            background-image: linear-gradient(rgba(8, 11, 9, 0.92), rgba(8, 11, 9, 0.96)), linear-gradient(to right, #162419 1px, transparent 1px), linear-gradient(to bottom, #162419 1px, transparent 1px);
+            background: #080b09;
+            color: #d1dad2;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-y: auto;
+            background-image: 
+                linear-gradient(rgba(8, 11, 9, 0.92), rgba(8, 11, 9, 0.96)),
+                linear-gradient(to right, #162419 1px, transparent 1px),
+                linear-gradient(to bottom, #162419 1px, transparent 1px);
             background-size: 100% 100%, 40px 40px, 40px 40px;
         }
-        .terminal-consola { width: 100%; max-width: 950px; margin: 20px; background: #040605; border: 2px solid #223526; border-top: 6px solid #4a6b52; border-radius: 4px; padding: 30px; box-sizing: border-box; position: relative; }
-        .top-bar-actions { position: absolute; top: 8px; right: 12px; display: flex; align-items: center; gap: 15px; }
-        .session-top { font-size: 0.75rem; color: #bfa054; font-weight: bold; }
-        .btn-admin-oculto { display: none; background: #1a160d; border: 1px solid #bfa054; color: #bfa054; padding: 3px 8px; font-size: 0.65rem; text-transform: uppercase; font-weight: bold; cursor: pointer; text-decoration: none; }
-        .header-tactico { text-align: center; margin-top: 15px; margin-bottom: 30px; border-bottom: 1px dashed #223526; padding-bottom: 15px; }
-        .header-tactico h1 { color: #6da077; text-transform: uppercase; margin: 0; font-size: 2.2rem; letter-spacing: 4px; }
-        .seccion-clasificacion { background: #060907; border: 1px solid #223526; padding: 15px; margin-top: 25px; }
-        .tabla-ranking { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        .tabla-ranking th { color: #6da077; padding: 6px; border-bottom: 1px solid #1c2e21; text-align: left; }
-        .tabla-ranking td { padding: 8px 6px; border-bottom: 1px dashed #111a13; color: #a4b3a7; }
-        .menu-interactivo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
-        .btn-consola { background: #0f1712; border: 1px solid #2d4533; padding: 20px 10px; color: #e2e8e3; text-decoration: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+
+        .terminal-consola {
+            width: 100%;
+            max-width: 950px;
+            margin: 20px;
+            background: #040605;
+            border: 2px solid #223526;
+            border-top: 6px solid #4a6b52;
+            border-radius: 4px;
+            padding: 30px;
+            box-sizing: border-box;
+            box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(74, 107, 82, 0.15);
+            position: relative;
+        }
+
+        .terminal-consola::before {
+            content: "HQ-NEGREIRA // ECO-OPS // SYS-ACTIVE";
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            font-size: 0.7rem;
+            color: #38523f;
+            letter-spacing: 2px;
+        }
+
+        .top-bar-actions {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .session-top {
+            font-size: 0.75rem;
+            color: #ff6b6b; /* Por defecto rojo hasta que verifique conexión */
+            font-weight: bold;
+        }
+
+        .btn-admin-oculto {
+            display: none;
+            background: #1a160d;
+            border: 1px solid #bfa054;
+            color: #bfa054;
+            padding: 3px 8px;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 2px;
+            text-decoration: none;
+        }
+        .btn-admin-oculto:hover {
+            background: #bfa054;
+            color: #040605;
+        }
+
+        .header-tactico {
+            text-align: center;
+            margin-top: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #223526;
+        }
+
+        .header-tactico h1 {
+            color: #6da077;
+            text-transform: uppercase;
+            margin: 0;
+            font-size: 2.2rem;
+            letter-spacing: 4px;
+        }
+
+        .seccion-clasificacion {
+            background: #060907;
+            border: 1px solid #223526;
+            border-radius: 3px;
+            padding: 15px;
+            margin-top: 25px;
+        }
+        .seccion-clasificacion h3 {
+            margin: 0 0 12px 0;
+            font-size: 0.9rem;
+            color: #bfa054;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px dashed #223526;
+            padding-bottom: 6px;
+        }
+        .tabla-ranking {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            text-align: left;
+        }
+        .tabla-ranking th {
+            color: #6da077;
+            padding: 6px;
+            border-bottom: 1px solid #1c2e21;
+            text-transform: uppercase;
+        }
+        .tabla-ranking td {
+            padding: 8px 6px;
+            border-bottom: 1px dashed #111a13;
+            color: #a4b3a7;
+        }
+
+        .menu-interactivo {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn-consola {
+            background: #0f1712;
+            border: 1px solid #2d4533;
+            border-radius: 3px;
+            padding: 20px 10px;
+            color: #e2e8e3;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .btn-consola:hover { background: #18241c; border-color: #4a6b52; }
+
         .modal-oculta { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(4,6,5,0.9); }
-        .modal-contenido { background: #060907; margin: 12% auto; padding: 25px; border: 2px solid #38523f; width: 85%; max-width: 500px; }
+        .modal-contenido { background: #060907; margin: 12% auto; padding: 25px; border: 2px solid #38523f; width: 85%; max-width: 500px; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -39,23 +168,41 @@
         
         <div class="header-tactico">
             <h1>Airsoft Negreira</h1>
-            <p style="color:#bfa054; font-size:0.85rem; margin:5px 0 0 0; letter-spacing:3px; text-transform:uppercase;">Sistema de Navegación</p>
+            <p style="color: #bfa054; font-size: 0.85rem; margin-top: 5px; text-transform: uppercase; letter-spacing: 3px;">Sistema de Navegación de Campo</p>
         </div>
 
         <div class="menu-interactivo">
-            <a href="login.html" class="btn-consola"><span>🔑</span><strong style="font-size:0.85rem; text-transform:uppercase; margin-top:5px;">Acceso</strong></a>
-            <div class="btn-consola" onclick="desplegarseEnPartida()"><span>🔫</span><strong style="font-size:0.85rem; text-transform:uppercase; margin-top:5px; color:#6da077;">Desplegarse</strong></div>
-            <div class="btn-consola" onclick="abrirModalPartidas()"><span>🛰️</span><strong style="font-size:0.85rem; text-transform:uppercase; margin-top:5px; color:#bfa054;">Escanear</strong></div>
+            <a href="login.html" class="btn-consola">
+                <span style="font-size:1.5rem;">🔑</span>
+                <strong style="font-size:0.85rem; text-transform:uppercase; margin-top:5px;">Acceso</strong>
+            </a>
+
+            <div class="btn-consola" onclick="desplegarseEnPartida()" style="border-color: #6da077;">
+                <span style="font-size:1.5rem;">🔫</span>
+                <strong style="font-size:0.85rem; text-transform:uppercase; margin-top:5px; color:#6da077;">Desplegarse</strong>
+            </div>
+
+            <div class="btn-consola" onclick="abrirModalPartidas()">
+                <span style="font-size:1.5rem;">🛰️</span>
+                <strong style="font-size:0.85rem; text-transform:uppercase; margin-top:5px; color:#bfa054;">Escanear</strong>
+            </div>
         </div>
 
         <div class="seccion-clasificacion">
-            <h3 style="margin:0 0 10px 0; font-size:0.9rem; color:#bfa054; text-transform:uppercase;">📊 Clasificación de Operadores</h3>
+            <h3>📊 Clasificación General de Operadores</h3>
             <table class="tabla-ranking">
                 <thead>
-                    <tr><th>Indicativo</th><th>Especialidad</th><th>Rango</th><th>Estado</th></tr>
+                    <tr>
+                        <th>Indicativo Militar</th>
+                        <th>Especialidad</th>
+                        <th>Rango Operativo</th>
+                        <th>Estado</th>
+                    </tr>
                 </thead>
                 <tbody id="tablaCuerpoClasificacion">
-                    <tr><td colspan="4" style="text-align:center; padding:15px; color:#728576;">Cargando registros...</td></tr>
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #728576; padding: 15px;">Estableciendo enlace satelital...</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -63,99 +210,124 @@
 
     <div id="modalPartidas" class="modal-oculta">
         <div class="modal-contenido">
-            <span style="float:right; cursor:pointer; color:#51755a; font-weight:bold;" onclick="cerrarModalPartidas()">&times;</span>
+            <span style="float:right; cursor:pointer; color:#51755a; font-size:20px;" onclick="cerrarModalPartidas()">&times;</span>
             <h3 style="color:#6da077; text-transform:uppercase; margin-top:0;">📟 Datos del Cuadrante</h3>
             <div id="contenedorInfoPartida"></div>
         </div>
     </div>
 
 <script>
-    // Todo envuelto de forma segura para evitar bloqueos del hilo principal del navegador
+    // Inicialización al cargar la ventana
     window.onload = function() {
-        try {
-            verificarPerfilYRol();
-            cargarClasificacionJugadores();
-        } catch (error) {
-            console.error("Error crítico evitado en la carga inicial:", error);
+        if (!window.supabaseClient) {
+            document.getElementById("indicadorSesion").innerHTML = "🔴 ERROR: ARCHIVO SUPABASE.JS NO ENCONTRADO";
+            return;
         }
+        sincronizarTerminalYConexion();
     };
 
-    async function verificarPerfilYRol() {
+    // Sincroniza el estado de la conexión en vivo y verifica el perfil del usuario
+    async function sincronizarTerminalYConexion() {
         const usuarioActivo = localStorage.getItem("usuarioLogueado");
-        if (!usuarioActivo) return;
-
-        document.getElementById("indicadorSesion").innerText = `🟢 OP: ${usuarioActivo.toUpperCase()}`;
-        
-        // Si por algún motivo supabase falló al cargar, salimos sin congelar la pantalla
-        if (!window.supabaseClient) return;
+        const indicador = document.getElementById("indicadorSesion");
 
         try {
-            const { data: jugador, error } = await window.supabaseClient
+            // Hacemos una consulta rápida de control a la base de datos
+            const { data: testConnection, error: testError } = await window.supabaseClient
                 .from("jugadores")
-                .select("es_admin")
-                .eq("usuario", usuarioActivo)
-                .maybeSingle();
+                .select("usuario, es_admin")
+                .order('usuario', { ascending: true });
 
-            if (!error && jugador && jugador.es_admin === true) {
-                document.getElementById("btnComando").style.display = "inline-block";
+            if (testError) throw testError;
+
+            // SI LLEGAMOS AQUÍ, HAY CONEXIÓN REAL CON SUPABASE
+            if (usuarioActivo) {
+                indicador.innerText = `🟢 OP: ${usuarioActivo.toUpperCase()}`;
+                indicador.style.color = "#6da077";
+
+                // Buscar si el usuario activo es administrador dentro del set de datos conectado
+                const usuarioActual = testConnection.find(u => u.usuario === usuarioActivo);
+                if (usuarioActual && usuarioActual.es_admin === true) {
+                    document.getElementById("btnComando").style.display = "inline-block";
+                }
+            } else {
+                indicador.innerText = "🟢 EN LÍNEA (ANÓNIMO)";
+                indicador.style.color = "#6da077";
             }
-        } catch (e) {
-            console.log("Fallo silencioso controlado.");
+
+            // Renderizar la tabla con los datos reales de la conexión exitosa
+            renderizarTabla(testConnection);
+
+        } catch (error) {
+            // SI FALLA LA CONEXIÓN SE QUEDA EN ROJO Y CIERRA EL ACCESO
+            console.error(error);
+            indicador.innerText = "🔴 RED FUERA DE LÍNEA";
+            indicador.style.color = "#ff6b6b";
+            document.getElementById("tablaCuerpoClasificacion").innerHTML = 
+                `<tr><td colspan="4" style="text-align: center; color: #ff6b6b; font-weight:bold;">[ERROR DE ENLACE] Revisa las credenciales en 'supabase.js' o las políticas RLS.</td></tr>`;
         }
     }
 
-    async function cargarClasificacionJugadores() {
+    function renderizarTabla(lista) {
         const tabla = document.getElementById("tablaCuerpoClasificacion");
-        if (!window.supabaseClient) {
-            tabla.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#ff6b6b;">Error: Base de datos no inicializada.</td></tr>`;
+        if (!lista || lista.length === 0) {
+            tabla.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #728576;">No hay operadores en la base de datos.</td></tr>`;
             return;
         }
-        
-        try {
-            const { data: lista, error } = await window.supabaseClient
-                .from("jugadores")
-                .select("usuario, rol_juego, es_admin, en_partida")
-                .order('usuario', { ascending: true });
 
-            if (error || !lista || lista.length === 0) {
-                tabla.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#728576;">Sin registros o error de RLS en Supabase.</td></tr>`;
-                return;
-            }
-
-            let htmlFilas = "";
-            lista.forEach(j => {
-                const rango = j.es_admin ? "<span style='color:#bfa054;'>[CMD]</span>" : "OPERADOR";
-                const estado = j.en_partida ? "<span style='color:#6da077;'>● LISTO</span>" : "<span style='color:#728576;'>○ BASE</span>";
-                htmlFilas += `<tr><td><strong>${(j.usuario || 'N/N').toUpperCase()}</strong></td><td>${j.rol_juego || 'Asalto'}</td><td>${rango}</td><td>${estado}</td></tr>`;
-            });
-            tabla.innerHTML = htmlFilas;
-        } catch (err) {
-            tabla.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#ff6b6b;">Error de conexión de red.</td></tr>`;
-        }
+        let htmlFilas = "";
+        lista.forEach(j => {
+            const rango = j.es_admin ? "<span style='color:#bfa054;'>[CMD] ALTO MANDO</span>" : "OPERADOR";
+            const estado = j.en_partida ? "<span style='color:#6da077;'>● DESPLEGADO</span>" : "<span style='color:#728576;'>○ BASE</span>";
+            htmlFilas += `
+                <tr>
+                    <td style="font-weight:bold; color:#e2e8e3;">${(j.usuario || 'N/N').toUpperCase()}</td>
+                    <td>${j.rol_juego || 'Asalto'}</td>
+                    <td>${rango}</td>
+                    <td>${estado}</td>
+                </tr>`;
+        });
+        tabla.innerHTML = htmlFilas;
     }
 
     async function desplegarseEnPartida() {
         const usuario = localStorage.getItem("usuarioLogueado");
-        if (!usuario) { alert("Inicia sesión primero."); return; }
-        if (!window.supabaseClient) return;
+        if (!usuario) {
+            alert("ERROR: Debes iniciar sesión antes de desplegarte.");
+            return;
+        }
 
         try {
-            await window.supabaseClient.from("jugadores").update({ en_partida: true }).eq("usuario", usuario);
-            alert("Desplegado.");
-            cargarClasificacionJugadores();
-        } catch(e) { alert("Error de red."); }
+            const { error } = await window.supabaseClient
+                .from("jugadores")
+                .update({ en_partida: true })
+                .eq("usuario", usuario);
+
+            if (error) throw error;
+            alert(`¡Desplegado con éxito! Actualizando cuadrante.`);
+            sincronizarTerminalYConexion();
+        } catch(e) {
+            alert("Acción rechazada: Sin respuesta del servidor.");
+        }
     }
 
-    function abrirModalPartidas() { document.getElementById("modalPartidas").style.display = "block"; consultarPartidasYJugadores(); }
-    function cerrarModalPartidas() { document.getElementById("modalPartidas").style.display = "none"; }
+    function abrirModalPartidas() {
+        document.getElementById("modalPartidas").style.display = "block";
+        consultarPartidasYJugadores();
+    }
+    function cerrarModalPartidas() {
+        document.getElementById("modalPartidas").style.display = "none";
+    }
 
     async function consultarPartidasYJugadores() {
         const contenedor = document.getElementById("contenedorInfoPartida");
-        if (!window.supabaseClient) return;
+        contenedor.innerHTML = "<p style='text-align:center; color:#6da077;'>Escaneando...</p>";
         try {
             const { data: partida } = await window.supabaseClient.from("partidas").select("nombre").eq("activa", true).maybeSingle();
-            contenedor.innerHTML = partida ? `<p>Misión: ${partida.nombre}</p>` : "<p>No hay operaciones activas.</p>";
-        } catch (e) { contenedor.innerHTML = "Error."; }
+            contenedor.innerHTML = partida ? `<p style='margin:10px 0;'><strong>Operación Activa:</strong> <span style='color:#bfa054;'>${partida.nombre}</span></p>` : "<p style='color:#728576;'>No hay misiones planeadas hoy.</p>";
+        } catch (e) {
+            contenedor.innerHTML = "<p style='color:#ff6b6b;'>Fallo de enlace satelital.</p>";
+        }
     }
 </script>
 </body>
