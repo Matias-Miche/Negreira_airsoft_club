@@ -1,6 +1,11 @@
 // supabase.js
-const supabaseUrl = 'https://tu-proyecto.supabase.co'; // Reemplaza con tu URL real
-const supabaseAnonKey = 'tu-clave-anon-key-de-supabase'; // Reemplaza con tu clave API real
+const supabaseUrl = 'https://tu-proyecto.supabase.co'; 
+const supabaseAnonKey = 'tu-clave-anon-key';
 
-// Esto asigna el cliente a la ventana global para que index.html pueda usarlo
-window.supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+// Asegura que la librería global de Supabase se haya cargado antes de activarla
+if (typeof supabase !== 'undefined') {
+    window.supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+    console.log("Enlace de Supabase preparado correctamente.");
+} else {
+    console.error("Error crítico: La librería CDN de Supabase no ha cargado en el HTML.");
+}
