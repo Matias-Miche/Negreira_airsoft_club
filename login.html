@@ -33,7 +33,7 @@
             border-radius: 4px;
             padding: 30px;
             box-sizing: border-box;
-            box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(191, 160, 84, 0.08);
+            box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.8);
             position: relative;
         }
 
@@ -67,7 +67,6 @@
             font-size: 0.8rem;
             text-transform: uppercase;
             font-weight: bold;
-            letter-spacing: 1px;
         }
 
         input {
@@ -99,13 +98,9 @@
             text-transform: uppercase;
             font-size: 0.9rem;
             letter-spacing: 1px;
-            box-shadow: 0 3px 0 #0b110d;
         }
 
-        button:hover {
-            background: #274930;
-            color: #ffd875;
-        }
+        button:hover { background: #274930; color: #ffd875; }
 
         .enlace-cambio {
             display: block;
@@ -149,31 +144,38 @@
             return;
         }
 
-        // Busca el usuario y verifica la contraseña correspondiente en la tabla
-        const { data: jugador, error } = await window.supabaseClient
-            .from("jugadores")
-            .select("usuario, contrasena, es_admin")
-            .eq("usuario", usuario)
-            .maybeSingle();
-
-        if (error) {
-            console.error(error);
-            alert("Error de respuesta con el servidor táctico.");
+        // CONTROL EXTRA: Evita cuelgues si supabaseClient no cargó correctamente
+        if (typeof window.supabaseClient === 'undefined') {
+            alert("ERROR CRÍTICO: No se puede conectar con 'supabase.js'. Revisa tus claves.");
             return;
         }
 
-        // Valida que el jugador exista y que la contraseña coincida exactamente
-        if (jugador && jugador.contrasena === password) {
-            localStorage.setItem("usuarioLogueado", jugador.usuario);
-            alert(`¡Conexión establecida! Código de acceso correcto.`);
-            
-            if (jugador.es_admin === true) {
-                window.location.href = "admin.html";
-            } else {
-                window.location.href = "index.html";
+        try {
+            const { data: jugador, error } = await window.supabaseClient
+                .from("jugadores")
+                .select("usuario, contrasena, es_admin")
+                .eq("usuario", usuario)
+                .maybeSingle();
+
+            if (error) {
+                alert("Error de respuesta de las tablas en Supabase. Verifica las columnas.");
+                return;
             }
-        } else {
-            alert("ACCESO RECHAZADO: El indicativo militar o la contraseña no coinciden.");
+
+            if (jugador && jugador.contrasena === password) {
+                localStorage.setItem("usuarioLogueado", jugador.usuario);
+                alert(`¡Conexión establecida!`);
+                
+                if (jugador.es_admin === true) {
+                    window.location.href = "admin.html";
+                } else {
+                    window.location.href = "index.html";
+                }
+            } else {
+                alert("ACCESO RECHAZADO: Usuario o contraseña incorrectos.");
+            }
+        } catch (err) {
+            alert("Error general de conexión de red.");
         }
     }
 </script>
