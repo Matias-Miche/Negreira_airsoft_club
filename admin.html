@@ -76,7 +76,7 @@
         <div class="seccion-form" style="border-color: #1a291f;">
             <label style="color: #6da077;">🛰️ Historial de Misiones:</label>
             <div class="lista-misiones" id="contenedorListaMisiones">
-                <div style="text-align: center; color: #728576; font-size: 0.8rem; padding: 10px;">Sincronizando...</div>
+                <div style="text-align: center; color: #728576; font-size: 0.8rem; padding: 10px;">Esperando datos del servidor central...</div>
             </div>
         </div>
 
@@ -95,19 +95,17 @@
         let supabaseLocal;
 
         document.addEventListener("DOMContentLoaded", function() {
-            // Ponemos por defecto la fecha y hora actual en el campo
+            // Ponemos la fecha de hoy por defecto
             const ahora = new Date();
             ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
             document.getElementById('fechaMision').value = ahora.toISOString().slice(0,16);
 
-            setTimeout(() => {
-                try {
-                    supabaseLocal = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                    obtenerMisionesActuales();
-                } catch (e) {
-                    console.error(e);
-                }
-            }, 100);
+            try {
+                supabaseLocal = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                obtenerMisionesActuales();
+            } catch (e) {
+                console.error(e);
+            }
         });
 
         async function obtenerMisionesActuales() {
@@ -121,7 +119,7 @@
 
                 const contenedor = document.getElementById("contenedorListaMisiones");
                 if (!misiones || misiones.length === 0) {
-                    contenedor.innerHTML = "<div style='text-align: center; color: #728576; font-size:0.8rem;'>No hay misiones.</div>";
+                    contenedor.innerHTML = "<div style='text-align: center; color: #728576; font-size:0.8rem;'>No hay misiones guardadas.</div>";
                     return;
                 }
 
@@ -136,6 +134,7 @@
                 contenedor.innerHTML = html;
             } catch (err) {
                 console.error(err);
+                document.getElementById("contenedorListaMisiones").innerHTML = "<div style='text-align: center; color: #728576; font-size:0.8rem;'>Historial temporalmente no disponible.</div>";
             }
         }
 
@@ -144,7 +143,7 @@
             const fechaInput = document.getElementById("fechaMision").value;
             
             if (!nombreOriginal) {
-                alert("Introduce un nombre.");
+                alert("Introduce un nombre para la misión.");
                 return;
             }
 
@@ -153,15 +152,12 @@
             const med = document.getElementById("varMedicos").checked;
             const resp = document.getElementById("varRespawn").checked;
 
-            // Formateamos la fecha para que se vea bonita en el nombre si falla la base de datos
             let fechaFormateada = "";
             if(fechaInput) {
                 const f = new Date(fechaInput);
                 fechaFormateada = ` [${f.getDate()}/${f.getMonth()+1} ${f.getHours()}:${String(f.getMinutes()).padStart(2, '0')}]`;
             }
 
-            // Creamos un súper nombre combinado que guarda la fecha, yugernouts y vehículos en una sola celda de texto.
-            // Así saltamos CUALQUIER error de RLS o falta de columnas en Supabase de forma inteligente.
             let extras = [];
             if (jugg) extras.push("🛡️JUGGERNAUT");
             if (vehic) extras.push("🚜VEHÍCULOS");
@@ -171,5 +167,30 @@
             const nombreDefinitivo = nombreOriginal + fechaFormateada + (extras.length > 0 ? " (" + extras.join(" - ") + ")" : "");
 
             try {
-                // Forzar apagado de misiones anteriores de forma segura
+                // Desactivamos misiones viejas de forma segura
                 try {
+                    await supabaseLocal.from("partidas").update({ activa: false }).eq("activa", true);
+                } catch(e){}
+
+                // Insertamos la nueva partida
+                const { error } = await supabaseLocal
+                    .from("partidas")
+                    .insert([{
+                        nombre: nombreDefinitivo,
+                        activa: true
+                    }]);
+                
+                if (error) throw error;
+
+                alert("🟢 ¡Misión desplegada con éxito!");
+                document.getElementById("nombreMision").value = "";
+                obtenerMisionesActuales();
+
+            } catch (err) {
+                console.error(err);
+                alert("Error de envío. Asegúrate de haber ejecutado el comando del PASO 1 en tu panel de Supabase.");
+            }
+        }
+    </script>
+</body>
+</html>
