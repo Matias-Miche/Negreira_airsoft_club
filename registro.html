@@ -8,147 +8,88 @@
     <script src="supabase.js"></script>
     <style>
         body {
-            background: #080b09;
-            color: #d1dad2;
-            font-family: 'Courier New', Courier, monospace;
-            padding: 20px;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            background: #080b09; color: #d1dad2; font-family: 'Courier New', Courier, monospace;
+            padding: 20px; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;
             background-image: 
                 linear-gradient(rgba(8, 11, 9, 0.92), rgba(8, 11, 9, 0.96)),
-                linear-gradient(to right, #162419 1px, transparent 1px),
-                linear-gradient(to bottom, #162419 1px, transparent 1px);
+                linear-gradient(to right, #162419 1px, transparent 1px), linear-gradient(to bottom, #162419 1px, transparent 1px);
             background-size: 100% 100%, 40px 40px, 40px 40px;
         }
-
-        .contenedor-box {
-            width: 100%;
-            max-width: 450px;
-            background: #040605;
-            border: 2px solid #223526;
-            border-top: 6px solid #4a6b52;
-            border-radius: 4px;
-            padding: 30px;
-            box-sizing: border-box;
-            box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.8);
-        }
-
-        h2 {
-            color: #6da077;
-            text-transform: uppercase;
-            margin-top: 0;
-            letter-spacing: 2px;
-            font-size: 1.2rem;
-            text-align: center;
-            border-bottom: 1px dashed #223526;
-            padding-bottom: 12px;
-        }
-
+        .contenedor-registro { width: 100%; max-width: 450px; background: #040605; border: 2px solid #223526; border-top: 6px solid #6da077; border-radius: 4px; padding: 30px; box-sizing: border-box; box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.8); }
+        h2 { color: #6da077; text-transform: uppercase; margin-top: 10px; letter-spacing: 2px; font-size: 1.2rem; text-align: center; border-bottom: 1px dashed #223526; padding-bottom: 12px; }
         .campo { margin-bottom: 18px; }
-
-        label {
-            color: #a4b3a7;
-            display: block;
-            margin-bottom: 6px;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 10px;
-            background: #0f1712;
-            color: #e2e8e3;
-            border: 1px solid #2d4533;
-            border-radius: 3px;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: #6da077;
-            background: #142018;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #1e3825;
-            color: #bfa054;
-            border: 1px solid #4a6b52;
-            border-radius: 3px;
-            cursor: pointer;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            margin-top: 5px;
-        }
-
-        button:hover { background: #274930; color: #ffd875; }
-        .enlace-cambio { display: block; text-align: center; margin-top: 15px; color: #728576; font-size: 0.8rem; text-decoration: none; }
-        .enlace-cambio:hover { color: #6da077; }
+        label { color: #a4b3a7; display: block; margin-bottom: 6px; font-size: 0.8rem; text-transform: uppercase; font-weight: bold; }
+        input, select { width: 100%; padding: 11px; background: #0f1712; color: #e2e8e3; border: 1px solid #2d4533; border-radius: 3px; box-sizing: border-box; font-family: inherit; }
+        input:focus, select:focus { outline: none; border-color: #6da077; background: #142018; }
+        button { width: 100%; padding: 12px; background: #1a2f20; color: #6da077; border: 1px solid #2d4533; border-radius: 3px; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 0.9rem; }
+        button:hover { background: #24422d; color: #a4b3a7; }
+        .enlace-volver { display: block; text-align: center; margin-top: 15px; color: #728576; font-size: 0.8rem; text-decoration: none; }
+        .enlace-volver:hover { color: #bfa054; }
     </style>
 </head>
 <body>
 
-    <div class="contenedor-box">
-        <h2>📝 Alta de Operador</h2>
-
+    <div class="contenedor-registro">
+        <h2>📝 Alistamiento de Operador</h2>
+        
         <div class="campo">
-            <label>🌲 Nombre de Jugador (Usuario):</label>
-            <input type="text" id="regUsuario" placeholder="Tu indicativo militar">
+            <label>🌲 Indicativo / Nombre de Usuario:</label>
+            <input type="text" id="regUsuario" placeholder="Ej: Striker, Fox...">
+        </div>
+        
+        <div class="campo">
+            <label>🔒 Contraseña de Acceso:</label>
+            <input type="password" id="regPassword" placeholder="Crea una contraseña">
         </div>
 
         <div class="campo">
-            <label>🔑 Contraseña de Acceso:</label>
-            <input type="password" id="regPassword" placeholder="Clave de seguridad">
-        </div>
-
-        <div class="campo">
-            <label>🛠️ Especialidad (Rol de Juego):</label>
+            <label>🕹️ Especialidad de Combate:</label>
             <select id="regRol">
                 <option value="Asalto">Asalto</option>
-                <option value="Sniper">Sniper</option>
                 <option value="Médico">Médico</option>
-                <option value="AT">AT</option>
+                <option value="Tirador Selecto">Tirador Selecto (DMR)</option>
+                <option value="Sniper">Sniper</option>
+                <option value="Apoyo">Apoyo</option>
             </select>
         </div>
 
-        <button onclick="registrarNuevoOperadorDirecto()">Crear Cuenta</button>
-        
-        <a href="login.html" class="enlace-cambio">¿Ya tienes cuenta? Iniciar Sesión</a>
-        <a href="index.html" class="enlace-cambio" style="color: #51755a;">⬅️ Volver a la terminal</a>
+        <button onclick="registrarNuevoOperador()">Dar de Alta en la Red</button>
+        <a href="login.html" class="enlace-volver">⬅️ Ya tengo cuenta, ir al Login</a>
     </div>
 
 <script>
-    async function registrarNuevoOperadorDirecto() {
-        const usuario = document.getElementById("regUsuario").value.trim();
+    async function registrarNuevoOperador() {
+        const usuario = document.getElementById("regUsuario").value.trim().toLowerCase();
         const password = document.getElementById("regPassword").value;
-        const rolJuego = document.getElementById("regRol").value;
+        const rol = document.getElementById("regRol").value;
 
-        if (!usuario || !password) {
-            alert("ERROR: Todos los campos de credenciales son obligatorios.");
-            return;
+        if (!usuario || !password) { alert("Completa todos los campos obligatorios."); return; }
+        if (!window.supabaseClient) { alert("Error de enlace con el servidor."); return; }
+
+        try {
+            // Guardamos el nuevo usuario en Supabase de forma directa
+            const { error } = await window.supabaseClient
+                .from("jugadores")
+                .insert([
+                    { usuario: usuario, contrasena: password, rol_juego: rol, es_admin: false, en_partida: false }
+                ]);
+
+            if (error) {
+                if (error.code === "23505") { // Código de error de duplicado en PostgreSQL
+                    alert("El indicativo ya está registrado por otro operador.");
+                } else {
+                    alert("Error en el alta: " + error.message);
+                }
+                return;
+            }
+
+            alert("¡Registro completado con éxito! Ya puedes iniciar sesión.");
+            window.location.href = "login.html";
+
+        } catch (err) {
+            alert("Error crítico de red.");
         }
-
-        // Comprobar si ya existe el indicativo militar
-        const { data: existente } = await window.supabaseClient
-            .from("jugadores")
-            .select("usuario")
-            .eq("usuario", usuario)
-            .maybeSingle();
-
-        if (existente) {
-            alert("ERROR: Este indicativo ya se encuentra registrado en el sistema.");
-            return;
-        }
-
-        // Se guarda nombre, contraseña (puro texto) y rol en la tabla
-        const { error } = await window.supabaseClient
-            .from("jugadores")
+    }
+</script>
+</body>
+</html>
