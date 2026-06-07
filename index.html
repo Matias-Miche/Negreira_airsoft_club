@@ -30,11 +30,10 @@
             font-size: 0.65rem; text-transform: uppercase; font-weight: bold; cursor: pointer; border-radius: 2px; text-decoration: none;
         }
         .header-tactico { text-align: center; margin-bottom: 25px; border-bottom: 1px dashed #1c2e21; padding-bottom: 15px; }
-        .header-tactico h1 { color: #6da077; text-transform: uppercase; margin: 0; font-size: 2.2rem; letter-spacing: 4px; filter: drop-shadow(0 0 5px rgba(109,160,117,0.3)); }
+        .header-tactico h1 { color: #6da077; text-transform: uppercase; margin: 0; font-size: 2.2rem; letter-spacing: 4px; }
         
         .panel-mision-activa { background: #070d09; border: 1px solid #16261b; border-radius: 3px; padding: 12px; margin-bottom: 15px; text-align: center; font-size: 0.85rem; }
 
-        /* --- CONTENEDOR DEL RADAR MEJORADO --- */
         .contenedor-radar-central { display: flex; justify-content: center; margin: 25px 0; position: relative; }
         
         .pantalla-radar {
@@ -42,8 +41,124 @@
             position: relative; overflow: hidden; box-shadow: inset 0 0 25px rgba(0,255,0,0.15), 0 0 15px rgba(40,68,46,0.4);
         }
 
-        /* Rejilla de sonar real (Anillos de distancia) */
         .radar-grid {
             position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; border-radius: 50%;
             background: 
-                radial-gradient(circle, transparent 30%, rgba(40,68,46,0.
+                radial-gradient(circle, transparent 30%, rgba(40,68,46,0.18) 31%, transparent 32%, 
+                                        transparent 60%, rgba(40,68,46,0.18) 61%, transparent 62%,
+                                        transparent 88%, rgba(40,68,46,0.25) 89%, transparent 90%);
+        }
+        .radar-grid::before { content: ""; position: absolute; top: 0; left: 50%; width: 1px; height: 100%; background: rgba(40,68,46,0.2); }
+        .radar-grid::after { content: ""; position: absolute; left: 0; top: 50%; width: 100%; height: 1px; background: rgba(40,68,46,0.2); }
+
+        .radar-telemetria {
+            position: absolute; width: 100%; height: 100%; font-size: 0.6rem; color: #406c46; padding: 12px; box-sizing: border-box; pointer-events: none; font-weight: bold; z-index: 8;
+        }
+        .tel-top-left { position: absolute; top: 8px; left: 10px; }
+        .tel-bottom-right { position: absolute; bottom: 8px; right: 10px; }
+
+        .pantalla-radar::before {
+            content: ""; position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
+            background: conic-gradient(from 0deg, rgba(85, 200, 110, 0.4) 0deg, rgba(85,200,110,0.1) 45deg, transparent 180deg);
+            animation: barrido-militar 3.5s linear infinite; pointer-events: none; z-index: 5;
+        }
+        @keyframes barrido-militar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        /* Corregido posicionamiento de los Blips */
+        .blip-objetivo {
+            position: absolute; width: 8px; height: 8px; background: #6eff82; border-radius: 50%;
+            box-shadow: 0 0 8px #6eff82; transform: translate(-50%, -50%);
+            transition: left 3.4s ease-in-out, top 3.4s ease-in-out;
+            animation: rastro-sonar 3.5s infinite ease-out; z-index: 6;
+        }
+        .blip-juggernaut {
+            position: absolute; width: 12px; height: 12px; background: #ff2a2a; border-radius: 2px;
+            box-shadow: 0 0 12px #ff2a2a; transform: translate(-50%, -50%);
+            transition: left 3.4s ease-in-out, top 3.4s ease-in-out;
+            animation: rastro-sonar 3.5s infinite ease-out; z-index: 7;
+        }
+        .blip-vehiculo {
+            position: absolute; width: 14px; height: 9px; background: #26a6ff; border-radius: 1px;
+            box-shadow: 0 0 10px #26a6ff; transform: translate(-50%, -50%);
+            transition: left 3.4s ease-in-out, top 3.4s ease-in-out;
+            animation: rastro-sonar 3.5s infinite ease-out; z-index: 7;
+        }
+
+        @keyframes rastro-sonar {
+            0% { opacity: 1; filter: brightness(1.6); }
+            50% { opacity: 0.2; }
+            100% { opacity: 1; }
+        }
+        
+        .seccion-clasificacion { background: #030604; border: 1px solid #182b1e; border-radius: 3px; padding: 15px; margin-top: 25px; }
+        .seccion-clasificacion h3 { margin: 0 0 12px 0; font-size: 0.9rem; color: #bfa054; text-transform: uppercase; border-bottom: 1px dashed #1c2e21; padding-bottom: 6px; }
+        .tabla-ranking { width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: left; }
+        .tabla-ranking th { color: #6da077; padding: 6px; border-bottom: 1px solid #16261b; text-transform: uppercase; }
+        .tabla-ranking td { padding: 8px 6px; border-bottom: 1px dashed #0c140e; color: #a4b3a7; }
+        
+        .menu-interactivo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 25px; }
+        .btn-consola { background: #09100a; border: 1px solid #1b3321; border-radius: 3px; padding: 15px 10px; color: #e2e8e3; text-decoration: none; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .btn-consola:hover { background: #112014; border-color: #3b5f44; }
+    </style>
+</head>
+<body>
+
+    <div class="terminal-consola" id="consolaPrincipal">
+        <div class="top-bar-actions">
+            <a href="admin.html" id="btnComando" class="btn-admin-oculto">⚡ Comando</a>
+            <div id="indicadorSesion" class="session-top">🔴 ENLACE CENTRAL</div>
+        </div>
+        
+        <div class="header-tactico">
+            <h1>Airsoft Negreira</h1>
+            <p style="color: #bfa054; font-size: 0.85rem; margin: 5px 0 0 0; text-transform: uppercase; letter-spacing: 3px;">Consola Radar Global</p>
+        </div>
+
+        <div class="panel-mision-activa" id="infoMisionActiva">
+            📡 Conectando con los sistemas de escaneo perimetral...
+        </div>
+
+        <div class="contenedor-radar-central">
+            <div class="pantalla-radar">
+                <div class="radar-grid"></div>
+                <div class="radar-telemetria">
+                    <div class="tel-top-left" id="telemetriaRng">SYS: OK<br>TGTS: 00</div>
+                    <div class="tel-bottom-right" id="telemetriaCoordenadas">AZM: 000°<br>HDG: TRK</div>
+                </div>
+                <div id="capaBlips"></div>
+            </div>
+        </div>
+
+        <div class="menu-interactivo">
+            <a href="login.html" id="linkLogin" class="btn-consola">
+                <span style="font-size:1.3rem;">🔑</span>
+                <strong style="font-size:0.8rem; text-transform:uppercase; margin-top:5px;">Acceso Terminal</strong>
+            </a>
+            <a href="perfil.html" id="linkPerfil" class="btn-consola" style="display:none; border-color: #bfa054;">
+                <span style="font-size:1.3rem;">🪪</span>
+                <strong style="font-size:0.8rem; text-transform:uppercase; margin-top:5px; color:#bfa054;">Mi Perfil / Misión</strong>
+            </a>
+            <div class="btn-consola" onclick="document.location.reload()">
+                <span style="font-size:1.3rem;">🔄</span>
+                <strong style="font-size:0.8rem; text-transform:uppercase; margin-top:5px; color:#6da077;">Actualizar</strong>
+            </div>
+        </div>
+
+        <div class="seccion-clasificacion">
+            <h3>📊 Sistema de Clasificación de Operadores</h3>
+            <table class="tabla-ranking">
+                <thead>
+                    <tr><th>Rango</th><th>Operador</th><th>Rol</th><th>Honor</th><th>Estado</th></tr>
+                </thead>
+                <tbody id="tablaCuerpoClasificacion">
+                    <tr><td colspan="5" style="text-align: center; color: #728576; padding: 15px;">Estableciendo enlace de red estricto...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const SUPABASE_URL = "https://wbcfszivrbuqfqnizarq.supabase.co"; 
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMj
