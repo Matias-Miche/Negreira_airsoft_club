@@ -64,7 +64,6 @@
         }
         @keyframes barrido-militar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         
-        /* Corregido posicionamiento de los Blips */
         .blip-objetivo {
             position: absolute; width: 8px; height: 8px; background: #6eff82; border-radius: 50%;
             box-shadow: 0 0 8px #6eff82; transform: translate(-50%, -50%);
@@ -115,14 +114,14 @@
         </div>
 
         <div class="panel-mision-activa" id="infoMisionActiva">
-            📡 Conectando con los sistemas de escaneo perimetral...
+            📡 Cargando matriz de escaneo perimetral...
         </div>
 
         <div class="contenedor-radar-central">
             <div class="pantalla-radar">
                 <div class="radar-grid"></div>
                 <div class="radar-telemetria">
-                    <div class="tel-top-left" id="telemetriaRng">SYS: OK<br>TGTS: 00</div>
+                    <div class="tel-top-left" id="telemetriaRng">SYS: OK<br>TGTS: --</div>
                     <div class="tel-bottom-right" id="telemetriaCoordenadas">AZM: 000°<br>HDG: TRK</div>
                 </div>
                 <div id="capaBlips"></div>
@@ -161,4 +160,155 @@
 
     <script>
         const SUPABASE_URL = "https://wbcfszivrbuqfqnizarq.supabase.co"; 
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMj
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2Zzeml2cmJ1cWZxbml6YXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTkyMjEsImV4cCI6MjA5NTQ3NTIyMX0.2iX7Twex3d96A9Iawg3zxvGAjFNLBqt81tSZgrzqA9s";
+        let supabaseLocal;
+        let listaElementosRadar = [];
+
+        function decodificarNombre(textoRaw) {
+            if (textoRaw && textoRaw.startsWith("{")) {
+                try { return JSON.parse(textoRaw); } catch(e){}
+            }
+            return { nombre: textoRaw || "Operación estándar", jugg: false, vehic: false, medicos: false, respawn: false, fecha: "" };
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            try {
+                supabaseLocal = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            } catch (e) { console.error("Error al iniciar Supabase:", e); }
+            
+            // Forzamos la ejecución inmediata y los bucles de movimiento reactivos
+            conectarYVerificarTodo();
+            setInterval(actualizarPosicionesMoviles, 3500);
+            setInterval(actualizarTelemetriaNumerica, 1000);
+        });
+
+        async function conectarYVerificarTodo() {
+            const usuarioActivo = localStorage.getItem("usuarioLogueado");
+            const indicador = document.getElementById("indicadorSesion");
+            
+            let partidaConfig = { nombre: "Patrulla de Rutina", jugg: true, vehic: true, medicos: false, respawn: false, fecha: "" };
+            let jugadoresLista = [];
+
+            // Intentamos descargar los datos de Supabase. Si falla, el radar NO se congela.
+            try {
+                if(supabaseLocal) {
+                    const { data: partidas } = await supabaseLocal.from("partidas").select("*").eq("activa", true).limit(1);
+                    if (partidas && partidas.length > 0) {
+                        partidaConfig = decodificarNombre(partidas[0].nombre);
+                    }
+                    const { data: jugadores } = await supabaseLocal.from("jugadores").select("*").order('puntos', { ascending: false });
+                    if (jugadores) jugadoresLista = jugadores;
+                }
+            } catch (err) { 
+                console.log("Modo simulación activado debido a un retraso de respuesta en Supabase.");
+            }
+
+            // Actualizar interfaz del panel superior
+            const panelMision = document.getElementById("infoMisionActiva");
+            const consola = document.getElementById("consolaPrincipal");
+            
+            let modificadoresTexto = [];
+            if (partidaConfig.jugg) { modificadoresTexto.push("⚠️ JUGGERNAUT DETECTADO"); consola.classList.add("alerta-juggernaut"); }
+            if (partidaConfig.vehic) modificadoresTexto.push("🚜 VEHÍCULOS EN CAMPO");
+            if (partidaConfig.medicos) modificadoresTexto.push("🩹 MÉDICOS");
+            
+            let stringModificadores = modificadoresTexto.length > 0 ? `<br><span style="color:#ff6b6b; font-size:0.75rem;">MODIFICADORES: ${modificadoresTexto.join(" | ")}</span>` : "";
+            panelMision.innerHTML = `🛰️ RADAR ACTIVO: <strong>${partidaConfig.nombre.toUpperCase()}</strong> ${stringModificadores}`;
+
+            if (usuarioActivo) {
+                indicador.innerText = `🟢 ONLINE: ${usuarioActivo.toUpperCase()}`;
+                indicador.style.color = "#6da077";
+                document.getElementById("linkLogin").style.display = "none";
+                document.getElementById("linkPerfil").style.display = "flex";
+            }
+
+            renderizarTabla(jugadoresLista);
+            generarEstructuraRadar(jugadoresLista, partidaConfig);
+        }
+
+        function renderizarTabla(lista) {
+            const tabla = document.getElementById("tablaCuerpoClasificacion");
+            if (!lista || lista.length === 0) {
+                // Datos de muestra si la tabla de Supabase está vacía para que no se quede fea
+                tabla.innerHTML = `
+                    <tr><td><strong>#1</strong></td><td>ALPHA_ONE</td><td>Asalto</td><td style="color:#bfa054; font-weight:bold;">120 PTS</td><td><span style='color:#ff6b6b;'>● EN COMBATE</span></td></tr>
+                    <tr><td><strong>#2</strong></td><td>BRAVO_TWO</td><td>Médico</td><td style="color:#bfa054; font-weight:bold;">95 PTS</td><td><span style='color:#728576;'>○ BASE</span></td></tr>`;
+                return;
+            }
+            let html = "";
+            lista.forEach((j, index) => {
+                const estado = j.en_partida ? "<span style='color:#ff6b6b;'>● EN COMBATE</span>" : "<span style='color:#728576;'>○ BASE</span>";
+                html += `<tr>
+                    <td><strong>#${index + 1}</strong></td>
+                    <td>${j.usuario.toUpperCase()}</td>
+                    <td>${j.rol_juego || 'Asalto'}</td>
+                    <td style="color:#bfa054; font-weight:bold;">${j.puntos || 0} PTS</td>
+                    <td>${estado}</td>
+                </tr>`;
+            });
+            tabla.innerHTML = html;
+        }
+
+        function generarEstructuraRadar(lista, config) {
+            const capa = document.getElementById("capaBlips");
+            capa.innerHTML = "";
+            listaElementosRadar = [];
+            
+            // Si no hay jugadores en la base de datos, creamos 4 puntos tácticos automáticos para que se muevan
+            let numOperadores = lista.filter(j => j.en_partida === true).length;
+            if (numOperadores === 0) numOperadores = 4; 
+
+            for (let i = 0; i < numOperadores; i++) {
+                const el = document.createElement("div");
+                el.className = "blip-objetivo";
+                capa.appendChild(el);
+                listaElementosRadar.push({ elemento: el, tipo: 'operador' });
+            }
+
+            if (config.jugg) {
+                const elJugg = document.createElement("div");
+                elJugg.className = "blip-juggernaut";
+                capa.appendChild(elJugg);
+                listaElementosRadar.push({ elemento: elJugg, tipo: 'juggernaut' });
+            }
+
+            if (config.vehic) {
+                const elVeh = document.createElement("div");
+                elVeh.className = "blip-vehiculo";
+                capa.appendChild(elVeh);
+                listaElementosRadar.push({ elemento: elVeh, tipo: 'vehiculo' });
+            }
+
+            actualizarPosicionesMoviles();
+        }
+
+        function actualizarPosicionesMoviles() {
+            const centro = 140; // Eje de rotación exacto de la pantalla
+            
+            listaElementosRadar.forEach(objeto => {
+                let angulo = Math.random() * Math.PI * 2;
+                let radio = Math.random() * 90 + 15; 
+                
+                if (objeto.tipo === 'juggernaut') {
+                    radio = Math.random() * 40 + 10; 
+                } else if (objeto.tipo === 'vehiculo') {
+                    radio = Math.random() * 25 + 85; 
+                }
+
+                const x = Math.floor(centro + Math.cos(angulo) * radio);
+                const y = Math.floor(centro + Math.sin(angulo) * radio);
+
+                objeto.elemento.style.left = `${x}px`;
+                objeto.elemento.style.top = `${y}px`;
+            });
+        }
+
+        function actualizarTelemetriaNumerica() {
+            const azm = Math.floor(Math.random() * 360);
+            const targets = listaElementosRadar.length;
+            document.getElementById("telemetriaRng").innerHTML = `SYS: TRK_ON<br>TGTS: 0${targets}`;
+            document.getElementById("telemetriaCoordenadas").innerHTML = `AZM: ${azm}°<br>HDG: N-NW`;
+        }
+    </script>
+</body>
+</html>
