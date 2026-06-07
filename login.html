@@ -7,70 +7,76 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .box { background: #0b0b0b; padding: 30px; border: 2px solid #4a5d4e; border-radius: 10px; width: 100%; max-width: 400px; }
-        h2 { text-align: center; margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; margin-bottom: 15px; background: #2b2b2b; color: white; border: 1px solid #444; border-radius: 5px; }
-        button { width: 100%; padding: 12px; background: #4a5d4e; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
-        button:hover { opacity: 0.9; }
-        #msg { margin-top: 15px; text-align: center; color: #ff8a8a; }
-        .links { margin-top: 20px; text-align: center; }
-        .links a { color: #8dc891; text-decoration: none; }
-        .links a:hover { text-decoration: underline; }
+        body { background: #1a1a1a; color: white; font-family: Arial, sans-serif; padding: 20px; margin: 0; }
+        .box { max-width: 450px; margin: 80px auto; background: #0b0b0b; border: 2px solid #4a5d4e; border-radius: 10px; padding: 30px; box-sizing: border-box; }
+        h2 { text-align: center; color: #7fa984; text-transform: uppercase; margin-bottom: 25px; margin-top: 0; }
+        label { display: block; margin-top: 15px; color: #7fa984; font-weight: bold; font-size: 0.9em; }
+        input { width: 100%; padding: 12px; margin-top: 5px; background: #2b2b2b; color: white; border: 1px solid #4a5d4e; border-radius: 5px; box-sizing: border-box; font-size: 1rem; }
+        input:focus { border-color: #bd913c; outline: none; }
+        button { margin-top: 25px; padding: 12px; border: none; background: #4a5d4e; color: white; cursor: pointer; border-radius: 5px; font-weight: bold; width: 100%; text-transform: uppercase; font-size: 1rem; transition: background 0.2s; }
+        button:hover { background: #5c7461; }
+        #mensajeFeedback { text-align: center; margin-top: 15px; font-weight: bold; min-height: 20px; }
+        .enlace-volver { display: block; text-align: center; margin-top: 20px; color: #8dc891; text-decoration: none; font-weight: bold; font-size: 0.95em; }
+        .enlace-volver:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
+
     <div class="box">
-        <h2>Iniciar Sesión</h2>
-        <input id="user" type="text" placeholder="Usuario">
-        <input id="pass" type="password" placeholder="Contraseña">
-        <button onclick="login()">Entrar</button>
-        <p id="msg"></p>
-        <div class="links"><a href="registro.html">Crear cuenta</a></div>
+        <h2>Autenticación de Operador</h2>
+        
+        <label for="usuarioInput">Nombre de Operador (Nickname):</label>
+        <input type="text" id="usuarioInput" placeholder="Tu nombre de jugador" required>
+
+        <label for="passwordInput">Contraseña:</label>
+        <input type="password" id="passwordInput" placeholder="••••••••" required>
+
+        <button onclick="iniciarSesion()">🔑 Validar Credenciales</button>
+        
+        <div id="mensajeFeedback"></div>
+
+        <a href="registro.html" class="enlace-volver">¿No tienes ficha? Regístrate aquí</a>
+        <a href="index.html" class="enlace-volver" style="color: #aaa; font-size: 0.85em; margin-top: 10px;">⬅️ Volver al Inicio</a>
     </div>
+
 <script>
-    document.addEventListener("DOMContentLoaded", comprobarSesion);
+    async function iniciarSesion() {
+        const usuarioForm = document.getElementById("usuarioInput").value.trim();
+        const password = document.getElementById("passwordInput").value;
+        const feedback = document.getElementById("mensajeFeedback");
 
-    async function comprobarSesion() {
-        const { data: { session } } = await window.supabaseClient.auth.getSession();
-        if (session) {
-            window.location.href = "perfil.html";
-        }
-    }
-
-    async function login() {
-        let user = document.getElementById("user").value.trim().toLowerCase().replace(/[^a-z0-9@._-]/g, "");
-        const pass = document.getElementById("pass").value;
-        const msg = document.getElementById("msg");
-
-        msg.innerText = "";
-
-        if (!user || !pass) {
-            msg.innerText = "Completa todos los campos";
+        if (!usuarioForm || !password) {
+            feedback.innerText = "❌ Completa los campos solicitados.";
+            feedback.style.color = "#ff8a8a";
             return;
         }
 
-        const email = user.includes("@") ? user : user + "@airsoft.local";
+        feedback.innerText = "Verificando identidad en el campo...";
+        feedback.style.color = "#bd913c";
 
-        const { error } = await window.supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: pass
+        // Reconstruimos el mismo correo virtual usado en el registro
+        const usuarioLimpio = usuarioForm.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+        const emailVirtual = `${usuarioLimpio}@negreira.com`;
+
+        // Intentar loguear en Supabase usando el correo fantasma
+        const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+            email: emailVirtual,
+            password: password
         });
 
         if (error) {
-            msg.innerText = "Usuario o contraseña incorrectos";
-            return;
+            console.error("Error Login:", error.message);
+            feedback.innerText = "❌ Nombre de jugador o contraseña incorrectos.";
+            feedback.style.color = "#ff8a8a";
+        } else {
+            feedback.innerText = "✔️ Acceso concedido. Cargando perfil...";
+            feedback.style.color = "#8dc891";
+            
+            setTimeout(() => {
+                window.location.href = "perfil.html";
+            }, 1000);
         }
-
-        window.location.href = "perfil.html";
     }
-
-    document.getElementById("pass").addEventListener("keydown", function(e) {
-        if (e.key === "Enter") {
-            login();
-        }
-    });
 </script>
 </body>
 </html>
